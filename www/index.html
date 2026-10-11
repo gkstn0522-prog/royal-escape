@@ -70,7 +70,9 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .talk{position:absolute;left:8px;right:8px;bottom:8px;z-index:6;display:flex;gap:10px;align-items:flex-start;background:rgb(20 22 31 / .96);border:1px solid var(--gold);border-radius:12px;padding:10px 12px;cursor:pointer;min-height:84px}
 .talk canvas{flex:0 0 auto;width:54px;height:54px;border-radius:8px;background:#2a3a2a;border:1px solid var(--line)}
 .talk-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.talk-head{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
 .talk-name{font-family:var(--font-display);font-weight:800;font-size:.95rem;color:var(--gold)}
+.talk-role{font-size:.72rem;color:var(--ink-dim)}
 .talk p{margin:0;font-size:.88rem;line-height:1.5;color:var(--ink)}
 .talk-next{position:absolute;right:12px;bottom:6px;font-size:.7rem;color:var(--ink-dim)}
 
@@ -167,6 +169,21 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .result-box p{margin:0;color:var(--ink-dim);font-size:.88rem;line-height:1.5}
 .result-box .btn{align-self:center;margin-top:6px}
 
+.title{position:fixed;inset:0;z-index:15;background:radial-gradient(120% 80% at 50% 20%,#2a2238 0%,#11131a 60%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding-inline:16px;text-align:center}
+.title-sub{font-family:var(--font-num);font-size:.72rem;letter-spacing:.3em;color:var(--ember)}
+.title h1{margin:0;font-family:var(--font-display);font-weight:800;font-size:2.4rem;letter-spacing:.12em;line-height:1.2;text-wrap:balance}
+.title p{margin:0;font-size:.82rem;color:var(--ink-dim)}
+#titleArt{width:min(320px,90vw);height:auto;aspect-ratio:320/120;max-width:100%}
+.title-menu{display:flex;flex-direction:column;gap:10px;width:min(260px,100%)}
+.title-menu .btn{width:100%;min-height:48px;font-size:1rem}
+.title-note{min-height:20px;font-size:.78rem;color:var(--ember)}
+.recap{position:fixed;inset:0;z-index:16;background:#0c0d12;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding-inline:24px}
+.recap h2{margin:0;font-family:var(--font-display);font-weight:800;font-size:1.4rem;color:var(--gold);letter-spacing:.2em}
+.recap-lines{max-width:34em;display:flex;flex-direction:column;gap:12px}
+.recap-lines p{margin:0;font-family:var(--font-display);font-weight:700;font-size:1rem;line-height:1.7;color:var(--ink);opacity:0;transform:translateY(6px);transition:opacity .6s,transform .6s}
+.recap-lines p.on{opacity:1;transform:none}
+.recap-chapter{font-family:var(--font-num);font-size:.75rem;color:var(--ember);letter-spacing:.2em}
+.recap-actions{display:flex;gap:10px}
 @media (prefers-reduced-motion: reduce){
   .banner.show{animation-duration:.6s}
   .btn.pulse{animation:none}
@@ -197,7 +214,7 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
     <div class="toast" id="toast" hidden></div>
     <div class="talk" id="talk" hidden>
       <canvas id="talkFace" class="px" width="54" height="54"></canvas>
-      <div class="talk-body"><div class="talk-name" id="talkName"></div><p id="talkText"></p></div>
+      <div class="talk-body"><div class="talk-head"><span class="talk-name" id="talkName"></span><span class="talk-role" id="talkRole"></span></div><p id="talkText"></p></div>
       <span class="talk-next">눌러서 계속 ▸</span>
     </div>
   </main>
@@ -268,6 +285,31 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
       </ul>
     </div>
     <button class="btn" type="button" id="btnRestart">전투 다시 시작</button>
+    <button class="btn ghost" type="button" id="btnMenuTitle">타이틀로 (진행은 자동 저장됨)</button>
+  </div>
+</div>
+
+<div class="title" id="title">
+  <div class="title-sub">ROUTE MOVE SRPG · 가제</div>
+  <h1>동물왕국 전기</h1>
+  <canvas id="titleArt" class="px" width="320" height="120" aria-hidden="true"></canvas>
+  <p>1화 · 왕도 탈출</p>
+  <div class="title-menu">
+    <button class="btn primary" type="button" id="tNew">처음부터</button>
+    <button class="btn" type="button" id="tContinue">이어하기</button>
+    <button class="btn" type="button" id="tSettings">설정</button>
+    <button class="btn ghost" type="button" id="tExit">나가기</button>
+  </div>
+  <div class="title-note" id="titleNote"></div>
+</div>
+
+<div class="recap" id="recap" hidden>
+  <div class="recap-chapter">PROLOGUE · 0화 요약</div>
+  <h2 id="recapTitle">지난 이야기</h2>
+  <div class="recap-lines" id="recapLines"></div>
+  <div class="recap-actions">
+    <button class="btn ghost" type="button" id="recapSkip">건너뛰기</button>
+    <button class="btn primary" type="button" id="recapGo">1화 시작</button>
   </div>
 </div>
 
@@ -276,6 +318,7 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
     <h2 id="resultTitle"></h2>
     <p id="resultText"></p>
     <button class="btn primary" type="button" id="btnAgain">다시 하기</button>
+    <button class="btn ghost" type="button" id="btnToTitle">타이틀로</button>
   </div>
 </div>
 
@@ -602,33 +645,62 @@ const ART = (() => {
     });
   }
   /* look: { species, head?, body, cape, weapon, shield, colors:{C,c,A,a,L,P,p,B,b,M,m,Y,Z,z} } */
-  function buildSprite(look, frame) {
-    const W = 18, H = 24, ox = 1, oy = 1;
-    const grid = Array.from({ length: H }, () => new Array(W).fill(EMPTY));
-    const sp = SPECIES[look.species];
-    const pal = Object.assign({}, BASE_PAL, look.colors, sp.pal, look.pal || {});
-    pal.S = pal[sp.hand || 'F'];
-    const bob = frame ? 1 : 0;
-    // back layers
-    if (sp.wings) paint(grid, BACK.wings.rows, ox, oy + BACK.wings.y + bob, Object.assign({}, pal, sp.wingPal || {}));
-    if (look.cape) paint(grid, BACK.cape.rows, ox, oy + BACK.cape.y, pal);
-    if (sp.tail) paint(grid, BACK[sp.tail].rows, ox, oy + BACK[sp.tail].y, pal);
-    // body (legs fixed, torso bobs)
-    const body = BODIES[look.body];
-    paint(grid, body.slice(0, 6), ox, oy + 10 + bob, pal);
-    paint(grid, body.slice(6), ox, oy + 16, pal);
-    // head
-    paint(grid, HEADS[look.head || sp.head], ox + 3, oy + bob, pal);
-    // weapon + shield
-    if (look.weapon) { const w = WEAPON_ART[look.weapon]; paint(grid, w.rows, ox, oy + w.y + bob, Object.assign({}, WEAPON_COLORS, { A:pal.A, a:pal.a, Y:pal.Y })); }
-    if (look.shield) paint(grid, SHIELD.rows, ox, oy + SHIELD.y + bob, pal);
-    // outline
-    const out = grid.map(r => r.slice());
+  // 말(탈것): 오른쪽을 보는 옆모습, 22x11
+  const MOUNT = [
+    '................mH....',
+    '...............mHHH...',
+    '..............mHHkHH..',
+    '..............HHHHHHH.',
+    '..CCCCCCC.....HHH..hh.',
+    '.HHHHHHHHHHHHHHHH.....',
+    'mHHHHHHHHHHHHHHHh.....',
+    'mHHHHHHHHHHHHHHh......',
+    'm.HH.hH.....HH.hH.....',
+    '..HH.hH.....HH.hH.....',
+    '..kk.kk.....kk.kk.....'];
+  const MOUNT_PAL = { H:'#6a4a32', h:'#4a3220', m:'#2a1c12', k:'#1e1610' };
+  function outlineGrid(grid) {
+    const H = grid.length, W = grid[0].length, out = grid.map(r => r.slice());
     for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
       if (grid[y][x]) continue;
       if ((y > 0 && grid[y - 1][x]) || (y < H - 1 && grid[y + 1][x]) || (x > 0 && grid[y][x - 1]) || (x < W - 1 && grid[y][x + 1])) out[y][x] = OUTLINE;
     }
-    return { w:W, h:H, px:out, footX:ox + 8, footY:oy + 20 };
+    return out;
+  }
+  function buildSprite(look, frame) {
+    const sp = SPECIES[look.species];
+    const pal = Object.assign({}, BASE_PAL, look.colors, sp.pal, look.pal || {});
+    pal.S = pal[sp.hand || 'F'];
+    const bob = frame ? 1 : 0;
+    const wpal = Object.assign({}, WEAPON_COLORS, { A:pal.A, a:pal.a, Y:pal.Y });
+    if (look.mount) {
+      // 기마: 말 위에 상반신. 캔버스 24x28, 말은 아래, 기수는 안장 위
+      const W = 24, H = 24, ox = 1;
+      const grid = Array.from({ length: H }, () => new Array(W).fill(EMPTY));
+      const rx = ox - 1, ry = 2 + bob;      // rider template origin
+      if (look.cape) paint(grid, BACK.cape.rows.slice(0, 5), rx, ry + 10, pal);
+      if (sp.wings) paint(grid, BACK.wings.rows.slice(0, 5), rx, ry + 10, Object.assign({}, pal, sp.wingPal || {}));
+      const mpal = Object.assign({}, MOUNT_PAL, look.mountPal || {}, { C:pal.C || pal.A });
+      paint(grid, MOUNT, ox, 12, mpal);
+      const body = BODIES[look.body];
+      paint(grid, body.slice(0, 5), rx, ry + 10, pal);
+      paint(grid, ['.......BB.......', '.......Bb.......'], rx, 17, pal);   // 걸친 다리
+      paint(grid, HEADS[look.head || sp.head], rx + 3, ry, pal);
+      if (look.weapon) { const w = WEAPON_ART[look.weapon]; paint(grid, w.rows, rx, ry + w.y, wpal); }
+      return { w:W, h:H, px:outlineGrid(grid), footX:ox + 9, footY:23 };
+    }
+    const W = 18, H = 24, ox = 1, oy = 1;
+    const grid = Array.from({ length: H }, () => new Array(W).fill(EMPTY));
+    if (sp.wings) paint(grid, BACK.wings.rows, ox, oy + BACK.wings.y + bob, Object.assign({}, pal, sp.wingPal || {}));
+    if (look.cape) paint(grid, BACK.cape.rows, ox, oy + BACK.cape.y, pal);
+    if (sp.tail) paint(grid, BACK[sp.tail].rows, ox, oy + BACK[sp.tail].y, pal);
+    const body = BODIES[look.body];
+    paint(grid, body.slice(0, 6), ox, oy + 10 + bob, pal);
+    paint(grid, body.slice(6), ox, oy + 16, pal);
+    paint(grid, HEADS[look.head || sp.head], ox + 3, oy + bob, pal);
+    if (look.weapon) { const w = WEAPON_ART[look.weapon]; paint(grid, w.rows, ox, oy + w.y + bob, wpal); }
+    if (look.shield) paint(grid, SHIELD.rows, ox, oy + SHIELD.y + bob, pal);
+    return { w:W, h:H, px:outlineGrid(grid), footX:ox + 8, footY:oy + 20 };
   }
 
   // ---------- terrain ----------
@@ -838,6 +910,7 @@ const WEAPONS = {
   'spear':   { name:'창',          pow:1.00, hits:2.0, crit:0.10, kind:'melee', art:'spear', spear:true },
   'knuckle': { name:'너클',        pow:0.85, hits:3.0, crit:0.25, kind:'melee', art:'knuckle', noPass:true },
   'bow':     { name:'활',          pow:1.00, crit:0.20, kind:'ranged', art:'bow', range:7 },
+  'shortbow':{ name:'단궁',        pow:0.90, crit:0.15, kind:'ranged', art:'bow', range:5 },
   'xbow':    { name:'석궁',        pow:1.20, crit:0.20, kind:'ranged', art:'xbow', range:5 },
   'staff':   { name:'지팡이',      pow:0,    crit:0,    kind:'magic',  art:'staff' },
 };
@@ -890,15 +963,15 @@ const GEAR = {
 };
 const MODE_NAME = { attack:'공격', formation:'진형방어', escort:'호위', escape:'탈출', enemy:'공격' };
 
-const LOOKS = {"tiger": {"species": "tiger", "body": "knight", "cape": true, "weapon": "sword", "colors": {"C": "#2e4a8c", "c": "#1f3366", "A": "#e0b44a", "a": "#a8812c", "L": "#5a3a22", "Y": "#f6d878", "P": "#33354e", "p": "#24263a", "B": "#5a3a22", "b": "#3e2816", "M": "#c0392f", "m": "#7d2220"}}, "boar": {"species": "boar", "body": "plate", "weapon": "sword", "shield": true, "colors": {"A": "#a4aebc", "a": "#6e7888", "Y": "#e0b44a", "S": "#7a5236", "B": "#6e7888", "b": "#4e5664", "Z": "#8a5a32", "z": "#5a3a1e"}}, "horse": {"species": "horse", "body": "knight", "weapon": "spear", "colors": {"C": "#3a7a4c", "c": "#285638", "A": "#c4ccd8", "a": "#8a94a4", "L": "#5a3a22", "Y": "#e0b44a", "P": "#4a3a2a", "p": "#36281c", "B": "#3e2a1a", "b": "#2a1c10"}}, "deer": {"species": "deer", "body": "tunic", "weapon": "bow", "colors": {"C": "#6a8a3a", "c": "#4e6a28", "L": "#7a5236", "Y": "#d8b860", "P": "#5a4630", "p": "#443420", "B": "#5a3a22", "b": "#3e2816"}}, "bear": {"species": "bear", "body": "tunic", "weapon": "knuckle", "colors": {"C": "#8a3a2a", "c": "#622a1e", "A": "#a4aebc", "a": "#6e7888", "L": "#3e2a1a", "Y": "#d8b860", "P": "#3a3a44", "p": "#2a2a32", "B": "#3e2a1a", "b": "#2a1c10"}}, "wolf": {"species": "wolf", "body": "knight", "weapon": "great", "colors": {"C": "#4a4a6a", "c": "#34344c", "A": "#9aa4b2", "a": "#666e7c", "L": "#3e2a1a", "Y": "#c8a850", "P": "#2e2e3a", "p": "#20202a", "B": "#2e2e3a", "b": "#1c1c24"}}, "rabbit": {"species": "rabbit", "body": "tunic", "weapon": "xbow", "colors": {"C": "#b8763a", "c": "#8a5628", "L": "#5a3a22", "Y": "#e8d080", "P": "#5a4630", "p": "#443420", "B": "#5a3a22", "b": "#3e2816"}}, "fox": {"species": "fox", "body": "robe", "weapon": "staff", "colors": {"C": "#7a3aa0", "c": "#562878", "Y": "#f0cc60", "B": "#3a2a4a", "b": "#281c34"}}, "crowInf": {"species": "crow", "body": "tunic", "weapon": "sword", "colors": {"C": "#4a4258", "c": "#342e40", "L": "#2a2420", "Y": "#8a7a5a", "P": "#2a2830", "p": "#1c1a22", "B": "#2a2420", "b": "#1c1814"}}, "sparrow": {"species": "sparrow", "body": "tunic", "weapon": "bow", "colors": {"C": "#a07a44", "c": "#7a5a30", "L": "#5a3a22", "Y": "#d8c080", "P": "#5a4a36", "p": "#463828", "B": "#4a3420", "b": "#342416"}}, "parrot": {"species": "parrot", "body": "robe", "weapon": "staff", "colors": {"C": "#2f62b4", "c": "#21468a", "Y": "#f0c84a", "B": "#2a2a3a", "b": "#1c1c28"}}, "hawkRider": {"species": "hawk", "head": "hawkRider", "body": "plate", "weapon": "spear", "colors": {"A": "#a8886a", "a": "#76604a", "Y": "#e0b44a", "B": "#76604a", "b": "#544434"}}, "eagleIron": {"species": "eagle", "head": "eagleIron", "body": "plate", "weapon": "sword", "shield": true, "colors": {"A": "#e2e6ee", "a": "#9aa2b2", "Y": "#e0b44a", "R": "#c0392f", "B": "#9aa2b2", "b": "#6e7688", "Z": "#e2e6ee", "z": "#9aa2b2"}}, "eagleChief": {"species": "eagle", "head": "eagleChief", "body": "plate", "cape": true, "weapon": "great", "colors": {"A": "#f0f0f4", "a": "#a8acb8", "Y": "#f0c040", "B": "#a8acb8", "b": "#7a7e8c", "M": "#f4f2ea", "m": "#c8c4b4"}}, "humanHeavy": {"species": "human", "head": "humanHeavy", "body": "plate", "weapon": "sword", "shield": true, "colors": {"A": "#7e8694", "a": "#545a66", "Y": "#c0392f", "B": "#545a66", "b": "#3a3e48", "Z": "#a8322d", "z": "#6e1e1a"}}, "humanXbow": {"species": "human", "body": "tunic", "weapon": "xbow", "colors": {"C": "#8a2a2a", "c": "#621e1e", "L": "#3e2a1a", "Y": "#c8a850", "P": "#3a3a44", "p": "#2a2a32", "B": "#3e2a1a", "b": "#2a1c10"}}, "humanPike": {"species": "human", "head": "humanHeavy", "body": "knight", "weapon": "spear", "colors": {"C": "#8a2a2a", "c": "#621e1e", "A": "#7e8694", "a": "#545a66", "L": "#3e2a1a", "Y": "#c8a850", "P": "#3a3a44", "p": "#2a2a32", "B": "#3e2a1a", "b": "#2a1c10"}}};
+const LOOKS = {"tiger": {"species": "tiger", "body": "knight", "cape": true, "weapon": "sword", "colors": {"C": "#2e4a8c", "c": "#1f3366", "A": "#e0b44a", "a": "#a8812c", "L": "#5a3a22", "Y": "#f6d878", "P": "#33354e", "p": "#24263a", "B": "#5a3a22", "b": "#3e2816", "M": "#c0392f", "m": "#7d2220"}}, "boar": {"species": "boar", "body": "plate", "weapon": "sword", "shield": true, "colors": {"A": "#a4aebc", "a": "#6e7888", "Y": "#e0b44a", "S": "#7a5236", "B": "#6e7888", "b": "#4e5664", "Z": "#8a5a32", "z": "#5a3a1e"}}, "horse": {"species": "horse", "body": "knight", "weapon": "spear", "colors": {"C": "#3a7a4c", "c": "#285638", "A": "#c4ccd8", "a": "#8a94a4", "L": "#5a3a22", "Y": "#e0b44a", "P": "#4a3a2a", "p": "#36281c", "B": "#3e2a1a", "b": "#2a1c10"}}, "deer": {"species": "deer", "body": "tunic", "weapon": "bow", "colors": {"C": "#6a8a3a", "c": "#4e6a28", "L": "#7a5236", "Y": "#d8b860", "P": "#5a4630", "p": "#443420", "B": "#5a3a22", "b": "#3e2816"}}, "bear": {"species": "bear", "body": "tunic", "weapon": "knuckle", "colors": {"C": "#8a3a2a", "c": "#622a1e", "A": "#a4aebc", "a": "#6e7888", "L": "#3e2a1a", "Y": "#d8b860", "P": "#3a3a44", "p": "#2a2a32", "B": "#3e2a1a", "b": "#2a1c10"}}, "wolf": {"species": "wolf", "body": "knight", "weapon": "great", "colors": {"C": "#4a4a6a", "c": "#34344c", "A": "#9aa4b2", "a": "#666e7c", "L": "#3e2a1a", "Y": "#c8a850", "P": "#2e2e3a", "p": "#20202a", "B": "#2e2e3a", "b": "#1c1c24"}}, "rabbit": {"species": "rabbit", "body": "tunic", "weapon": "xbow", "colors": {"C": "#b8763a", "c": "#8a5628", "L": "#5a3a22", "Y": "#e8d080", "P": "#5a4630", "p": "#443420", "B": "#5a3a22", "b": "#3e2816"}}, "fox": {"species": "fox", "body": "robe", "weapon": "staff", "colors": {"C": "#7a3aa0", "c": "#562878", "Y": "#f0cc60", "B": "#3a2a4a", "b": "#281c34"}}, "crowInf": {"species": "crow", "body": "tunic", "weapon": "sword", "colors": {"C": "#4a4258", "c": "#342e40", "L": "#2a2420", "Y": "#8a7a5a", "P": "#2a2830", "p": "#1c1a22", "B": "#2a2420", "b": "#1c1814"}}, "sparrow": {"species": "sparrow", "body": "tunic", "weapon": "bow", "colors": {"C": "#a07a44", "c": "#7a5a30", "L": "#5a3a22", "Y": "#d8c080", "P": "#5a4a36", "p": "#463828", "B": "#4a3420", "b": "#342416"}}, "parrot": {"species": "parrot", "body": "robe", "weapon": "staff", "colors": {"C": "#2f62b4", "c": "#21468a", "Y": "#f0c84a", "B": "#2a2a3a", "b": "#1c1c28"}}, "hawkRider": {"species": "hawk", "head": "hawkRider", "body": "plate", "weapon": "spear", "mount": true, "colors": {"A": "#a8886a", "a": "#76604a", "Y": "#e0b44a", "B": "#76604a", "b": "#544434", "C": "#6b2f2a"}}, "eagleIron": {"species": "eagle", "head": "eagleIron", "body": "plate", "weapon": "sword", "shield": true, "colors": {"A": "#e2e6ee", "a": "#9aa2b2", "Y": "#e0b44a", "R": "#c0392f", "B": "#9aa2b2", "b": "#6e7688", "Z": "#e2e6ee", "z": "#9aa2b2"}}, "eagleChief": {"species": "eagle", "head": "eagleChief", "body": "plate", "cape": true, "weapon": "great", "colors": {"A": "#f0f0f4", "a": "#a8acb8", "Y": "#f0c040", "B": "#a8acb8", "b": "#7a7e8c", "M": "#f4f2ea", "m": "#c8c4b4"}}, "humanHeavy": {"species": "human", "head": "humanHeavy", "body": "plate", "weapon": "sword", "shield": true, "colors": {"A": "#7e8694", "a": "#545a66", "Y": "#c0392f", "B": "#545a66", "b": "#3a3e48", "Z": "#a8322d", "z": "#6e1e1a"}}, "humanXbow": {"species": "human", "body": "tunic", "weapon": "xbow", "colors": {"C": "#8a2a2a", "c": "#621e1e", "L": "#3e2a1a", "Y": "#c8a850", "P": "#3a3a44", "p": "#2a2a32", "B": "#3e2a1a", "b": "#2a1c10"}}, "humanPike": {"species": "human", "head": "humanHeavy", "body": "knight", "weapon": "spear", "colors": {"C": "#8a2a2a", "c": "#621e1e", "A": "#7e8694", "a": "#545a66", "L": "#3e2a1a", "Y": "#c8a850", "P": "#3a3a44", "p": "#2a2a32", "B": "#3e2a1a", "b": "#2a1c10"}}, "falco": {"species": "hawk", "body": "plate", "weapon": "spear", "mount": true, "cape": true, "mountPal": {"H": "#e8e2d6", "h": "#b8b0a2", "m": "#4a3a2a"}, "colors": {"A": "#c8a050", "a": "#8a6a30", "Y": "#f0d070", "B": "#8a6a30", "b": "#5a4420", "C": "#8a2a22", "M": "#8a2a22", "m": "#5a1a14"}}, "karas": {"species": "crow", "body": "knight", "weapon": "great", "cape": true, "colors": {"C": "#4a2a5a", "c": "#341c40", "A": "#6a6a7a", "a": "#4a4a58", "L": "#2a2420", "Y": "#c0a050", "P": "#2a2830", "p": "#1c1a22", "B": "#2a2420", "b": "#1c1814", "M": "#6a1a2a", "m": "#40101a"}}, "noah": {"species": "human", "body": "knight", "weapon": "sword", "cape": true, "pal": {"H": "#2a2a32"}, "colors": {"C": "#1f3a6a", "c": "#162a4c", "A": "#c8ccd6", "a": "#8a90a0", "L": "#3e2a1a", "Y": "#e0c060", "P": "#2a2a36", "p": "#1e1e28", "B": "#3e2a1a", "b": "#2a1c10", "M": "#e8e4dc", "m": "#b8b2a6"}}, "garuda": {"species": "eagle", "head": "eagleChief", "body": "plate", "cape": true, "weapon": "great", "colors": {"A": "#f0f0f4", "a": "#a8acb8", "Y": "#f0c040", "B": "#a8acb8", "b": "#7a7e8c", "M": "#f4f2ea", "m": "#c8c4b4"}}};
 
 /* 유닛 원형. grow = 레벨당 성장률(1레벨 대비). elite = 이 스테이지에서 사실상 못 잡는 적 */
 const UNIT_DEFS = {
-  tiger:  { name:'왕자', race:'호랑이', species:'tiger', team:'ally', weapon:'1h', hp:130, atk:50, mag:10, def:30, mov:6, hitBonus:0.2, manual:true, prince:true, passives:['rally'],
+  tiger:  { name:'레오스', race:'호랑이', title:'동물 왕국의 왕자', age:16, species:'tiger', team:'ally', weapon:'1h', hp:130, atk:50, mag:10, def:30, mov:6, hitBonus:0.2, manual:true, prince:true, passives:['rally'],
             grow:{ hp:0.05, atk:0.05, mag:0.02, def:0.04 }, gear:['w_1h_royal','arm_leather'], special:'tigerDance' },
-  boar:   { name:'기사1', race:'멧돼지', species:'boar', team:'ally', weapon:'1hs', hp:170, atk:44, mag:5, def:45, mov:4, manual:true, passives:['wall'],
+  boar:   { name:'보르도', race:'멧돼지', title:'왕실 기사', age:23, species:'boar', team:'ally', weapon:'1hs', hp:170, atk:44, mag:5, def:45, mov:4, manual:true, passives:['wall'],
             grow:{ hp:0.08, atk:0.03, mag:0.01, def:0.06 }, gear:['w_1h_guard','arm_chain'], special:'ironWall' },
-  horse:  { name:'기사2', race:'말', species:'horse', team:'ally', weapon:'spear', hp:135, atk:46, mag:5, def:28, mov:10, hitBonus:1.0, manual:true,
+  horse:  { name:'로벤', race:'말', title:'왕실 기사', age:22, species:'horse', team:'ally', weapon:'spear', hp:135, atk:46, mag:5, def:28, mov:10, hitBonus:1.0, manual:true,
             grow:{ hp:0.05, atk:0.05, mag:0.01, def:0.03 }, gear:['w_spear_knight','arm_leather'], special:'galeCharge' },
   deer:   { name:'궁수', race:'사슴', species:'deer', team:'ally', weapon:'bow', hp:100, atk:44, mag:8, def:20, mov:7,
             grow:{ hp:0.04, atk:0.05, mag:0.02, def:0.02 }, gear:['w_bow_hunt'], special:'skyBow' },
@@ -912,10 +985,14 @@ const UNIT_DEFS = {
             grow:{ hp:0.03, atk:0.01, mag:0.08, def:0.02 }, gear:['w_staff_oak','arm_robe'], special:'foxBlessing' },
 
   crowInf:    { name:'까마귀 보병', species:'crow', team:'enemy', weapon:'1h', lv:2, hp:90, atk:34, mag:5, def:18, mov:6 },
-  sparrow:    { name:'참새 궁수', species:'sparrow', team:'enemy', weapon:'bow', lv:2, hp:70, atk:30, mag:6, def:12, mov:6, special:'skyBow' },
+  sparrow:    { name:'참새 궁수', species:'sparrow', team:'enemy', weapon:'shortbow', lv:2, hp:70, atk:26, mag:6, def:12, mov:6, special:'skyBow' },
   parrot:     { name:'앵무새 술사', species:'parrot', team:'enemy', weapon:'staff', lv:3, hp:80, atk:10, mag:34, def:14, mov:5, maxMp:100, skills:['feather','heal'] },
   hawkRider:  { name:'매 기갑병', species:'hawk', team:'enemy', weapon:'spear', lv:6, hp:260, atk:46, mag:5, def:50, mov:8, special:'whirl', elite:true },
   eagleIron:  { name:'흰독수리 철갑병', species:'eagle', team:'enemy', weapon:'1hs', lv:8, hp:420, atk:60, mag:5, def:95, mov:4, passives:['wall'], special:'ironWall', elite:true },
+  garuda:     { name:'가루다', race:'흰독수리', title:'흰독수리 철갑군단장', age:32, species:'eagle', team:'enemy', weapon:'2h', lv:10, hp:600, atk:70, mag:5, def:90, mov:4, special:'dive', elite:true, boss:true },
+  falco:      { name:'팔코', race:'매', title:'매 기갑대장', age:31, species:'hawk', team:'enemy', weapon:'spear', lv:8, hp:320, atk:50, mag:5, def:55, mov:8, special:'whirl', elite:true, boss:true },
+  karas:      { name:'카라스', race:'까마귀', title:'까마귀 보병대장', age:26, species:'crow', team:'enemy', weapon:'2h', lv:5, hp:170, atk:44, mag:5, def:30, mov:6, special:'dive' },
+  noah:       { name:'노아', race:'인간', title:'인간 원정군 대장', age:33, species:'human', team:'enemy', weapon:'1h', lv:10, hp:380, atk:58, mag:5, def:80, mov:5, elite:true, boss:true },
   eagleChief: { name:'흰독수리 군단장', species:'eagle', team:'enemy', weapon:'2h', lv:10, hp:600, atk:70, mag:5, def:90, mov:4, special:'dive', elite:true, boss:true },
   humanHeavy: { name:'인간 중갑병', species:'human', team:'enemy', weapon:'1hs', lv:7, hp:300, atk:50, mag:5, def:80, mov:4, passives:['wall'], elite:true },
   humanXbow:  { name:'인간 석궁병', species:'human', team:'enemy', weapon:'xbow', lv:6, hp:180, atk:48, mag:5, def:40, mov:5, elite:true },
@@ -924,58 +1001,88 @@ const UNIT_DEFS = {
 
 /* ---------- 1화 왕도 탈출 ---------- */
 const STAGE = {
-  map: ["#######NNNN####XXX", "#ff....::::...#XXX", "#f..f...::....#rrr", "..f.....::.f..#rr.", ".....f..::....#r..", ".f......::......r.", "...ff...::...f....", "~~~~~~~~=~~~~~~=~~", "~~~~~~~~=~~~~~~=~~", "ss..s...:...rr..s.", "......p.:.....f...", ".c.c..p.:....ff...", "......p.:.........", "........:...##....", "......p.::....f...", ".c.c..p..:...fff..", "......p..:....f...", "~~~.......:.......", "~~~~..f...:...ff..", "......f...:.......", "..f......::.......", "HHHH.HHHH::HHH.HHH", "Hoooooooo::ooooohH", "Hohhoooo.::.hhoohH", "Hohhoooooo::hhoooH", "Hoooooooo::ooooohH", "Hohhooooo::oohhooH", "Hohhooooo::oohhooH", "Hoooooooo::ooooooH", "HHHHHHHHHHHHHHHHHH"],
+  map: ["##########NNNN#######XXX", "###........::.....##rXXX", "###..f.rr..::.....##rrrr", "#.f........::..f..##rrrr", "#.......f..::......#rrrr", "#..f.......::..rr..#rrrr", "#.....f....::...f..#rrrr", "#..........::......#rrrr", "....f......::.f.....rrrr", "...........::.......rrrr", "~~~~~~~~~~~=~~~~~~~~~=~~", "~~~~~~~~~~~=~~~~~~~~~=~~", "sss..ss....::...ss.....s", ".........f.::...........", "...........::.rrr..ff...", "........p..::.rrr....f..", "..c..c..p..::.......f...", "........p..::....f....f.", "...........::...f.......", "........p..::...........", "..c..c..p..:::.~~~~.....", "........p..:::.~~~~~....", "...........::..~~~~.....", "........p..::...........", "..c..c..p..::...........", "........p..::......f..f.", "...........::....##.f...", "~~~~f......::.f......f..", "~~~~.......::..f........", ".....rrr...::...........", "...........::...........", "HHHHH.HHHHH::HHHHH.HHHHH", "Hoooooooooo::ooooooooooH", "Hohhoohhooo::oohhoohhooH", "Hohhoohhooo::oohhoohhooH", "Hooooooohho::ohhoooooooH", "Hooooooohho::ohhoooooooH", "H::::::::::::::::::::::H", "Hoooooooooo::ooooooooooH", "Hohhoohhooo::oohhoohhooH", "Hohhoohhooo::oohhoohhooH", "Hoooooooooo::ooooooooooH", "Hoooooooooo::ooooooooooH", "HHHHHHHHHHHHHHHHHHHHHHHH"],
+  recap: {
+    title:'지난 이야기',
+    lines:[
+      '동물과 조류의 전쟁은 백 년을 이어 왔다.',
+      '마침내 승기를 잡은 동물군은 조류의 땅을 끝내러 진격했다.',
+      '그러나 조류는 결코 손잡아서는 안 될 상대, 인간과 동맹을 맺었다.',
+      '인간 원정군의 기습으로 전세는 하룻밤 만에 뒤집혔고, 동물 왕국의 수도까지 불길이 번졌다.',
+      '왕과 왕비는 끝내 목숨을 잃었다. 공주는 행방을 알 수 없고, 충신들도 붙잡히거나 흩어졌다.',
+      '살아남은 왕자 레오스는 두 기사, 보르도와 로벤과 함께 불타는 왕도를 빠져나가려 한다.',
+    ],
+  },
   objectives: {
-    north: { text:'왕자를 북문까지 데려가라', label:'북문', tile:'N' },
-    east:  { text:'왕자를 오른쪽 위 산길 끝까지 데려가 탈출하라', label:'탈출', tile:'X' },
+    north: { text:'레오스를 북문까지 데려가라', label:'북문', tile:'N' },
+    east:  { text:'레오스를 오른쪽 위 산길 끝까지 데려가 탈출하라', label:'탈출', tile:'X' },
   },
   allies: [
-    { unit:'tiger', x:9, y:27 }, { unit:'boar', x:10, y:26 }, { unit:'horse', x:8, y:26 }, { unit:'deer', x:9, y:28 },
+    { unit:'tiger', x:11, y:40 }, { unit:'boar', x:12, y:39 }, { unit:'horse', x:10, y:39 }, { unit:'deer', x:11, y:41 },
   ],
   enemies: [
-    { unit:'crowInf', x:6,  y:24, name:'까마귀 보병 A', drop:'arm_crow' },
-    { unit:'crowInf', x:13, y:22, name:'까마귀 보병 B', drop:'acc_feather' },
-    { unit:'crowInf', x:9,  y:22, name:'까마귀 보병 C' },
-    { unit:'sparrow', x:5,  y:19, name:'참새 궁수 A', drop:'w_bow_sparrow', activeTurn:2 },
-    { unit:'sparrow', x:13, y:19, name:'참새 궁수 B', activeTurn:2 },
-    { unit:'parrot',  x:11, y:17, name:'앵무새 술사', drop:'acc_boots', activeTurn:2 },
-    { unit:'humanHeavy', x:4, y:12, name:'인간 중갑병 A', ai:'hold' },
-    { unit:'humanHeavy', x:4, y:14, name:'인간 중갑병 B', ai:'hold' },
-    { unit:'humanXbow',  x:2, y:12, name:'인간 석궁병 A', ai:'hold' },
-    { unit:'humanXbow',  x:2, y:14, name:'인간 석궁병 B', ai:'hold' },
-    { unit:'humanPike',  x:3, y:13, name:'인간 장창병', ai:'hold' },
+    { unit:'crowInf', x:7,  y:36, name:'까마귀 보병 A', drop:'arm_crow' },
+    { unit:'crowInf', x:17, y:34, name:'까마귀 보병 B', drop:'acc_feather' },
+    { unit:'crowInf', x:12, y:33, name:'까마귀 보병 C' },
+    { unit:'crowInf', x:4,  y:38, name:'까마귀 보병 D' },
+    { unit:'crowInf', x:19, y:38, name:'까마귀 보병 E' },
+    { unit:'karas',   x:11, y:30, drop:'w_2h_iron' },
+    { unit:'sparrow', x:6,  y:28, name:'참새 궁수 A', drop:'w_bow_sparrow', activeTurn:2 },
+    { unit:'sparrow', x:17, y:28, name:'참새 궁수 B', activeTurn:2 },
+    { unit:'parrot',  x:14, y:25, name:'앵무새 술사', drop:'acc_boots', activeTurn:2 },
+    { unit:'noah',       x:4, y:20, ai:'hold' },
+    { unit:'humanHeavy', x:6, y:17, name:'인간 중갑병 A', ai:'hold' },
+    { unit:'humanHeavy', x:6, y:21, name:'인간 중갑병 B', ai:'hold' },
+    { unit:'humanXbow',  x:3, y:18, name:'인간 석궁병 A', ai:'hold' },
+    { unit:'humanXbow',  x:3, y:22, name:'인간 석궁병 B', ai:'hold' },
+    { unit:'humanPike',  x:6, y:24, name:'인간 장창병', ai:'hold' },
   ],
   events: [
     { id:'open', at:'start', objective:'north', talk:[
-      { text:'동물 왕국의 수도가 불타고 있다. 인간과 손잡은 조류군이 성벽을 넘었다.' },
+      { text:'불타는 왕도. 성벽을 넘은 조류군이 거리마다 들이닥쳤다.' },
       { who:'boar', text:'왕자님, 성은 끝났습니다. 북문으로 빠져나가셔야 합니다!' },
       { who:'horse', text:'까마귀 놈들이 성 안까지 들어왔습니다. 길은 저희가 엽니다.' },
       { who:'tiger', text:'…아버지, 어머니. 반드시 돌아오겠습니다.' },
       { who:'deer', text:'뒤는 제가 맡겠습니다. 서쪽 인간 진영엔 다가가지 마십시오.' } ] },
-    { id:'hawks', turn:2, focus:[16, 18], banner:'매 기갑군단 출현', spawn:[
-      { unit:'hawkRider', x:15, y:17, name:'매 기갑병 A', activeIn:4 },
-      { unit:'hawkRider', x:16, y:18, name:'매 기갑대장', activeIn:4 },
-      { unit:'hawkRider', x:17, y:19, name:'매 기갑병 B', activeIn:4 } ], talk:[
-      { who:'hawkRider', name:'매 기갑대장', text:'동쪽 평원은 우리 기갑대가 맡는다. 신호가 오면 단숨에 짓밟아라!' },
-      { who:'horse', text:'동쪽에 매 기갑대가… 아직은 움직이지 않는군요. 저놈들이 달려오기 전에 강을 건너야 합니다.' } ] },
-    { id:'crows', turn:4, focus:[2, 19], banner:'까마귀 보병대 출현', spawn:[
-      { unit:'crowInf', x:1, y:20, name:'까마귀 보병장', activeIn:1 },
-      { unit:'crowInf', x:2, y:19, name:'까마귀 보병 D', activeIn:1 },
-      { unit:'crowInf', x:0, y:19, name:'까마귀 보병 E', activeIn:1 },
-      { unit:'crowInf', x:3, y:20, name:'까마귀 보병 F', activeIn:1 } ], talk:[
-      { who:'crowInf', name:'까마귀 보병장', text:'성 뒤쪽을 막아라! 호랑이 새끼를 놓치지 마!' } ] },
-    { id:'eagles', allyRow:12, focus:[8, 2], banner:'흰독수리 철갑군단 출현', objective:'east', spawn:[
-      { unit:'eagleChief', x:8,  y:1, name:'흰독수리 군단장', activeIn:1 },
-      { unit:'eagleIron',  x:7,  y:2, name:'흰독수리 철갑병 A', activeIn:1 },
-      { unit:'eagleIron',  x:10, y:2, name:'흰독수리 철갑병 B', activeIn:1 },
-      { unit:'eagleIron',  x:6,  y:3, name:'흰독수리 철갑병 C', activeIn:1 },
-      { unit:'eagleIron',  x:11, y:3, name:'흰독수리 철갑병 D', activeIn:1 },
-      { unit:'sparrow',    x:9,  y:3, name:'참새 궁수 C', activeIn:1 },
-      { unit:'sparrow',    x:5,  y:1, name:'참새 궁수 D', activeIn:1 } ], talk:[
-      { who:'eagleChief', name:'흰독수리 군단장', text:'북문은 이미 우리 철갑군단의 것이다. 여기서 끝이다, 호랑이 왕자.' },
+    { id:'karas', at:'start', focus:[11, 30], talk:[
+      { who:'karas', text:'호랑이 새끼가 아직 성 안에 있다! 성문을 막아라, 한 놈도 놓치지 마!' },
+      { who:'tiger', text:'카라스… 저 까마귀가 성문을 지키고 있어.' } ] },
+    { id:'hawks', turn:2, focus:[21, 29], banner:'매 기갑군단 출현', spawn:[
+      { unit:'falco',     x:21, y:30, activeIn:5 },
+      { unit:'hawkRider', x:20, y:29, name:'매 기갑병 A', activeIn:5 },
+      { unit:'hawkRider', x:22, y:29, name:'매 기갑병 B', activeIn:5 },
+      { unit:'hawkRider', x:20, y:30, name:'매 기갑병 C', activeIn:5 } ], talk:[
+      { who:'falco', text:'동쪽 평원은 우리 기갑대가 맡는다. 말에게 숨을 고르게 해라. 신호가 오면 단숨에 짓밟는다.' },
+      { who:'horse', text:'팔코의 기갑대… 아직은 움직이지 않는군요. 저놈들이 달려오기 전에 강을 건너야 합니다.' } ] },
+    { id:'noah', turn:3, focus:[4, 20], talk:[
+      { who:'noah', text:'조류 놈들이 알아서 하겠지. 우리는 지켜보기만 한다. 짐승의 왕자가 어디까지 가는지.' },
+      { who:'boar', text:'인간들… 저 노아라는 자, 움직이지 않습니다. 건드리지 않는 게 좋겠습니다.' } ] },
+    { id:'crows', turn:4, focus:[2, 30], banner:'까마귀 보병대 출현', spawn:[
+      { unit:'crowInf', x:1, y:30, name:'까마귀 보병 F', activeIn:1 },
+      { unit:'crowInf', x:2, y:29, name:'까마귀 보병 G', activeIn:1 },
+      { unit:'crowInf', x:3, y:30, name:'까마귀 보병 H', activeIn:1 },
+      { unit:'crowInf', x:4, y:29, name:'까마귀 보병 I', activeIn:1 } ], talk:[
+      { text:'서쪽에서 까마귀 보병대가 뒤를 쫓아온다.' } ] },
+    { id:'eagles', allyRow:18, focus:[11, 2], banner:'흰독수리 철갑군단 출현', objective:'east', spawn:[
+      { unit:'garuda',    x:11, y:1, activeIn:1 },
+      { unit:'eagleIron', x:10, y:2, name:'흰독수리 철갑병 A', activeIn:1 },
+      { unit:'eagleIron', x:13, y:2, name:'흰독수리 철갑병 B', activeIn:1 },
+      { unit:'eagleIron', x:9,  y:3, name:'흰독수리 철갑병 C', activeIn:1 },
+      { unit:'eagleIron', x:14, y:3, name:'흰독수리 철갑병 D', activeIn:1 },
+      { unit:'sparrow',   x:8,  y:2, name:'참새 궁수 C', activeIn:1 },
+      { unit:'sparrow',   x:15, y:2, name:'참새 궁수 D', activeIn:1 } ], talk:[
+      { who:'garuda', text:'북문은 이미 우리 철갑군단의 것이다. 여기서 끝이다, 레오스.' },
+      { who:'tiger', text:'가루다…!' },
       { who:'boar', text:'북문이 막혔습니다! 저 철갑엔 칼이 들지 않습니다!' },
       { who:'horse', text:'동쪽 산길로 우회하십시오! 오른쪽 위 끝까지 가면 빠져나갈 수 있습니다!' } ] },
   ],
+  defeat: [
+    { who:'tiger', text:'여기까지… 인가…' },
+    { who:'boar', text:'왕자님! 눈을 뜨십시오, 왕자님!' },
+    { text:'왕국의 마지막 희망이 불타는 왕도에서 쓰러졌다.' } ],
+  victory: [
+    { who:'horse', text:'산길을 넘었습니다! 추격대가 더는 따라오지 못합니다.' },
+    { who:'tiger', text:'…왕도가 아직 불타고 있어. 반드시 돌아온다. 누이도, 모두도.' } ],
 };
 const MAP = STAGE.map;
 const COLS = MAP[0].length, ROWS = MAP.length;
@@ -1003,7 +1110,7 @@ function makeUnit(defId, place) {
 }
 function resetState() {
   Object.assign(S, { turn:1, phase:'player', units:[], escaped:[], items:{ potion:4, ether:0 }, bag:[],
-    globalMode:'escort', allManual:false, over:null, log:[], speed:S.speed || 1, objective:'north', fired:{}, kills:0 });
+    globalMode:'escort', allManual:false, over:null, log:[], speed:S.speed || 1, objective:'north', fired:{}, kills:0, met:{}, fallen:null });
   for (const a of STAGE.allies) S.units.push(makeUnit(a.unit, a));
   for (const e of STAGE.enemies) S.units.push(makeUnit(e.unit, e));
 }
@@ -1188,6 +1295,7 @@ const spearMul = n => CFG.spearBonus[Math.min(n, CFG.spearBonus.length - 1)];
 
 function kill(u, by) {
   u.hp = 0; u.sp = null;
+  if (u.prince) S.fallen = { x:u.x, y:u.y };
   FX.log(`${u.name} 쓰러짐`, 'kill');
   FX.onKill(u);
   if (by && by.team === 'ally' && u.team === 'enemy') S.kills++;
@@ -1655,11 +1763,12 @@ function planHits(u, plan) {
   if (plan.knTarget) return true;
   return computePlan(u, plan.route, null).rows.some(r => r.strikes.length);
 }
+const stopAI = () => S.over && S.over !== 'lose';
 async function aiTakeTurn(u) {
-  if (u.hp <= 0 || S.over) return;
+  if (u.hp <= 0 || stopAI()) return;
   if (isDormant(u)) { u.acted = true; return; }
   FX.focus(u);
-  if (u.team === 'ally' && effMode(u) !== 'escape' && u.hp / u.maxHp < 0.4 && S.items.potion > 0 && alive().some(o => o.team !== u.team && !isDormant(o) && man(o.x, o.y, u.x, u.y) <= 10)) {
+  if (u.team === 'ally' && u.hp / u.maxHp < (effMode(u) === 'escape' ? 0.3 : 0.4) && S.items.potion > 0 && alive().some(o => o.team !== u.team && !isDormant(o) && man(o.x, o.y, u.x, u.y) <= 10)) {
     useItem(u, 'potion'); u.acted = true; await wait(300); FX.changed(); return;
   }
   const sp = rageFull(u) ? specialOf(u) : null;
@@ -1670,7 +1779,7 @@ async function aiTakeTurn(u) {
   if (armed && sp.kind === 'charge') useRage(u);
   await execMove(u, plan.route, plan.knTarget || null);
   if (u.team === 'ally' && u.hp > 0) { if (await afterAllyMove(u)) { u.sp = null; return; } }
-  if (u.hp > 0 && plan.action && !checkEnd()) {
+  if (u.hp > 0 && plan.action && !stopAI()) {
     const a = plan.action;
     if (a.type === 'shot') { const d = a.target.hp > 0 ? man(a.target.x, a.target.y, u.x, u.y) : 0; if (d >= 1 && d <= rangeOf(u)) await execShot(u, a.target, armed && sp.kind === 'shot' ? sp : null); }
     else if (a.type === 'skill') {
@@ -1688,7 +1797,7 @@ async function aiTakeTurn(u) {
 }
 async function runAI(list) {
   for (const u of list) {
-    if (S.over) return;
+    if (stopAI()) return;
     if (u.hp <= 0 || !S.units.includes(u)) continue;
     if (isDormant(u)) { u.acted = true; continue; }
     FX.focus(u);
@@ -1740,7 +1849,9 @@ function spriteFor(look, frame, white) {
   if (!spriteCache[key]) {
     const s = ART.buildSprite(look, frame);
     const px = white ? s.px.map(r => r.map(c => (c && c !== ART.OUTLINE ? '#ffffff' : c))) : s.px;
-    spriteCache[key] = pixelsToCanvas(px, s.w, s.h);
+    const c = pixelsToCanvas(px, s.w, s.h);
+    c.footX = s.footX; c.footY = s.footY;
+    spriteCache[key] = c;
   }
   return spriteCache[key];
 }
@@ -1761,7 +1872,7 @@ function drawFace(canvas, look, size) {
   g.imageSmoothingEnabled = false;
   g.clearRect(0, 0, canvas.width, canvas.height);
   const s = spriteFor(look, 0), k = size || 2;
-  g.drawImage(s, Math.round(canvas.width / 2 - 9 * k), 1, s.width * k, s.height * k);
+  g.drawImage(s, Math.round(canvas.width / 2 - (s.footX + 0.5) * k), 1, s.width * k, s.height * k);
 }
 
 /* ---------- camera ---------- */
@@ -1904,8 +2015,9 @@ function drawUnits(now) {
     ctx.globalAlpha = dim ? 0.5 : 1;
     ctx.translate(cx, 0);
     if (u.face < 0) ctx.scale(-1, 1);
-    ctx.drawImage(spr, -9 * PX, bottom - 22 * PX, 18 * PX, 24 * PX);
-    if (u.flash > 0) { ctx.globalAlpha = u.flash * 0.8; ctx.drawImage(spriteFor(u.look, frame, true), -9 * PX, bottom - 22 * PX, 18 * PX, 24 * PX); }
+    const sl = -(spr.footX + 0.5) * PX, st = bottom - (spr.footY + 1) * PX;
+    ctx.drawImage(spr, sl, st, spr.width * PX, spr.height * PX);
+    if (u.flash > 0) { ctx.globalAlpha = u.flash * 0.8; ctx.drawImage(spriteFor(u.look, frame, true), sl, st, spr.width * PX, spr.height * PX); }
     ctx.restore();
     // bars
     const bw = T * 0.7, bx = cx - bw / 2, by = bottom - 2;
@@ -2030,7 +2142,10 @@ FX.talk = lines => new Promise(resolve => {
   const show = () => {
     const l = lines[i];
     const def = l.who ? UNIT_DEFS[l.who] : null;
+    const first = def && def.age && !S.met[l.who];
+    if (first) S.met[l.who] = true;
     $('#talkName').textContent = l.name || (def ? def.name : '');
+    $('#talkRole').textContent = first ? `${def.age}세 · ${def.title}` : '';
     $('#talkText').textContent = l.text;
     const face = $('#talkFace');
     if (def) { face.hidden = false; drawFace(face, LOOKS[l.who], 3); } else face.hidden = true;
@@ -2357,6 +2472,7 @@ function finishUnit(u) {
   Object.assign(UI, { sel:null, mode:'idle', route:[], kn:null, reachSet:null, plan:null, sub:null, targets:null, tsel:null, skill:null, special:false, tpreview:null });
   if (u) UI.inspect = u;
   render();
+  saveGame();
 }
 function doItem(kind) { const u = UI.sel; if (!u || !useItem(u, kind)) return; finishUnit(u); }
 function enterTarget(sid, special) {
@@ -2412,7 +2528,16 @@ async function runSkill(sid, tx, ty) {
   if (afterAction()) return;
   finishUnit(u);
 }
-function afterAction() { const r = checkEnd(); if (r) { showResult(r); return true; } render(); return false; }
+function afterAction() { const r = checkEnd(); if (r) { finishStage(r); return true; } render(); return false; }
+async function finishStage(r) {
+  UI.busy = true;
+  Object.assign(UI, { sel:null, mode:'idle', route:[], kn:null, reachSet:null, plan:null, targets:null, tsel:null });
+  render();
+  if (r === 'lose' && S.fallen) { centerOn(S.fallen.x, S.fallen.y); await FX.sleep(700); await FX.talk(STAGE.defeat); }
+  if (r === 'escape') await FX.talk(STAGE.victory);
+  clearSave();
+  showResult(r);
+}
 
 async function banner(text, tone) {
   const b = $('#banner');
@@ -2430,12 +2555,12 @@ async function endTurn() {
     S.phase = 'ally'; render();
     await banner('동맹 행동', 'ally');
     await runAI(autos);
-    if (S.over) return showResult(S.over);
+    if (S.over === 'escape') return finishStage(S.over);
   }
   S.phase = 'enemy'; render();
   await banner('적 페이즈', 'enemy');
   await runAI(enemyOrder());
-  if (S.over) return showResult(S.over);
+  if (S.over) return finishStage(S.over);
   startTurn();
   S.phase = 'player';
   const p = prince();
@@ -2446,6 +2571,7 @@ async function endTurn() {
   if (p) centerOn(p.x, p.y);
   UI.busy = false;
   render();
+  saveGame();
 }
 function showResult(r) {
   UI.busy = false;
@@ -2453,8 +2579,8 @@ function showResult(r) {
   box.dataset.r = r === 'lose' ? 'lose' : 'win';
   $('#resultTitle').textContent = r === 'lose' ? '패배' : '탈출 성공';
   $('#resultText').textContent = r === 'lose'
-    ? `왕자가 쓰러졌습니다. ${S.turn}턴 동안 버텼어요. 처치한 적 ${S.kills}.`
-    : `${S.turn}턴 만에 왕자가 왕도를 빠져나갔습니다. 탈출 ${S.escaped.length}/${STAGE.allies.length}명 · 처치한 적 ${S.kills}.`;
+    ? `레오스가 쓰러졌습니다. ${S.turn}턴 동안 버텼어요. 처치한 적 ${S.kills}.`
+    : `${S.turn}턴 만에 레오스가 왕도를 빠져나갔습니다. 탈출 ${S.escaped.length}/${STAGE.allies.length}명 · 처치한 적 ${S.kills}.`;
   $('#result').hidden = false;
   render();
 }
@@ -2539,10 +2665,82 @@ async function newBattle() {
   await runStartEvents();
   UI.busy = false;
   const toast = $('#toast');
-  toast.textContent = '왕자를 누른 채 위로 끌어 경로를 그리고, 끝 칸을 두 번 누르면 출발해요';
+  toast.textContent = '레오스를 누른 채 위로 끌어 경로를 그리고, 끝 칸을 두 번 누르면 출발해요';
   toast.hidden = false;
   render();
+  saveGame();
 }
+
+/* ---------- save / title ---------- */
+const SAVE_KEY = 'rondo.save.v1';
+function saveGame() {
+  if (S.over) return;
+  try {
+    const data = { v:1, at:Date.now(), S:{ turn:S.turn, units:S.units, escaped:S.escaped, items:S.items, bag:S.bag, globalMode:S.globalMode, objective:S.objective, fired:S.fired, kills:S.kills, met:S.met, log:S.log.slice(0, 80) } };
+    localStorage.setItem(SAVE_KEY, JSON.stringify(data));
+  } catch (e) {}
+}
+function readSave() { try { const t = localStorage.getItem(SAVE_KEY); return t ? JSON.parse(t) : null; } catch (e) { return null; } }
+function clearSave() { try { localStorage.removeItem(SAVE_KEY); } catch (e) {} }
+function showTitle() {
+  $('#title').hidden = false; $('#recap').hidden = true; $('#result').hidden = true; closeSheets();
+  const sv = readSave();
+  const b = $('#tContinue');
+  b.disabled = !sv;
+  b.innerHTML = sv ? `이어하기<small>${sv.S.turn}턴</small>` : '이어하기';
+  $('#titleNote').textContent = '';
+  drawTitleArt();
+}
+function drawTitleArt() {
+  const c = $('#titleArt'), g = c.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  g.clearRect(0, 0, c.width, c.height);
+  const cast = [['garuda', 236, -1], ['falco', 288, -1], ['horse', 70, 1], ['tiger', 128, 1], ['boar', 178, 1]];
+  for (const [id, x, face] of cast) {
+    const spr = spriteFor(LOOKS[id], 0), k = 4;
+    g.save(); g.translate(x, 0); if (face < 0) g.scale(-1, 1);
+    g.drawImage(spr, -(spr.footX + 0.5) * k, 112 - (spr.footY + 1) * k, spr.width * k, spr.height * k);
+    g.restore();
+  }
+}
+function showRecap() {
+  $('#title').hidden = true;
+  const box = $('#recapLines');
+  box.textContent = '';
+  $('#recapTitle').textContent = STAGE.recap.title;
+  STAGE.recap.lines.forEach((t, i) => {
+    const p = document.createElement('p'); p.textContent = t; box.append(p);
+    setTimeout(() => p.classList.add('on'), reduceMotion ? 0 : 400 + i * 900);
+  });
+  $('#recap').hidden = false;
+}
+function continueGame() {
+  const sv = readSave();
+  if (!sv) return;
+  const keepSpeed = S.speed || 1;
+  resetState();
+  Object.assign(S, sv.S, { speed:keepSpeed, phase:'player', over:null, fallen:null, allManual:false });
+  for (const u of S.units.concat(S.escaped)) { u.dx = u.x; u.dy = u.y; u.flash = 0; u.sp = null; }
+  Object.assign(UI, { mode:'idle', sel:null, inspect:prince(), route:[], kn:null, busy:false, reachSet:null, plan:null, sub:null, skill:null, special:false, armed:false,
+    targets:null, tsel:null, tpreview:null, popups:[], areas:[], ptr:null, lastTap:null, edge:null, tileInfo:null });
+  $('#title').hidden = true; $('#result').hidden = true;
+  const p = prince(); if (p) centerOn(p.x, p.y, true);
+  FX.log('이어하기', 'event');
+  render();
+}
+function exitGame() {
+  const app = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.App;
+  if (app && app.exitApp) { app.exitApp(); return; }
+  $('#titleNote').textContent = '브라우저에서는 탭을 닫으면 종료돼요.';
+}
+$('#tNew').addEventListener('click', () => { clearSave(); showRecap(); });
+$('#tContinue').addEventListener('click', continueGame);
+$('#tSettings').addEventListener('click', () => { renderMenu(); openSheet('menuSheet'); });
+$('#tExit').addEventListener('click', exitGame);
+$('#recapGo').addEventListener('click', () => { $('#recap').hidden = true; newBattle(); });
+$('#recapSkip').addEventListener('click', () => { $('#recap').hidden = true; newBattle(); });
+$('#btnToTitle').addEventListener('click', showTitle);
+$('#btnMenuTitle').addEventListener('click', () => { saveGame(); showTitle(); });
 
 /* boot */
 readColors();
@@ -2550,7 +2748,8 @@ try { const sp = parseFloat(localStorage.getItem('rondo.speed')); if (sp) S.spee
 buildMapFrames();
 resize();
 new ResizeObserver(() => resize()).observe($('#boardWrap'));
-newBattle();
+resetState();
+showTitle();
 requestAnimationFrame(frame);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => render());
 </script>
