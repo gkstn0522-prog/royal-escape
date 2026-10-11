@@ -2,6 +2,9 @@
   "appId": "com.example.royalescape",
   "appName": "왕도 탈출",
   "webDir": "www",
+  "server": {
+    "url": "https://gkstn0522-prog.github.io/royal-escape/www/"
+  },
   "android": {
     "backgroundColor": "#11131a"
   }
