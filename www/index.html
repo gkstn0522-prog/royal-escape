@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=Nanum+Myeongjo:wght@700;800&display=swap">
 <style>
-/* Layout: one-screen battle for a phone held upright. Header strip, square-tile board, docked command panel; sheets slide up over the board. Single night palette by choice (the capital burning at night). */
+/* Layout: one-screen battle for a phone held upright. Header + objective strip, scrollable pixel-art battlefield, docked command panel. Single night-campaign palette by choice. */
 :root{
   --ground:#11131a;
   --panel:#191c26;
@@ -27,11 +27,6 @@
   --good:#82c98f;
   --mana:#8b97f2;
   --gold:#f2cf73;
-  --tile-a:#252a37;
-  --tile-b:#2a2f3e;
-  --wall:#14161e;
-  --wall-top:#1f2230;
-  --grid:#1a1d28;
   --font-display:"Nanum Myeongjo","Noto Serif KR","AppleMyungjo",serif;
   --font-body:"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif;
   --font-num:"IBM Plex Mono",ui-monospace,"SFMono-Regular",monospace;
@@ -42,10 +37,10 @@ html{height:100%;box-sizing:border-box}
 body{height:100%;margin:0;background:var(--ground);color:var(--ink);font-family:var(--font-body);overflow:hidden;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
 button{font:inherit;color:inherit}
 button:focus-visible,[role="switch"]:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 
-.app{height:100%;max-width:560px;margin:0 auto;padding-inline:16px;display:flex;flex-direction:column;gap:8px}
+.app{height:100%;max-width:640px;margin:0 auto;padding-inline:16px;display:flex;flex-direction:column;gap:6px}
 
-/* header */
 .top{display:flex;align-items:center;gap:6px;padding-block:10px 0}
 .chapter{flex:1;min-width:0;margin:0;font-family:var(--font-display);font-weight:800;font-size:1.2rem;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .chapter small{font-family:var(--font-num);font-weight:500;font-size:.7rem;color:var(--ember);letter-spacing:.08em;margin-right:6px;vertical-align:2px}
@@ -54,26 +49,37 @@ button:focus-visible,[role="switch"]:focus-visible{outline:2px solid var(--gold)
 .phase-chip[data-phase="ally"]{color:var(--good);border-color:var(--good)}
 .phase-chip[data-phase="enemy"]{color:var(--enemy);border-color:var(--enemy)}
 .icon-btn{background:none;border:1px solid var(--line);border-radius:8px;min-height:34px;padding:0 9px;font-size:.8rem;font-weight:600;color:var(--ink);cursor:pointer}
+.objective{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--ink-dim);min-height:20px;white-space:nowrap;overflow:hidden}
+.objective b{color:var(--ember);font-weight:600;overflow:hidden;text-overflow:ellipsis}
+.objective span{margin-left:auto;font-family:var(--font-num);font-size:.7rem;flex:0 0 auto}
 
-/* board */
-.board-wrap{flex:1;min-height:0;position:relative;display:grid;place-items:center;overflow:hidden}
-#board{display:block;touch-action:none;border-radius:4px;box-shadow:0 0 0 1px var(--line),0 18px 40px -20px #000}
-.banner{position:absolute;left:-16px;right:-16px;top:42%;transform:translateY(-50%);display:grid;place-items:center;pointer-events:none;opacity:0}
-.banner span{display:block;width:100%;text-align:center;padding:10px 0;font-family:var(--font-display);font-weight:800;font-size:1.7rem;letter-spacing:.35em;text-indent:.35em;background:linear-gradient(90deg,transparent,var(--panel) 18%,var(--panel) 82%,transparent);border-block:1px solid var(--line)}
+.board-wrap{flex:1;min-height:0;position:relative;overflow:hidden;border-radius:6px;box-shadow:0 0 0 1px var(--line);background:#0b0d12}
+#board{display:block;position:absolute;inset:0;touch-action:none}
+.board-tools{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:6px;z-index:3}
+.tool{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:rgb(17 19 26 / .82);color:var(--ink);font-size:.72rem;font-weight:700;cursor:pointer}
+.banner{position:absolute;left:0;right:0;top:40%;transform:translateY(-50%);display:grid;place-items:center;pointer-events:none;opacity:0;z-index:4}
+.banner span{display:block;width:100%;text-align:center;padding:10px 0;font-family:var(--font-display);font-weight:800;font-size:1.6rem;letter-spacing:.32em;text-indent:.32em;background:linear-gradient(90deg,transparent,rgb(25 28 38 / .94) 16%,rgb(25 28 38 / .94) 84%,transparent);border-block:1px solid var(--line)}
 .banner[data-tone="enemy"] span{color:var(--enemy)}
 .banner[data-tone="ally"] span{color:var(--good)}
 .banner[data-tone="player"] span{color:var(--ally)}
+.banner[data-tone="event"] span{color:var(--gold)}
 .banner.show{animation:banner 1s ease-out forwards}
 @keyframes banner{0%{opacity:0;transform:translate(-30px,-50%)}18%{opacity:1;transform:translate(0,-50%)}72%{opacity:1;transform:translate(0,-50%)}100%{opacity:0;transform:translate(30px,-50%)}}
-.toast{position:absolute;left:0;right:0;bottom:10px;margin:0 auto;width:max-content;max-width:92%;background:var(--panel);border:1px solid var(--ember);color:var(--ink);font-size:.82rem;padding:8px 12px;border-radius:10px;text-align:center;pointer-events:none}
+.toast{position:absolute;left:0;right:0;bottom:10px;margin:0 auto;width:max-content;max-width:92%;background:var(--panel);border:1px solid var(--ember);color:var(--ink);font-size:.82rem;padding:8px 12px;border-radius:10px;text-align:center;pointer-events:none;z-index:3}
 
-/* command panel */
-.panel{height:200px;flex:0 0 auto;background:var(--panel);border:1px solid var(--line);border-bottom:none;border-radius:14px 14px 0 0;padding:12px 12px 10px;display:flex;flex-direction:column;gap:8px;margin-inline:-4px}
+.talk{position:absolute;left:8px;right:8px;bottom:8px;z-index:6;display:flex;gap:10px;align-items:flex-start;background:rgb(20 22 31 / .96);border:1px solid var(--gold);border-radius:12px;padding:10px 12px;cursor:pointer;min-height:84px}
+.talk canvas{flex:0 0 auto;width:54px;height:54px;border-radius:8px;background:#2a3a2a;border:1px solid var(--line)}
+.talk-body{flex:1;min-width:0;display:flex;flex-direction:column;gap:4px}
+.talk-name{font-family:var(--font-display);font-weight:800;font-size:.95rem;color:var(--gold)}
+.talk p{margin:0;font-size:.88rem;line-height:1.5;color:var(--ink)}
+.talk-next{position:absolute;right:12px;bottom:6px;font-size:.7rem;color:var(--ink-dim)}
+
+.panel{height:198px;flex:0 0 auto;background:var(--panel);border:1px solid var(--line);border-bottom:none;border-radius:14px 14px 0 0;padding:10px 12px;display:flex;flex-direction:column;gap:7px;margin-inline:-4px}
 .card{display:flex;flex-direction:column;gap:6px;min-width:0}
 .card-head{display:flex;align-items:center;gap:10px;min-width:0}
-.tok{width:34px;height:34px;flex:0 0 auto;border-radius:50%;display:grid;place-items:center;font-size:20px;border:2px solid var(--ally);background:var(--ally-deep)}
-.tok[data-team="enemy"]{border-color:var(--enemy);background:var(--enemy-deep)}
-.tok[data-manual="true"]{border-color:var(--gold)}
+#cTok{width:36px;height:36px;flex:0 0 auto;border-radius:50%;border:2px solid var(--ally);background:var(--ally-deep)}
+#cTok[data-team="enemy"]{border-color:var(--enemy);background:var(--enemy-deep)}
+#cTok[data-manual="true"]{border-color:var(--gold)}
 .who{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
 .who b{font-size:.95rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .who span{font-size:.75rem;color:var(--ink-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -86,9 +92,6 @@ button:focus-visible,[role="switch"]:focus-visible{outline:2px solid var(--gold)
 .bar.mp i{background:var(--mana)}
 .bar.rage i{background:var(--ember)}
 .bar.rage.full{box-shadow:0 0 0 1px var(--ember)}
-.stat.gear{color:var(--ink)}
-.stat.gear em{font-style:normal;color:var(--ink-dim);margin-right:4px}
-.stat.lv b{color:var(--gold)}
 .bar span{position:relative;display:block;padding-left:6px;font-family:var(--font-num);font-size:.68rem;line-height:16px;color:var(--ink);font-variant-numeric:tabular-nums;text-shadow:0 1px 0 var(--ground)}
 .stats{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;white-space:nowrap}
 .stats::-webkit-scrollbar{display:none}
@@ -96,6 +99,10 @@ button:focus-visible,[role="switch"]:focus-visible{outline:2px solid var(--gold)
 .stat b{font-family:var(--font-num);font-weight:600;color:var(--ink);margin-left:4px;font-variant-numeric:tabular-nums}
 .stat.up b{color:var(--gold)}
 .stat.passive{color:var(--gold)}
+.stat.gear{color:var(--ink)}
+.stat.gear em{font-style:normal;color:var(--ink-dim);margin-right:4px}
+.stat.lv b{color:var(--gold)}
+.stat.warn{color:var(--enemy)}
 .preview{margin:0;min-height:18px;font-size:.78rem;color:var(--ink-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-variant-numeric:tabular-nums}
 .preview b{color:var(--ember);font-weight:600}
 .preview .warn{color:var(--enemy)}
@@ -111,9 +118,8 @@ button:focus-visible,[role="switch"]:focus-visible{outline:2px solid var(--gold)
 @keyframes pulse{0%,100%{box-shadow:0 0 0 0 transparent}50%{box-shadow:0 0 0 4px rgb(232 163 61 / .28)}}
 .busy-note{font-size:.82rem;color:var(--ink-dim);align-self:center}
 
-/* sheets */
 .sheet-back{position:fixed;inset:0;z-index:20;background:rgb(6 7 11 / .6);display:flex;align-items:flex-end;justify-content:center}
-.sheet{width:min(560px,100%);max-height:80%;overflow:auto;background:var(--panel);border:1px solid var(--line);border-bottom:none;border-radius:16px 16px 0 0;padding:14px 16px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
+.sheet{width:min(640px,100%);max-height:80%;overflow:auto;background:var(--panel);border:1px solid var(--line);border-bottom:none;border-radius:16px 16px 0 0;padding:14px 16px calc(18px + env(safe-area-inset-bottom,0px));display:flex;flex-direction:column;gap:14px}
 .sheet-head{display:flex;align-items:center;justify-content:space-between;gap:12px}
 .sheet-head h2{margin:0;font-family:var(--font-display);font-weight:800;font-size:1.15rem}
 .sheet h3{margin:0 0 6px;font-size:.72rem;letter-spacing:.1em;color:var(--ink-dim);font-weight:600}
@@ -127,7 +133,13 @@ button:focus-visible,[role="switch"]:focus-visible{outline:2px solid var(--gold)
 .tac-row{display:grid;grid-template-columns:minmax(0,1fr);gap:6px;padding:10px;border-radius:10px;background:var(--panel-2)}
 .tac-who{display:flex;align-items:center;gap:8px;font-size:.86rem;font-weight:600;min-width:0}
 .tac-who span{font-size:.74rem;font-weight:500;color:var(--ink-dim)}
-.tac-who em{font-style:normal;font-size:18px}
+.tac-who canvas{width:28px;height:28px;border-radius:6px;background:#2a3a2a}
+.tac-stats{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:.72rem;color:var(--ink-dim);font-variant-numeric:tabular-nums}
+.tac-stats b{color:var(--ink);font-family:var(--font-num);font-weight:600}
+.tac-gear{display:flex;flex-wrap:wrap;gap:4px}
+.tac-gear span{font-size:.72rem;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:2px 6px}
+.tac-gear em{font-style:normal;color:var(--ink-dim);margin-right:4px}
+.bag{font-size:.78rem;color:var(--ink-dim);line-height:1.5}
 .switch-row{display:flex;align-items:center;justify-content:space-between;gap:12px;font-size:.88rem}
 [role="switch"]{width:46px;height:28px;flex:0 0 auto;border-radius:999px;border:1px solid var(--line);background:var(--panel-2);position:relative;cursor:pointer;padding:0}
 [role="switch"]::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:var(--ink-dim);transition:transform .2s}
@@ -145,14 +157,8 @@ button:focus-visible,[role="switch"]:focus-visible{outline:2px solid var(--gold)
 .log li[data-k="sys"]{color:var(--ally)}
 .log li[data-k="level"]{color:var(--gold)}
 .log li[data-k="special"]{color:var(--ember);font-weight:600}
-.tac-stats{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:.72rem;color:var(--ink-dim);font-variant-numeric:tabular-nums}
-.tac-stats b{color:var(--ink);font-family:var(--font-num);font-weight:600}
-.tac-gear{display:flex;flex-wrap:wrap;gap:4px}
-.tac-gear span{font-size:.72rem;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:2px 6px}
-.tac-gear em{font-style:normal;color:var(--ink-dim);margin-right:4px}
-.bag{display:flex;flex-wrap:wrap;gap:6px;font-size:.78rem;color:var(--ink-dim)}
+.log li[data-k="event"]{color:var(--gold);font-weight:600}
 
-/* result */
 .result{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgb(6 7 11 / .72);padding-inline:16px}
 .result-box{width:min(380px,100%);background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:24px 20px;text-align:center;display:flex;flex-direction:column;gap:10px}
 .result-box h2{margin:0;font-family:var(--font-display);font-weight:800;font-size:2rem;letter-spacing:.3em;text-indent:.3em}
@@ -179,17 +185,27 @@ button:focus-visible,[role="switch"]:focus-visible{outline:2px solid var(--gold)
     <button class="icon-btn" id="btnLog" type="button">기록</button>
     <button class="icon-btn" id="btnMenu" type="button">설정</button>
   </header>
+  <div class="objective" id="objective">목표 <b id="objText"></b><span id="objMeta"></span></div>
 
   <main class="board-wrap" id="boardWrap">
-    <canvas id="board" aria-label="전투 맵. 수동 유닛을 누른 채 끌어서 이동 경로를 그립니다."></canvas>
+    <canvas id="board" class="px" aria-label="전투 맵. 유닛을 누른 채 끌어 경로를 그리고, 빈 곳을 끌면 화면이 움직입니다."></canvas>
+    <div class="board-tools">
+      <button class="tool" id="btnCenter" type="button" aria-label="왕자 위치로">왕자</button>
+      <button class="tool" id="btnZoom" type="button" aria-label="확대 또는 축소">확대</button>
+    </div>
     <div class="banner" id="banner"><span id="bannerText"></span></div>
     <div class="toast" id="toast" hidden></div>
+    <div class="talk" id="talk" hidden>
+      <canvas id="talkFace" class="px" width="54" height="54"></canvas>
+      <div class="talk-body"><div class="talk-name" id="talkName"></div><p id="talkText"></p></div>
+      <span class="talk-next">눌러서 계속 ▸</span>
+    </div>
   </main>
 
   <section class="panel" aria-live="polite">
     <div class="card">
       <div class="card-head">
-        <span class="tok" id="cTok"></span>
+        <canvas id="cTok" class="px" width="36" height="36"></canvas>
         <div class="who"><b id="cName"></b><span id="cSub"></span></div>
         <span class="ctrl" id="cCtrl"></span>
       </div>
@@ -212,7 +228,7 @@ button:focus-visible,[role="switch"]:focus-visible{outline:2px solid var(--gold)
       <h3>자동 동료 전체 작전</h3>
       <div class="seg" id="globalSeg"></div>
     </div>
-    <p id="tacNote">자동 동료는 개별 작전이 있으면 그것을, 없으면 전체 작전을 따릅니다. 진형방어는 지정한 순간의 위치에서 2칸 안, 호위는 왕자에게서 3칸 안에서 행동을 끝냅니다. 장비는 얻는 즉시 가장 이득이 큰 동료가 자동으로 착용합니다.</p>
+    <p>자동 동료는 개별 작전이 있으면 그것을, 없으면 전체 작전을 따릅니다. 진형방어는 지정한 순간의 위치에서 2칸 안, 호위는 왕자에게서 3칸 안에서 행동을 끝냅니다. 장비는 얻는 즉시 가장 이득이 큰 동료가 자동으로 착용합니다.</p>
     <div class="tac-list" id="tacList"></div>
     <div>
       <h3>가방</h3>
@@ -243,12 +259,12 @@ button:focus-visible,[role="switch"]:focus-visible{outline:2px solid var(--gold)
       <h3>조작법</h3>
       <ul class="rules">
         <li><b>경로 그리기</b> 금색 테두리 유닛을 누른 채 끌면 경로가 그려집니다. 지나온 칸으로 되돌리면 취소됩니다.</li>
-        <li><b>통과 공격</b> 근접 유닛은 경로 위의 적을 지나가며 벱니다. 칸 위 숫자는 타격 횟수와 예상 피해입니다.</li>
-        <li><b>너클</b> 적을 통과하지 못합니다. 경로를 적 쪽으로 끌면 그 적이 공격 대상이 됩니다.</li>
-        <li><b>활·석궁·마법</b> 이동한 뒤 공격이나 스킬 버튼을 누르고, 대상을 두 번 누르면 실행됩니다.</li>
-        <li><b>분노·필살기</b> 때리면 타격당 +6, 맞으면 피격당 +10. 100이 되면 필살기 버튼이 켜집니다. 돌격형은 이번 이동을 강화하고, 버프형은 즉시 발동한 뒤 그대로 움직일 수 있습니다.</li>
-        <li><b>성장·장비</b> 행동 +10, 처치 +30 경험치(상대 레벨이 높으면 추가). 100마다 레벨 업. 적이 떨어뜨린 장비는 자동 착용됩니다.</li>
-        <li><b>승리</b> 적 전멸 또는 왕자가 맨 위 탈출 지점에 도착. 왕자가 쓰러지면 패배.</li>
+        <li><b>돌격</b> 돌격 버튼을 누르거나, 경로 끝 칸을 두 번 누르면 바로 출발합니다.</li>
+        <li><b>화면 이동</b> 빈 곳을 끌면 화면이 움직입니다. 경로를 그리다 화면 가장자리로 가면 자동으로 따라갑니다.</li>
+        <li><b>지형</b> 초원은 이동력 120%(5칸 → 6칸), 돌밭·모래는 80%(5칸 → 4칸), 길·숲·다리는 100%. 물·절벽·건물은 지날 수 없습니다.</li>
+        <li><b>통과 공격</b> 근접 유닛은 경로 위의 적을 지나가며 벱니다. 너클은 적을 통과하지 못하고, 적 쪽으로 끌면 그 적이 대상이 됩니다.</li>
+        <li><b>활·석궁·마법</b> 이동한 뒤 공격이나 스킬을 고르고, 대상을 두 번 누르면 실행됩니다.</li>
+        <li><b>분노·필살기</b> 때리면 타격당 +6, 맞으면 +10. 100이 되면 필살기를 쓸 수 있습니다.</li>
       </ul>
     </div>
     <button class="btn" type="button" id="btnRestart">전투 다시 시작</button>
@@ -265,49 +281,577 @@ button:focus-visible,[role="switch"]:focus-visible{outline:2px solid var(--gold)
 
 <script>
 'use strict';
+//#ART-START
+const ART = (() => {
+  const OUTLINE = '#1a1420';
+  const EMPTY = null;
+  // ---------- heads: 11 cols x 10 rows, placed at template (3,0) ----------
+  const HEADS = {
+    tiger: [
+      '.FF...FF...',
+      '.FfF.FfF...',
+      '.FFDFDFFF..',
+      'FFFFFFFFF..',
+      'DFFEFFWEF..',
+      'FFFEFFEEF..',
+      'DFFFffffN..',
+      'FFFffffff..',
+      '.FFfffff...',
+      '...FFf.....'],
+    boar: [
+      '.DD...DD...',
+      '.DFD.DFD...',
+      '.FDDDDDFF..',
+      'FFFFFFFFF..',
+      'FFFEFFWEF..',
+      'FFFEFFEEFF.',
+      'FFFFfffNNN.',
+      'FFFffffNkN.',
+      '.FFfffTT...',
+      '...FFf.....'],
+    horse: [
+      '......F.F..',
+      '.HH...FfF..',
+      'HHHFFFFFF..',
+      'HHFFFFFFFF.',
+      'HHFEFFWEFF.',
+      'HHFEFFEEFff',
+      'HFFFFFffffk',
+      '.HFFFfffff.',
+      '..FFffff...',
+      '...FF......'],
+    deer: [
+      '..T.T.T.T..',
+      '...TT.TT...',
+      '.FFFFFFFF..',
+      'fFFFFFFFFf.',
+      'FFFEFFWEF..',
+      '.FFEFFEEF..',
+      '.FFFffffN..',
+      '.FFffffff..',
+      '..FFffff...',
+      '...FFf.....'],
+    bear: [
+      '...........',
+      '.FF....FF..',
+      '.FfFFFFfF..',
+      'FFFFFFFFF..',
+      'FFFEFFWEF..',
+      'FFFEFFEEF..',
+      'FFFFfffNf..',
+      'FFFffffff..',
+      '.FFfffff...',
+      '...FFf.....'],
+    wolf: [
+      '..F....F...',
+      '.FfF..FfF..',
+      '.FFFFFFFF..',
+      'FFFFFFFFF..',
+      'FFFEFFWEF..',
+      'FFFEFFEEFff',
+      'FFFFffffffN',
+      'FFFffffff..',
+      '.FFfffff...',
+      '...FFf.....'],
+    fox: [
+      '..D....D...',
+      '.DFF..DFF..',
+      '.FFFFFFFF..',
+      'FFFFFFFFF..',
+      'FFFEFFWEF..',
+      'fFFEFFEEFff',
+      'ffFFffffffN',
+      'fFFffffff..',
+      '.FFfffff...',
+      '...FFf.....'],
+    rabbit: [
+      '..Ff..Ff...',
+      '..Ff..Ff...',
+      '.FFFFFFFF..',
+      'FFFFFFFFF..',
+      'FFFEFFWEF..',
+      'FFFEFFEEF..',
+      'FFFFffffN..',
+      'FFFffffff..',
+      '.FFfffff...',
+      '...FFf.....'],
+    eagle: [
+      '...........',
+      '..FF.......',
+      '.FFFFFFFF..',
+      'FFFFFFFFF..',
+      'DFFEFDDEF..',
+      'FFFEFFWEKK.',
+      'FFFFFFFKKKk',
+      'FFFFFFFFkk.',
+      '.FFfffff...',
+      '...FFf.....'],
+    eagleIron: [
+      '....RRR....',
+      '..AAAAAA...',
+      '.AAAAAAAAa.',
+      'AAAAAAAAAa.',
+      'AAFFFDDEFa.',
+      'AAFFFFWEKK.',
+      'AAFFFFFKKKk',
+      '.AaFFFFFkk.',
+      '..AaaaaA...',
+      '...FFf.....'],
+    eagleChief: [
+      '..Y.Y.Y....',
+      '..YYYYYY...',
+      '.AAAAAAAAa.',
+      'AAAAAAAAAa.',
+      'AAFFFDDEFa.',
+      'AAFFFFWEKK.',
+      'AAFFFFFKKKk',
+      '.AaFFFFFkk.',
+      '..AaaaaA...',
+      '...FFf.....'],
+    hawk: [
+      '...........',
+      '...........',
+      '.FFFFFFFF..',
+      'FFFFFFFFF..',
+      'FFFEFFWEF..',
+      'FFFEFFEEkK.',
+      'FFFFfDfKKK.',
+      'FFFffDffK..',
+      '.FFfffff...',
+      '...FFf.....'],
+    hawkRider: [
+      '...........',
+      '..aAAAAa...',
+      '.aAAAAAAa..',
+      'aAAAAAAAA..',
+      'FFFEFFWEF..',
+      'FFFEFFEEkK.',
+      'FFFFfDfKKK.',
+      'FFFffDffK..',
+      '.FFfffff...',
+      '...FFf.....'],
+    crow: [
+      '...........',
+      '...F.......',
+      '.FFFFFFFF..',
+      'FFFFFFFFF..',
+      'FFFFFFWEF..',
+      'FFFFFFEEKK.',
+      'FFFFfffKKKK',
+      'FFFffffff..',
+      '.FFfffff...',
+      '...FFf.....'],
+    parrot: [
+      '...RR......',
+      '..RRRR.....',
+      '.FFFFFFFF..',
+      'FFFFFFFFF..',
+      'FFFEFFWEF..',
+      'FFFEFRREKK.',
+      'FFFFRRRKKk.',
+      'FFFfffffk..',
+      '.FFfffff...',
+      '...FFf.....'],
+    sparrow: [
+      '...........',
+      '...........',
+      '.FFFFFFFF..',
+      'FFFFFFFFF..',
+      'FFFEffWEf..',
+      'FFfEffEEfK.',
+      'FFffDfffKK.',
+      'FFfffffDD..',
+      '.FffffDD...',
+      '...FFf.....'],
+    owl: [
+      '.F.....F...',
+      '.FF...FF...',
+      '.FFFFFFFF..',
+      'FfffFfffF..',
+      'fWEffWEEf..',
+      'fEEffEEEf..',
+      'FfffKffff..',
+      'FFFfKffFF..',
+      '.FFfffff...',
+      '...FFf.....'],
+    human: [
+      '...........',
+      '..HHHHH....',
+      '.HHHHHHHH..',
+      'HHHFFFFFF..',
+      'HHFEFFWEF..',
+      'HFFEFFEEF..',
+      'HFFFFFFFN..',
+      '.FFFFFFF...',
+      '..FFFFF....',
+      '...FFF.....'],
+    humanHeavy: [
+      '...aAAa....',
+      '..AAAAAA...',
+      '.AAAAAAAAa.',
+      'AAAAAAAAAa.',
+      'AAFEFFWEFa.',
+      'AAFEFFEEFa.',
+      'AAFFFFFFFa.',
+      '.AaFFFFFa..',
+      '..AaaaaA...',
+      '...FFF.....'],
+  };
+  const pad16 = rows => rows.map(r => (r + '................').slice(0, 16));
+  // ---------- bodies: rows 10..19 ----------
+  const BODIES = {
+    tunic: [
+      '.....CCCCCC.....',
+      '....cCCCCCCC....',
+      '....cCCcCCCC....',
+      '....cCCCCCCC....',
+      '....SLLYLLLS....',
+      '.....CCCCCC.....',
+      '.....pp..PP.....',
+      '.....pp..PP.....',
+      '.....bb..BB.....',
+      '....bbb..BBB....'],
+    knight: [
+      '.....aCCCCa.....',
+      '....cAAAAAAC....',
+      '....cAAAAAAC....',
+      '....cCAAAACC....',
+      '....SLLYLLLS....',
+      '.....CCcCCC.....',
+      '.....pp..PP.....',
+      '.....pp..PP.....',
+      '.....bb..BB.....',
+      '....bbb..BBB....'],
+    plate: [
+      '...aAAAAAAAAa...',
+      '...aAAaAAAAAa...',
+      '....aAAAAAAA....',
+      '....aAAYYAAA....',
+      '....SAAAAAAS....',
+      '.....aAAAAA.....',
+      '.....aa..AA.....',
+      '.....aa..AA.....',
+      '.....bb..BB.....',
+      '....bbb..BBB....'],
+    robe: [
+      '.....CCCCCC.....',
+      '....cCCYCCCC....',
+      '....cCCYCCCC....',
+      '....cCCYCCCC....',
+      '....SCCYCCCS....',
+      '.....CCYCCC.....',
+      '.....CCYCCCC....',
+      '....cCCYCCCC....',
+      '....cCCCCCCCC...',
+      '....bbb..BBB....'],
+  };
+  // ---------- back layers (full 16 width, rows listed from rowStart) ----------
+  const BACK = {
+    cape:  { y:10, rows:['....M...........', '...MM...........', '...Mm...........', '..MMm...........', '..MMm...........', '..MMmm..........', '..MMmm..........', '..MMMm..........'] },
+    wings: { y:10, rows:['..FF............', '.FFfF...........', '.FfFF...........', '.FFfF...........', 'FFFF............', 'FDFD............', 'D.D.............'] },
+    tail_tiger: { y:11, rows:['.F..............', '.D..............', '.F..............', '.FD.............', '..FFF...........'] },
+    tail_horse: { y:12, rows:['..HH............', '.HHH............', '.HH.............', '.H..............', '.H..............'] },
+    tail_boar:  { y:13, rows:['...F............', '..F.............'] },
+    tail_deer:  { y:13, rows:['...f............'] },
+    tail_bushy: { y:12, rows:['..FF............', '.FFFF...........', '.FFF............', 'fFF.............'] },
+    tail_puff:  { y:14, rows:['...f............'] },
+  };
+  // ---------- weapons and shield (absolute rows) ----------
+  const WEAPON_ART = {
+    sword: { y:7, rows:['............X...', '............Xx..', '............Xx..', '............Xx..', '............Xx..', '............Xx..', '...........YYYY.', '............G...'] },
+    great: { y:2, rows:['............XX..', '............Xx..', '............Xx..', '............Xx..', '............Xx..', '............Xx..', '............Xx..', '............Xx..', '............Xx..', '............Xx..', '..........YYYYY.', '............G...', '............G...'] },
+    spear: { y:0, rows:['.............X..', '............xXx.', '.............G..', '.............G..', '.............G..', '.............G..', '.............G..', '.............G..', '.............G..', '.............G..', '.............G..', '.............G..', '.............G..', '.............G..', '.............G..', '.............G..', '.............G..', '.............G..', '.............G..', '.............G..'] },
+    knuckle: { y:13, rows:['....A......AA...', '....a......AAa..', '...........aa...'] },
+    bow: { y:7, rows:['............GG..', '............Q.G.', '............Q..G', '............Q..G', '............Q..G', '............Q..G', '............Q..G', '............Q.G.', '............GG..'] },
+    xbow: { y:11, rows:['...........x..G.', '..........GGGGGx', '...........x..G.'] },
+    staff: { y:0, rows:['...........OO...', '..........OOoO..', '...........OO...', '............G...', '............G...', '............G...', '............G...', '............G...', '............G...', '............G...', '............G...', '............G...', '............G...', '............G...', '............G...', '............G...', '............G...', '............G...', '............G...', '............G...'] },
+  };
+  const SHIELD = { y:10, rows:['..ZZZZ..........', '.ZYYYYz.........', '.ZYZZYz.........', '.ZZYYZz.........', '.ZZZZZz.........', '..ZZZz..........', '...Zz...........'] };
+  const WEAPON_COLORS = { X:'#e8eef4', x:'#9aa8b8', G:'#7a5230', Q:'#e6e0cc', O:'#7fd4ff', o:'#ffffff' };
+
+  // ---------- species palettes ----------
+  const SPECIES = {
+    tiger:  { head:'tiger',  tail:'tail_tiger', pal:{ F:'#ef8c2c', f:'#fff1d6', D:'#2a1a14', N:'#d06a5a' } },
+    boar:   { head:'boar',   tail:'tail_boar',  pal:{ F:'#7a5236', f:'#c9a07a', D:'#3e2818', N:'#d89a86', k:'#5a2a22', T:'#f6f0dc' } },
+    horse:  { head:'horse',  tail:'tail_horse', pal:{ F:'#a35e2c', f:'#e0bc8e', H:'#3b2416', k:'#2a1a12' } },
+    deer:   { head:'deer',   tail:'tail_deer',  pal:{ F:'#b98552', f:'#f3e2c4', T:'#ece0bc', N:'#2a1a14' } },
+    bear:   { head:'bear',   tail:null,         pal:{ F:'#6b4a32', f:'#c8a07a', N:'#2a1a14' } },
+    wolf:   { head:'wolf',   tail:'tail_bushy', pal:{ F:'#8a909e', f:'#eceef2', N:'#2a2a32' } },
+    fox:    { head:'fox',    tail:'tail_bushy', pal:{ F:'#e0762a', f:'#fff4e6', D:'#3a2418', N:'#2a1a14' } },
+    rabbit: { head:'rabbit', tail:'tail_puff',  pal:{ F:'#ece6da', f:'#f6b8c0', N:'#c86a7a' } },
+    eagle:  { head:'eagle',  wings:true, hand:'K', wingPal:{ F:'#5e3e24', f:'#7e5634', D:'#3a2414' }, pal:{ F:'#f6f4ee', f:'#dcd8cc', D:'#8a8a92', K:'#f2c230', k:'#b8860e' } },
+    hawk:   { head:'hawk',   wings:true, hand:'k', pal:{ F:'#8c5a30', f:'#f0e2c4', D:'#3a2414', K:'#5e5e66', k:'#e8c040' } },
+    crow:   { head:'crow',   wings:true, hand:'K', pal:{ F:'#2a2a34', f:'#45455a', K:'#55555f', W:'#d8e0ff' } },
+    parrot: { head:'parrot', wings:true, hand:'K', pal:{ F:'#3cae48', f:'#bfe060', R:'#e0412f', K:'#f0e6c8', k:'#2a2a2a' } },
+    sparrow:{ head:'sparrow',wings:true, hand:'K', pal:{ F:'#8c5a32', f:'#f0e0c2', D:'#24201c', K:'#3a3028' } },
+    owl:    { head:'owl',    wings:true, hand:'K', pal:{ F:'#7a5a3a', f:'#e8d8b8', K:'#e8b040', E:'#1a1622', W:'#f2a020' } },
+    human:  { head:'human',  tail:null, pal:{ F:'#f0c8a0', H:'#5a3a22', N:'#d8a07a' } },
+  };
+  const BASE_PAL = { E:'#1a1622', W:'#ffffff' };
+
+  function paint(grid, rows, x0, y0, pal) {
+    rows.forEach((row, dy) => {
+      for (let dx = 0; dx < row.length; dx++) {
+        const ch = row[dx];
+        if (ch === '.') continue;
+        const col = pal[ch];
+        if (!col) continue;
+        const x = x0 + dx, y = y0 + dy;
+        if (y >= 0 && y < grid.length && x >= 0 && x < grid[0].length) grid[y][x] = col;
+      }
+    });
+  }
+  /* look: { species, head?, body, cape, weapon, shield, colors:{C,c,A,a,L,P,p,B,b,M,m,Y,Z,z} } */
+  function buildSprite(look, frame) {
+    const W = 18, H = 24, ox = 1, oy = 1;
+    const grid = Array.from({ length: H }, () => new Array(W).fill(EMPTY));
+    const sp = SPECIES[look.species];
+    const pal = Object.assign({}, BASE_PAL, look.colors, sp.pal, look.pal || {});
+    pal.S = pal[sp.hand || 'F'];
+    const bob = frame ? 1 : 0;
+    // back layers
+    if (sp.wings) paint(grid, BACK.wings.rows, ox, oy + BACK.wings.y + bob, Object.assign({}, pal, sp.wingPal || {}));
+    if (look.cape) paint(grid, BACK.cape.rows, ox, oy + BACK.cape.y, pal);
+    if (sp.tail) paint(grid, BACK[sp.tail].rows, ox, oy + BACK[sp.tail].y, pal);
+    // body (legs fixed, torso bobs)
+    const body = BODIES[look.body];
+    paint(grid, body.slice(0, 6), ox, oy + 10 + bob, pal);
+    paint(grid, body.slice(6), ox, oy + 16, pal);
+    // head
+    paint(grid, HEADS[look.head || sp.head], ox + 3, oy + bob, pal);
+    // weapon + shield
+    if (look.weapon) { const w = WEAPON_ART[look.weapon]; paint(grid, w.rows, ox, oy + w.y + bob, Object.assign({}, WEAPON_COLORS, { A:pal.A, a:pal.a, Y:pal.Y })); }
+    if (look.shield) paint(grid, SHIELD.rows, ox, oy + SHIELD.y + bob, pal);
+    // outline
+    const out = grid.map(r => r.slice());
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      if (grid[y][x]) continue;
+      if ((y > 0 && grid[y - 1][x]) || (y < H - 1 && grid[y + 1][x]) || (x > 0 && grid[y][x - 1]) || (x < W - 1 && grid[y][x + 1])) out[y][x] = OUTLINE;
+    }
+    return { w:W, h:H, px:out, footX:ox + 8, footY:oy + 20 };
+  }
+
+  // ---------- terrain ----------
+  const TERRAIN = {
+    '.': { name:'초원', cost:50, pct:120 }, 'f': { name:'숲', cost:60, pct:100 }, ':': { name:'길', cost:60, pct:100 }, 'o': { name:'돌바닥', cost:60, pct:100 },
+    'r': { name:'돌밭', cost:74, pct:80 }, 's': { name:'모래', cost:74, pct:80 }, '=': { name:'다리', cost:60, pct:100 }, 'N': { name:'북문', cost:60, pct:100 }, 'X': { name:'산길', cost:74, pct:80 },
+    '~': { name:'물', cost:0 }, '#': { name:'절벽', cost:0 }, 'H': { name:'성벽', cost:0 }, 'h': { name:'민가', cost:0 }, 'p': { name:'목책', cost:0 }, 'c': { name:'천막', cost:0 },
+  };
+  function hash(x, y, s) { let h = (x * 374761393 + y * 668265263 + (s || 0) * 2147483647) | 0; h = Math.imul(h ^ (h >>> 13), 1274126177); return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
+  const C = {
+    g0:'#5bb043', g1:'#6fc44e', g2:'#4a9634', g3:'#3c7f2a', flowerY:'#f8e060', flowerW:'#ffffff',
+    d0:'#d2ad6c', d1:'#e2c286', d2:'#b08c52',
+    st0:'#9c9486', st1:'#b8b0a2', st2:'#76705f',
+    r0:'#a89a7e', r1:'#c4b898', r2:'#7c705a', r3:'#5e5444',
+    s0:'#e6cf90', s1:'#f2e0a8', s2:'#c8ad6e',
+    w0:'#2f6fd8', w1:'#4a8cf0', w2:'#86b8ff', w3:'#1f52a8', foam:'#e8f4ff',
+    cl0:'#8f6f4e', cl1:'#b08c62', cl2:'#6a5038', cl3:'#4a3826', clTop:'#5bb043',
+    br0:'#b07a3e', br1:'#d09a56', br2:'#6e4822',
+    wall0:'#8e8a80', wall1:'#aaa69a', wall2:'#625e56', mortar:'#4e4a44',
+    tr0:'#2f7c34', tr1:'#45a043', tr2:'#1f5a26', trunk:'#6a4626',
+    tent0:'#e2d6b8', tent1:'#b4a684', tentR:'#a8322d',
+    stake:'#8a5e34', stake2:'#5e3e20',
+    cb0:'#c2b494', cb1:'#d8ccae', cb2:'#8e8268',
+    roof0:'#b4472e', roof1:'#d0603e', roof2:'#7e2e1e', plaster:'#e6d8b8', plaster2:'#b8a888', door:'#5a3a22', window:'#3a4a6a', soot:'#3a2a24',
+  };
+  function blank(fill) { return Array.from({ length:16 }, () => new Array(16).fill(fill)); }
+  function grassTile(x, y) {
+    const t = blank(C.g0);
+    for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) {
+      const h = hash(x * 16 + i, y * 16 + j, 1);
+      if (h < 0.08) t[j][i] = C.g2; else if (h < 0.16) t[j][i] = C.g1;
+    }
+    // tufts
+    for (let k = 0; k < 3; k++) {
+      const tx = 1 + Math.floor(hash(x, y, 10 + k) * 13), ty = 2 + Math.floor(hash(x, y, 20 + k) * 12);
+      t[ty][tx] = C.g3; if (ty > 0) t[ty - 1][tx] = C.g1; if (tx < 15) t[ty][tx + 1] = C.g3;
+    }
+    if (hash(x, y, 30) < 0.12) { const fx = 2 + Math.floor(hash(x, y, 31) * 11), fy = 3 + Math.floor(hash(x, y, 32) * 10); t[fy][fx] = hash(x, y, 33) < 0.5 ? C.flowerY : C.flowerW; t[fy][fx + 1] = C.g3; }
+    return t;
+  }
+  function dirtTile(x, y) {
+    const t = blank(C.d0);
+    for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) { const h = hash(x * 16 + i, y * 16 + j, 2); if (h < 0.1) t[j][i] = C.d2; else if (h < 0.2) t[j][i] = C.d1; }
+    return t;
+  }
+  function flagTile(x, y) {
+    const t = blank(C.cb0);
+    for (let j = 0; j < 16; j++) for (let i = 0; i < 16; i++) {
+      const row = Math.floor(j / 4), off = (row % 2) * 3 + Math.floor(hash(x, y * 4 + row, 13) * 2);
+      const edge = j % 4 === 3 || (i + off) % 5 === 4;
+      if (edge) t[j][i] = C.cb2;
+      else if (j % 4 === 0 || (i + off) % 5 === 0) t[j][i] = C.cb1;
+      else if (hash(x * 16 + i, y * 16 + j, 14) < 0.05) t[j][i] = C.cb2;
+    }
+    return t;
+  }
+  function houseTile(x, y, map) {
+    const t = blank(C.roof0);
+    const isH = (xx, yy) => yy >= 0 && yy < map.length && xx >= 0 && xx < map[0].length && map[yy][xx] === 'h';
+    const front = !isH(x, y + 1);
+    const roofEnd = front ? 9 : 16;
+    for (let j = 0; j < roofEnd; j++) for (let i = 0; i < 16; i++) {
+      t[j][i] = (j % 3 === 2) ? C.roof2 : ((i + (Math.floor(j / 3) % 2) * 2) % 4 === 0 ? C.roof2 : (j % 3 === 0 ? C.roof1 : C.roof0));
+    }
+    if (!isH(x, y - 1)) for (let i = 0; i < 16; i++) { t[0][i] = C.roof1; t[1][i] = C.roof1; }
+    if (front) {
+      for (let i = 0; i < 16; i++) t[9][i] = C.roof2;
+      for (let j = 10; j < 16; j++) for (let i = 0; i < 16; i++) t[j][i] = (j === 15) ? C.plaster2 : C.plaster;
+      for (let j = 11; j < 16; j++) { t[j][7] = C.door; t[j][8] = C.door; }
+      t[11][3] = C.window; t[12][3] = C.window; t[11][12] = C.window; t[12][12] = C.window;
+    }
+    if (hash(x, y, 15) < 0.45) { // scorched roof
+      for (let k = 0; k < 10; k++) { const i = Math.floor(hash(x, y, 60 + k) * 16), j = Math.floor(hash(x, y, 80 + k) * roofEnd); t[j][i] = C.soot; }
+    }
+    return t;
+  }
+  function rockyTile(x, y) {
+    const t = blank(C.r0);
+    for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) { const h = hash(x * 16 + i, y * 16 + j, 3); if (h < 0.1) t[j][i] = C.r2; else if (h < 0.18) t[j][i] = C.r1; }
+    for (let k = 0; k < 3; k++) {
+      const sx = 1 + Math.floor(hash(x, y, 40 + k) * 11), sy = 1 + Math.floor(hash(x, y, 50 + k) * 11);
+      for (let a = 0; a < 3; a++) for (let b = 0; b < 2; b++) t[sy + b][sx + a] = C.r2;
+      t[sy][sx] = C.r1; t[sy][sx + 1] = C.r1; t[sy + 2][sx + 1] = C.r3; t[sy + 2][sx + 2] = C.r3;
+    }
+    return t;
+  }
+  function sandTile(x, y) {
+    const t = blank(C.s0);
+    for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) { const h = hash(x * 16 + i, y * 16 + j, 4); if (h < 0.08) t[j][i] = C.s2; else if (h < 0.18) t[j][i] = C.s1; }
+    return t;
+  }
+  function waterTile(x, y, map, frame) {
+    const t = blank(C.w0);
+    for (let j = 0; j < 16; j++) for (let i = 0; i < 16; i++) {
+      const wave = (i + j * 2 + frame * 3 + Math.floor(hash(x, j + y * 16, 5) * 4)) % 12;
+      if (wave === 0 && (j % 4 === 1)) { t[j][i] = C.w2; if (i < 15) t[j][i + 1] = C.w1; }
+      if (hash(x * 16 + i, y * 16 + j, 6 + frame) < 0.012) t[j][i] = C.foam;
+    }
+    const land = (xx, yy) => { if (yy < 0 || yy >= map.length || xx < 0 || xx >= map[0].length) return false; const c = map[yy][xx]; return c !== '~' && c !== '='; };
+    if (land(x, y - 1)) { for (let i = 0; i < 16; i++) { t[0][i] = C.w3; t[1][i] = C.w3; t[2][i] = (i + frame) % 3 ? C.foam : C.w2; } }
+    if (land(x, y + 1)) { for (let i = 0; i < 16; i++) { t[15][i] = (i + frame) % 4 ? C.foam : C.w2; t[14][i] = C.w1; } }
+    if (land(x - 1, y)) for (let j = 0; j < 16; j++) { t[j][0] = C.foam; t[j][1] = C.w1; }
+    if (land(x + 1, y)) for (let j = 0; j < 16; j++) { t[j][15] = C.foam; t[j][14] = C.w1; }
+    return t;
+  }
+  function bridgeTile(x, y, map, frame) {
+    const t = waterTile(x, y, map, frame);
+    for (let j = 0; j < 16; j++) for (let i = 2; i < 14; i++) t[j][i] = (j % 4 === 3) ? C.br2 : (j % 4 === 0 ? C.br1 : C.br0);
+    for (let j = 0; j < 16; j++) { t[j][1] = C.br2; t[j][14] = C.br2; if (j % 5 === 0) { t[j][0] = C.br2; t[j][15] = C.br2; } }
+    return t;
+  }
+  function cliffTile(x, y, map) {
+    const t = blank(C.cl0);
+    for (let i = 0; i < 16; i++) for (let j = 0; j < 16; j++) {
+      const h = hash(x * 16 + i, y * 16 + j, 7);
+      const band = (j + Math.floor(hash(x * 16 + i, y, 8) * 3)) % 5;
+      t[j][i] = band === 0 ? C.cl2 : band === 1 ? C.cl1 : C.cl0;
+      if (h < 0.06) t[j][i] = C.cl3;
+    }
+    const open = (xx, yy) => yy >= 0 && yy < map.length && xx >= 0 && xx < map[0].length && map[yy][xx] !== '#';
+    if (open(x, y - 1)) for (let i = 0; i < 16; i++) { t[0][i] = C.clTop; t[1][i] = C.clTop; t[2][i] = i % 3 ? C.g2 : C.clTop; t[3][i] = C.cl1; }
+    if (open(x, y + 1)) for (let i = 0; i < 16; i++) { t[15][i] = C.cl3; t[14][i] = C.cl2; }
+    return t;
+  }
+  function wallTile(x, y, map) {
+    const t = blank(C.wall0);
+    for (let j = 0; j < 16; j++) for (let i = 0; i < 16; i++) {
+      const row = Math.floor(j / 4), off = (row % 2) * 4;
+      if (j % 4 === 3 || (i + off) % 8 === 7) t[j][i] = C.mortar;
+      else if (j % 4 === 0) t[j][i] = C.wall1;
+      else if (hash(x * 16 + i, y * 16 + j, 9) < 0.08) t[j][i] = C.wall2;
+    }
+    const open = (xx, yy) => yy >= 0 && yy < map.length && xx >= 0 && xx < map[0].length && map[yy][xx] !== 'H';
+    if (open(x, y - 1)) for (let i = 0; i < 16; i++) { t[0][i] = C.wall1; t[1][i] = C.wall1; if (i % 4 < 2) { t[0][i] = C.wall2; } }
+    if (open(x, y + 1)) for (let i = 0; i < 16; i++) { t[15][i] = C.mortar; t[14][i] = C.wall2; }
+    return t;
+  }
+  function forestTile(x, y) {
+    const t = grassTile(x, y);
+    const cx = 7 + Math.floor(hash(x, y, 11) * 2), cy = 6;
+    for (let j = 0; j < 16; j++) for (let i = 0; i < 16; i++) {
+      const dx = i - cx, dy = j - cy, d = dx * dx + dy * dy * 1.2;
+      if (d < 36) t[j][i] = d < 9 && dx < 0 && dy < 0 ? C.tr1 : (dx + dy > 3 ? C.tr2 : C.tr0);
+      if (d < 36 && hash(x * 16 + i, y * 16 + j, 12) < 0.12) t[j][i] = C.tr1;
+    }
+    for (let j = 12; j < 15; j++) { t[j][cx] = C.trunk; t[j][cx + 1] = C.trunk; }
+    for (let i = cx - 3; i < cx + 5; i++) if (i >= 0 && i < 16) t[15][i] = C.g3;
+    return t;
+  }
+  function palisadeTile(x, y) {
+    const t = grassTile(x, y);
+    for (let s = 0; s < 4; s++) { const i0 = s * 4 + 1; for (let j = 1; j < 15; j++) { t[j][i0] = C.stake; t[j][i0 + 1] = C.stake; t[j][i0 + 2] = C.stake2; } t[0][i0 + 1] = C.stake; }
+    for (let i = 0; i < 16; i++) { t[5][i] = C.stake2; t[11][i] = C.stake2; }
+    return t;
+  }
+  function tentTile(x, y) {
+    const t = grassTile(x, y);
+    for (let j = 2; j < 15; j++) { const half = Math.floor((j - 1) * 0.6); for (let i = 8 - half; i <= 8 + half; i++) if (i >= 0 && i < 16) t[j][i] = i < 8 ? C.tent0 : C.tent1; }
+    for (let j = 9; j < 15; j++) t[j][8] = C.cl3;
+    t[1][8] = C.tentR; t[0][8] = C.tentR; t[0][9] = C.tentR;
+    return t;
+  }
+  function gateTile(x, y) {
+    const t = dirtTile(x, y);
+    for (let j = 0; j < 16; j++) { t[j][0] = C.wall2; t[j][15] = C.wall2; }
+    return t;
+  }
+  function buildTile(ch, x, y, map, frame) {
+    switch (ch) {
+      case '.': return grassTile(x, y);
+      case 'f': return forestTile(x, y);
+      case ':': return dirtTile(x, y);
+      case 'o': return flagTile(x, y);
+      case 'r': return rockyTile(x, y);
+      case 's': return sandTile(x, y);
+      case '~': return waterTile(x, y, map, frame);
+      case '=': return bridgeTile(x, y, map, frame);
+      case '#': return cliffTile(x, y, map);
+      case 'H': return wallTile(x, y, map);
+      case 'h': return houseTile(x, y, map);
+      case 'p': return palisadeTile(x, y);
+      case 'c': return tentTile(x, y);
+      case 'N': return gateTile(x, y);
+      case 'X': return rockyTile(x, y);
+      default: return grassTile(x, y);
+    }
+  }
+  return { buildSprite, buildTile, TERRAIN, SPECIES, hash, OUTLINE };
+})();
+//#ART-END
+
 //#CORE-START
-/* ================= CORE: rules, data, AI (no DOM) ================= */
+/* ================= CORE: rules, data, stage, AI (no DOM) ================= */
 const CFG = {
-  critMul: 1.5,            // 치명타 배율 (전 무기 공통)
-  rnd: [0.95, 1.05],       // 보정치 난수 범위
-  magicDefRatio: 0.5,      // 마법 피해에 적용하는 방어력 비율
-  guardCut: 0.5,           // 가드 시 피해 감소율
-  baseReactCap: 0.25,      // 반격/가드 기본 최대 확률
-  totalReactCap: 0.5,      // 스킬 포함 최대 확률
-  manaRegen: 0.10,         // 턴당 마나 회복 = 마력 × 10%
-  spearBonus: [1, 1, 1.2, 1.3, 1.4], // 창: 동시 타격 인원별 배율 (index = 인원, 4명 이상 1.4)
-  rallyAtk: 0.15,          // 왕의 격려
-  rage: { max:100, hit:6, hurt:10, magic:8, support:6 }, // 분노: 타격당 +6, 피격당 +10
+  critMul: 1.5, rnd: [0.95, 1.05], magicDefRatio: 0.5, guardCut: 0.5,
+  baseReactCap: 0.25, totalReactCap: 0.5, manaRegen: 0.10,
+  spearBonus: [1, 1, 1.2, 1.3, 1.4], rallyAtk: 0.15,
+  rage: { max:100, hit:6, hurt:10, magic:8, support:6 },
   exp: { act:10, kill:30, perLevelGap:5, toLevel:100, maxLevel:50 },
+  moveUnit: 60, moveSlack: 24,          // 지형 이동: 칸 비용(초원 50, 보통 60, 돌밭·모래 74), 예산 = 이동 × 60 + 24 → 이동 3~14에서 균일 지형이면 정확히 round(이동 × 1.2 / 1 / 0.8)
+  enemyPrinceWeight: 1.15,
 };
 const WEAPONS = {
-  '1h':      { name:'한손검',      pow:0.90, hits:3.0, crit:0.10, kind:'melee', badge:'검' },
-  '1hs':     { name:'한손검+방패', pow:0.90, hits:2.0, crit:0.10, kind:'melee', badge:'방', shield:true, defBonus:20 },
-  '2h':      { name:'두손검',      pow:1.20, hits:2.0, crit:0.10, kind:'melee', badge:'대' },
-  'spear':   { name:'창',          pow:1.00, hits:2.0, crit:0.10, kind:'melee', badge:'창', spear:true },
-  'knuckle': { name:'너클',        pow:0.85, hits:3.0, crit:0.25, kind:'melee', badge:'권', noPass:true },
-  'bow':     { name:'활',          pow:1.00, crit:0.20, kind:'ranged', badge:'활', range:7 },
-  'xbow':    { name:'석궁',        pow:1.20, crit:0.20, kind:'ranged', badge:'노', range:5 },
-  'staff':   { name:'지팡이',      pow:0,    crit:0,    kind:'magic',  badge:'술' },
+  '1h':      { name:'한손검',      pow:0.90, hits:3.0, crit:0.10, kind:'melee', art:'sword' },
+  '1hs':     { name:'한손검+방패', pow:0.90, hits:2.0, crit:0.10, kind:'melee', art:'sword', shield:true, defBonus:20 },
+  '2h':      { name:'두손검',      pow:1.20, hits:2.0, crit:0.10, kind:'melee', art:'great' },
+  'spear':   { name:'창',          pow:1.00, hits:2.0, crit:0.10, kind:'melee', art:'spear', spear:true },
+  'knuckle': { name:'너클',        pow:0.85, hits:3.0, crit:0.25, kind:'melee', art:'knuckle', noPass:true },
+  'bow':     { name:'활',          pow:1.00, crit:0.20, kind:'ranged', art:'bow', range:7 },
+  'xbow':    { name:'석궁',        pow:1.20, crit:0.20, kind:'ranged', art:'xbow', range:5 },
+  'staff':   { name:'지팡이',      pow:0,    crit:0,    kind:'magic',  art:'staff' },
 };
 const SKILLS = {
-  fire:  { name:'화염탄',   type:'dmg',  shape:'single', coef:3.0, mp:20, range:4 },
-  blaze: { name:'폭염',     type:'dmg',  shape:'cross',  coef:1.6, mp:35, range:4 },
-  heal:  { name:'치유',     type:'heal', coef:2.0, mp:18, range:3 },
-  bless: { name:'축복',     type:'buff', atkUp:0.2, turns:2, mp:15, range:3 },
-  medit: { name:'명상',     type:'mana', amount:40, mp:0, range:0 },
-  wind:  { name:'바람칼날', type:'dmg',  shape:'single', coef:2.8, mp:20, range:4 },
+  fire:    { name:'화염탄',   type:'dmg',  shape:'single', coef:3.0, mp:20, range:4 },
+  blaze:   { name:'폭염',     type:'dmg',  shape:'cross',  coef:1.6, mp:35, range:4 },
+  heal:    { name:'치유',     type:'heal', coef:2.0, mp:18, range:3 },
+  bless:   { name:'축복',     type:'buff', atkUp:0.2, turns:2, mp:15, range:3 },
+  medit:   { name:'명상',     type:'mana', amount:40, mp:0, range:0 },
+  wind:    { name:'바람칼날', type:'dmg',  shape:'single', coef:2.8, mp:20, range:4 },
+  feather: { name:'깃털 폭풍', type:'dmg', shape:'cross',  coef:1.3, mp:30, range:4 },
 };
-const PASSIVES = {
-  rally:   { name:'왕의 격려' },
-  wall:    { name:'철벽', guard:0.15 },
-  riposte: { name:'역습', counter:0.15 },
-};
-const ITEMS = {
-  potion: { name:'회복약',    hp:60 },
-  ether:  { name:'마나 물약', mp:40 },
-};
-/* 필살기: 분노 100에서 사용. charge = 이번 이동 강화, buff = 즉시 발동(이동은 그대로), shot = 이동 후 특수 사격 */
+const PASSIVES = { rally:{ name:'왕의 격려' }, wall:{ name:'철벽', guard:0.15 }, riposte:{ name:'역습', counter:0.15 } };
+const ITEMS = { potion:{ name:'회복약', hp:60 }, ether:{ name:'마나 물약', mp:40 } };
 const SPECIALS = {
   tigerDance:  { name:'백호난무',     kind:'charge', desc:'이번 돌격의 공격횟수 2배', hitsMul:2 },
   ironWall:    { name:'철벽 진형',    kind:'buff',   desc:'자신과 상하좌우 아군 방어력 +20, 가드 +15%p (2턴)', area:'adjacent', buff:{ def:20, guard:0.15, turns:2 } },
@@ -321,7 +865,6 @@ const SPECIALS = {
   whirl:       { name:'회오리 창',    kind:'charge', desc:'이번 이동 +2칸, 창 보너스 +0.2', movAdd:2, spearAdd:0.2 },
   owlVeil:     { name:'밤의 장막',    kind:'buff',   desc:'아군 전원 방어력 +15 (2턴)', area:'team', buff:{ def:15, turns:2 } },
 };
-/* 장비: 무기(무기군 일치) · 방어구 · 장신구. 얻으면 가장 이득이 큰 동료에게 자동 착용 */
 const SLOT_NAME = { weapon:'무기', armor:'방어구', acc:'장신구' };
 const STAT_NAME = { hp:'체력', atk:'공격력', mag:'마력', def:'방어력', mov:'이동', hits:'공격횟수' };
 const GEAR = {
@@ -332,6 +875,7 @@ const GEAR = {
   w_knuckle_iron:{ name:'철권',          slot:'weapon', type:'knuckle', atk:3 },
   w_2h_iron:     { name:'철 대검',       slot:'weapon', type:'2h',      atk:3 },
   w_bow_hunt:    { name:'사냥 활',       slot:'weapon', type:'bow',     atk:2 },
+  w_bow_sparrow: { name:'참새깃 활',     slot:'weapon', type:'bow',     atk:5 },
   w_bow_eagle:   { name:'독수리 장궁',   slot:'weapon', type:'bow',     atk:7 },
   w_xbow_light:  { name:'경량 석궁',     slot:'weapon', type:'xbow',    atk:2 },
   w_staff_oak:   { name:'참나무 지팡이', slot:'weapon', type:'staff',   mag:4 },
@@ -339,87 +883,138 @@ const GEAR = {
   arm_leather:   { name:'가죽 갑옷',     slot:'armor', def:3 },
   arm_chain:     { name:'사슬 갑옷',     slot:'armor', def:6, hp:10 },
   arm_robe:      { name:'마도 로브',     slot:'armor', def:2, mag:3 },
+  arm_crow:      { name:'까마귀 경갑',   slot:'armor', def:5, hp:10 },
   arm_plate:     { name:'인간제 판금갑옷', slot:'armor', def:10, hp:20 },
   acc_feather:   { name:'매 깃털 장식',  slot:'acc', hits:0.2 },
   acc_boots:     { name:'질주의 장화',   slot:'acc', mov:1 },
 };
-const MODE_NAME = { attack:'공격', formation:'진형방어', escort:'호위', enemy:'공격' };
+const MODE_NAME = { attack:'공격', formation:'진형방어', escort:'호위', escape:'탈출', enemy:'공격' };
 
-const COLS = 10, ROWS = 14;
-const MAP = [
-  '##..EE..##',
-  '#........#',
-  '...##.....',
-  '...##..#..',
-  '.......#..',
-  '##........',
-  '....##....',
-  '....##..##',
-  '..........',
-  '.##.......',
-  '.##...##..',
-  '..........',
-  '..........',
-  '##......##',
-];
+const LOOKS = {"tiger": {"species": "tiger", "body": "knight", "cape": true, "weapon": "sword", "colors": {"C": "#2e4a8c", "c": "#1f3366", "A": "#e0b44a", "a": "#a8812c", "L": "#5a3a22", "Y": "#f6d878", "P": "#33354e", "p": "#24263a", "B": "#5a3a22", "b": "#3e2816", "M": "#c0392f", "m": "#7d2220"}}, "boar": {"species": "boar", "body": "plate", "weapon": "sword", "shield": true, "colors": {"A": "#a4aebc", "a": "#6e7888", "Y": "#e0b44a", "S": "#7a5236", "B": "#6e7888", "b": "#4e5664", "Z": "#8a5a32", "z": "#5a3a1e"}}, "horse": {"species": "horse", "body": "knight", "weapon": "spear", "colors": {"C": "#3a7a4c", "c": "#285638", "A": "#c4ccd8", "a": "#8a94a4", "L": "#5a3a22", "Y": "#e0b44a", "P": "#4a3a2a", "p": "#36281c", "B": "#3e2a1a", "b": "#2a1c10"}}, "deer": {"species": "deer", "body": "tunic", "weapon": "bow", "colors": {"C": "#6a8a3a", "c": "#4e6a28", "L": "#7a5236", "Y": "#d8b860", "P": "#5a4630", "p": "#443420", "B": "#5a3a22", "b": "#3e2816"}}, "bear": {"species": "bear", "body": "tunic", "weapon": "knuckle", "colors": {"C": "#8a3a2a", "c": "#622a1e", "A": "#a4aebc", "a": "#6e7888", "L": "#3e2a1a", "Y": "#d8b860", "P": "#3a3a44", "p": "#2a2a32", "B": "#3e2a1a", "b": "#2a1c10"}}, "wolf": {"species": "wolf", "body": "knight", "weapon": "great", "colors": {"C": "#4a4a6a", "c": "#34344c", "A": "#9aa4b2", "a": "#666e7c", "L": "#3e2a1a", "Y": "#c8a850", "P": "#2e2e3a", "p": "#20202a", "B": "#2e2e3a", "b": "#1c1c24"}}, "rabbit": {"species": "rabbit", "body": "tunic", "weapon": "xbow", "colors": {"C": "#b8763a", "c": "#8a5628", "L": "#5a3a22", "Y": "#e8d080", "P": "#5a4630", "p": "#443420", "B": "#5a3a22", "b": "#3e2816"}}, "fox": {"species": "fox", "body": "robe", "weapon": "staff", "colors": {"C": "#7a3aa0", "c": "#562878", "Y": "#f0cc60", "B": "#3a2a4a", "b": "#281c34"}}, "crowInf": {"species": "crow", "body": "tunic", "weapon": "sword", "colors": {"C": "#4a4258", "c": "#342e40", "L": "#2a2420", "Y": "#8a7a5a", "P": "#2a2830", "p": "#1c1a22", "B": "#2a2420", "b": "#1c1814"}}, "sparrow": {"species": "sparrow", "body": "tunic", "weapon": "bow", "colors": {"C": "#a07a44", "c": "#7a5a30", "L": "#5a3a22", "Y": "#d8c080", "P": "#5a4a36", "p": "#463828", "B": "#4a3420", "b": "#342416"}}, "parrot": {"species": "parrot", "body": "robe", "weapon": "staff", "colors": {"C": "#2f62b4", "c": "#21468a", "Y": "#f0c84a", "B": "#2a2a3a", "b": "#1c1c28"}}, "hawkRider": {"species": "hawk", "head": "hawkRider", "body": "plate", "weapon": "spear", "colors": {"A": "#a8886a", "a": "#76604a", "Y": "#e0b44a", "B": "#76604a", "b": "#544434"}}, "eagleIron": {"species": "eagle", "head": "eagleIron", "body": "plate", "weapon": "sword", "shield": true, "colors": {"A": "#e2e6ee", "a": "#9aa2b2", "Y": "#e0b44a", "R": "#c0392f", "B": "#9aa2b2", "b": "#6e7688", "Z": "#e2e6ee", "z": "#9aa2b2"}}, "eagleChief": {"species": "eagle", "head": "eagleChief", "body": "plate", "cape": true, "weapon": "great", "colors": {"A": "#f0f0f4", "a": "#a8acb8", "Y": "#f0c040", "B": "#a8acb8", "b": "#7a7e8c", "M": "#f4f2ea", "m": "#c8c4b4"}}, "humanHeavy": {"species": "human", "head": "humanHeavy", "body": "plate", "weapon": "sword", "shield": true, "colors": {"A": "#7e8694", "a": "#545a66", "Y": "#c0392f", "B": "#545a66", "b": "#3a3e48", "Z": "#a8322d", "z": "#6e1e1a"}}, "humanXbow": {"species": "human", "body": "tunic", "weapon": "xbow", "colors": {"C": "#8a2a2a", "c": "#621e1e", "L": "#3e2a1a", "Y": "#c8a850", "P": "#3a3a44", "p": "#2a2a32", "B": "#3e2a1a", "b": "#2a1c10"}}, "humanPike": {"species": "human", "head": "humanHeavy", "body": "knight", "weapon": "spear", "colors": {"C": "#8a2a2a", "c": "#621e1e", "A": "#7e8694", "a": "#545a66", "L": "#3e2a1a", "Y": "#c8a850", "P": "#3a3a44", "p": "#2a2a32", "B": "#3e2a1a", "b": "#2a1c10"}}};
+
+/* 유닛 원형. grow = 레벨당 성장률(1레벨 대비). elite = 이 스테이지에서 사실상 못 잡는 적 */
+const UNIT_DEFS = {
+  tiger:  { name:'왕자', race:'호랑이', species:'tiger', team:'ally', weapon:'1h', hp:130, atk:50, mag:10, def:30, mov:6, hitBonus:0.2, manual:true, prince:true, passives:['rally'],
+            grow:{ hp:0.05, atk:0.05, mag:0.02, def:0.04 }, gear:['w_1h_royal','arm_leather'], special:'tigerDance' },
+  boar:   { name:'기사1', race:'멧돼지', species:'boar', team:'ally', weapon:'1hs', hp:170, atk:44, mag:5, def:45, mov:4, manual:true, passives:['wall'],
+            grow:{ hp:0.08, atk:0.03, mag:0.01, def:0.06 }, gear:['w_1h_guard','arm_chain'], special:'ironWall' },
+  horse:  { name:'기사2', race:'말', species:'horse', team:'ally', weapon:'spear', hp:135, atk:46, mag:5, def:28, mov:10, hitBonus:1.0, manual:true,
+            grow:{ hp:0.05, atk:0.05, mag:0.01, def:0.03 }, gear:['w_spear_knight','arm_leather'], special:'galeCharge' },
+  deer:   { name:'궁수', race:'사슴', species:'deer', team:'ally', weapon:'bow', hp:100, atk:44, mag:8, def:20, mov:7,
+            grow:{ hp:0.04, atk:0.05, mag:0.02, def:0.02 }, gear:['w_bow_hunt'], special:'skyBow' },
+  bear:   { name:'곰', race:'곰', species:'bear', team:'ally', weapon:'knuckle', hp:140, atk:46, mag:5, def:30, mov:6, hitBonus:0.2,
+            grow:{ hp:0.06, atk:0.05, mag:0.01, def:0.03 }, gear:['w_knuckle_iron'], special:'bearRage' },
+  wolf:   { name:'늑대', race:'늑대', species:'wolf', team:'ally', weapon:'2h', hp:130, atk:52, mag:5, def:28, mov:6, passives:['riposte'],
+            grow:{ hp:0.04, atk:0.06, mag:0.01, def:0.03 }, gear:['w_2h_iron','arm_leather'], special:'wolfFang' },
+  rabbit: { name:'토끼', race:'토끼', species:'rabbit', team:'ally', weapon:'xbow', hp:95, atk:42, mag:8, def:20, mov:6,
+            grow:{ hp:0.04, atk:0.05, mag:0.02, def:0.02 }, gear:['w_xbow_light'], special:'pierceBolt' },
+  fox:    { name:'여우', race:'여우', species:'fox', team:'ally', weapon:'staff', hp:90, atk:15, mag:55, def:18, mov:6, maxMp:100, skills:['fire','blaze','heal','bless','medit'],
+            grow:{ hp:0.03, atk:0.01, mag:0.08, def:0.02 }, gear:['w_staff_oak','arm_robe'], special:'foxBlessing' },
+
+  crowInf:    { name:'까마귀 보병', species:'crow', team:'enemy', weapon:'1h', lv:2, hp:90, atk:34, mag:5, def:18, mov:6 },
+  sparrow:    { name:'참새 궁수', species:'sparrow', team:'enemy', weapon:'bow', lv:2, hp:70, atk:30, mag:6, def:12, mov:6, special:'skyBow' },
+  parrot:     { name:'앵무새 술사', species:'parrot', team:'enemy', weapon:'staff', lv:3, hp:80, atk:10, mag:34, def:14, mov:5, maxMp:100, skills:['feather','heal'] },
+  hawkRider:  { name:'매 기갑병', species:'hawk', team:'enemy', weapon:'spear', lv:6, hp:260, atk:46, mag:5, def:50, mov:8, special:'whirl', elite:true },
+  eagleIron:  { name:'흰독수리 철갑병', species:'eagle', team:'enemy', weapon:'1hs', lv:8, hp:420, atk:60, mag:5, def:95, mov:4, passives:['wall'], special:'ironWall', elite:true },
+  eagleChief: { name:'흰독수리 군단장', species:'eagle', team:'enemy', weapon:'2h', lv:10, hp:600, atk:70, mag:5, def:90, mov:4, special:'dive', elite:true, boss:true },
+  humanHeavy: { name:'인간 중갑병', species:'human', team:'enemy', weapon:'1hs', lv:7, hp:300, atk:50, mag:5, def:80, mov:4, passives:['wall'], elite:true },
+  humanXbow:  { name:'인간 석궁병', species:'human', team:'enemy', weapon:'xbow', lv:6, hp:180, atk:48, mag:5, def:40, mov:5, elite:true },
+  humanPike:  { name:'인간 장창병', species:'human', team:'enemy', weapon:'spear', lv:6, hp:220, atk:50, mag:5, def:55, mov:5, elite:true },
+};
+
+/* ---------- 1화 왕도 탈출 ---------- */
+const STAGE = {
+  map: ["#######NNNN####XXX", "#ff....::::...#XXX", "#f..f...::....#rrr", "..f.....::.f..#rr.", ".....f..::....#r..", ".f......::......r.", "...ff...::...f....", "~~~~~~~~=~~~~~~=~~", "~~~~~~~~=~~~~~~=~~", "ss..s...:...rr..s.", "......p.:.....f...", ".c.c..p.:....ff...", "......p.:.........", "........:...##....", "......p.::....f...", ".c.c..p..:...fff..", "......p..:....f...", "~~~.......:.......", "~~~~..f...:...ff..", "......f...:.......", "..f......::.......", "HHHH.HHHH::HHH.HHH", "Hoooooooo::ooooohH", "Hohhoooo.::.hhoohH", "Hohhoooooo::hhoooH", "Hoooooooo::ooooohH", "Hohhooooo::oohhooH", "Hohhooooo::oohhooH", "Hoooooooo::ooooooH", "HHHHHHHHHHHHHHHHHH"],
+  objectives: {
+    north: { text:'왕자를 북문까지 데려가라', label:'북문', tile:'N' },
+    east:  { text:'왕자를 오른쪽 위 산길 끝까지 데려가 탈출하라', label:'탈출', tile:'X' },
+  },
+  allies: [
+    { unit:'tiger', x:9, y:27 }, { unit:'boar', x:10, y:26 }, { unit:'horse', x:8, y:26 }, { unit:'deer', x:9, y:28 },
+  ],
+  enemies: [
+    { unit:'crowInf', x:6,  y:24, name:'까마귀 보병 A', drop:'arm_crow' },
+    { unit:'crowInf', x:13, y:22, name:'까마귀 보병 B', drop:'acc_feather' },
+    { unit:'crowInf', x:9,  y:22, name:'까마귀 보병 C' },
+    { unit:'sparrow', x:5,  y:19, name:'참새 궁수 A', drop:'w_bow_sparrow', activeTurn:2 },
+    { unit:'sparrow', x:13, y:19, name:'참새 궁수 B', activeTurn:2 },
+    { unit:'parrot',  x:11, y:17, name:'앵무새 술사', drop:'acc_boots', activeTurn:2 },
+    { unit:'humanHeavy', x:4, y:12, name:'인간 중갑병 A', ai:'hold' },
+    { unit:'humanHeavy', x:4, y:14, name:'인간 중갑병 B', ai:'hold' },
+    { unit:'humanXbow',  x:2, y:12, name:'인간 석궁병 A', ai:'hold' },
+    { unit:'humanXbow',  x:2, y:14, name:'인간 석궁병 B', ai:'hold' },
+    { unit:'humanPike',  x:3, y:13, name:'인간 장창병', ai:'hold' },
+  ],
+  events: [
+    { id:'open', at:'start', objective:'north', talk:[
+      { text:'동물 왕국의 수도가 불타고 있다. 인간과 손잡은 조류군이 성벽을 넘었다.' },
+      { who:'boar', text:'왕자님, 성은 끝났습니다. 북문으로 빠져나가셔야 합니다!' },
+      { who:'horse', text:'까마귀 놈들이 성 안까지 들어왔습니다. 길은 저희가 엽니다.' },
+      { who:'tiger', text:'…아버지, 어머니. 반드시 돌아오겠습니다.' },
+      { who:'deer', text:'뒤는 제가 맡겠습니다. 서쪽 인간 진영엔 다가가지 마십시오.' } ] },
+    { id:'hawks', turn:2, focus:[16, 18], banner:'매 기갑군단 출현', spawn:[
+      { unit:'hawkRider', x:15, y:17, name:'매 기갑병 A', activeIn:4 },
+      { unit:'hawkRider', x:16, y:18, name:'매 기갑대장', activeIn:4 },
+      { unit:'hawkRider', x:17, y:19, name:'매 기갑병 B', activeIn:4 } ], talk:[
+      { who:'hawkRider', name:'매 기갑대장', text:'동쪽 평원은 우리 기갑대가 맡는다. 신호가 오면 단숨에 짓밟아라!' },
+      { who:'horse', text:'동쪽에 매 기갑대가… 아직은 움직이지 않는군요. 저놈들이 달려오기 전에 강을 건너야 합니다.' } ] },
+    { id:'crows', turn:4, focus:[2, 19], banner:'까마귀 보병대 출현', spawn:[
+      { unit:'crowInf', x:1, y:20, name:'까마귀 보병장', activeIn:1 },
+      { unit:'crowInf', x:2, y:19, name:'까마귀 보병 D', activeIn:1 },
+      { unit:'crowInf', x:0, y:19, name:'까마귀 보병 E', activeIn:1 },
+      { unit:'crowInf', x:3, y:20, name:'까마귀 보병 F', activeIn:1 } ], talk:[
+      { who:'crowInf', name:'까마귀 보병장', text:'성 뒤쪽을 막아라! 호랑이 새끼를 놓치지 마!' } ] },
+    { id:'eagles', allyRow:12, focus:[8, 2], banner:'흰독수리 철갑군단 출현', objective:'east', spawn:[
+      { unit:'eagleChief', x:8,  y:1, name:'흰독수리 군단장', activeIn:1 },
+      { unit:'eagleIron',  x:7,  y:2, name:'흰독수리 철갑병 A', activeIn:1 },
+      { unit:'eagleIron',  x:10, y:2, name:'흰독수리 철갑병 B', activeIn:1 },
+      { unit:'eagleIron',  x:6,  y:3, name:'흰독수리 철갑병 C', activeIn:1 },
+      { unit:'eagleIron',  x:11, y:3, name:'흰독수리 철갑병 D', activeIn:1 },
+      { unit:'sparrow',    x:9,  y:3, name:'참새 궁수 C', activeIn:1 },
+      { unit:'sparrow',    x:5,  y:1, name:'참새 궁수 D', activeIn:1 } ], talk:[
+      { who:'eagleChief', name:'흰독수리 군단장', text:'북문은 이미 우리 철갑군단의 것이다. 여기서 끝이다, 호랑이 왕자.' },
+      { who:'boar', text:'북문이 막혔습니다! 저 철갑엔 칼이 들지 않습니다!' },
+      { who:'horse', text:'동쪽 산길로 우회하십시오! 오른쪽 위 끝까지 가면 빠져나갈 수 있습니다!' } ] },
+  ],
+};
+const MAP = STAGE.map;
+const COLS = MAP[0].length, ROWS = MAP.length;
 const DIRS = [[1,0],[-1,0],[0,1],[0,-1]];
 
-/* grow = 레벨당 성장률(1레벨 능력치 대비 %). 탱커는 체력, 여우는 마력이 가장 많이 오른다 */
-const ROSTER = [
-  { id:'tiger',  name:'왕자',   race:'호랑이', emoji:'🐯', team:'ally', weapon:'1h',      lv:1, hp:130, atk:50, mag:10, def:30, mov:6,  hitBonus:0.2, manual:true, prince:true, passives:['rally'],
-    grow:{ hp:0.05, atk:0.05, mag:0.02, def:0.04 }, gear:['w_1h_royal','arm_leather'], special:'tigerDance', x:4, y:12 },
-  { id:'boar',   name:'기사1',  race:'멧돼지', emoji:'🐗', team:'ally', weapon:'1hs',     lv:1, hp:170, atk:44, mag:5,  def:45, mov:4,  manual:true, passives:['wall'],
-    grow:{ hp:0.08, atk:0.03, mag:0.01, def:0.06 }, gear:['w_1h_guard','arm_chain'], special:'ironWall', x:5, y:11 },
-  { id:'horse',  name:'기사2',  race:'말',     emoji:'🐴', team:'ally', weapon:'spear',   lv:1, hp:135, atk:46, mag:5,  def:28, mov:10, hitBonus:1.0, manual:true,
-    grow:{ hp:0.05, atk:0.05, mag:0.01, def:0.03 }, gear:['w_spear_knight','arm_leather'], special:'galeCharge', x:3, y:11 },
-  { id:'bear',   name:'곰',     race:'곰',     emoji:'🐻', team:'ally', weapon:'knuckle', lv:1, hp:140, atk:46, mag:5,  def:30, mov:6,  hitBonus:0.2,
-    grow:{ hp:0.06, atk:0.05, mag:0.01, def:0.03 }, gear:['w_knuckle_iron'], special:'bearRage', x:6, y:12 },
-  { id:'wolf',   name:'늑대',   race:'늑대',   emoji:'🐺', team:'ally', weapon:'2h',      lv:1, hp:130, atk:52, mag:5,  def:28, mov:6,  passives:['riposte'],
-    grow:{ hp:0.04, atk:0.06, mag:0.01, def:0.03 }, gear:['w_2h_iron','arm_leather'], special:'wolfFang', x:2, y:12 },
-  { id:'deer',   name:'사슴',   race:'사슴',   emoji:'🦌', team:'ally', weapon:'bow',     lv:1, hp:100, atk:44, mag:8,  def:20, mov:7,
-    grow:{ hp:0.04, atk:0.05, mag:0.02, def:0.02 }, gear:['w_bow_hunt'], special:'skyBow', x:4, y:13 },
-  { id:'rabbit', name:'토끼',   race:'토끼',   emoji:'🐰', team:'ally', weapon:'xbow',    lv:1, hp:95,  atk:42, mag:8,  def:20, mov:6,
-    grow:{ hp:0.04, atk:0.05, mag:0.02, def:0.02 }, gear:['w_xbow_light'], special:'pierceBolt', x:5, y:13 },
-  { id:'fox',    name:'여우',   race:'여우',   emoji:'🦊', team:'ally', weapon:'staff',   lv:1, hp:90,  atk:15, mag:55, def:18, mov:6,  maxMp:100, skills:['fire','blaze','heal','bless','medit'],
-    grow:{ hp:0.03, atk:0.01, mag:0.08, def:0.02 }, gear:['w_staff_oak','arm_robe'], special:'foxBlessing', x:3, y:13 },
-
-  { id:'hawk1',  name:'매 전사 A',     emoji:'🦅', team:'enemy', weapon:'2h',    lv:3, hp:110, atk:46, mag:5,  def:24, mov:6, special:'dive', drop:'acc_feather', x:2, y:7 },
-  { id:'hawk2',  name:'매 전사 B',     emoji:'🦅', team:'enemy', weapon:'2h',    lv:3, hp:110, atk:46, mag:5,  def:24, mov:6, special:'dive', x:7, y:8 },
-  { id:'crow1',  name:'까마귀 창병 A', emoji:'🐦', team:'enemy', weapon:'spear', lv:2, hp:105, atk:42, mag:5,  def:22, mov:6, special:'whirl', drop:'w_spear_crow', x:4, y:8 },
-  { id:'crow2',  name:'까마귀 창병 B', emoji:'🐦', team:'enemy', weapon:'spear', lv:2, hp:105, atk:42, mag:5,  def:22, mov:6, special:'whirl', x:6, y:5 },
-  { id:'heavy',  name:'인간 중갑병',   emoji:'💂', team:'enemy', weapon:'1hs',   lv:4, hp:150, atk:40, mag:5,  def:40, mov:4, passives:['wall'], special:'ironWall', drop:'arm_plate', x:4, y:4 },
-  { id:'xbow1',  name:'인간 석궁병 A', emoji:'🧑', team:'enemy', weapon:'xbow',  lv:2, hp:85,  atk:40, mag:5,  def:18, mov:6, special:'pierceBolt', drop:'acc_boots', x:1, y:4 },
-  { id:'xbow2',  name:'인간 석궁병 B', emoji:'🧑', team:'enemy', weapon:'xbow',  lv:2, hp:85,  atk:40, mag:5,  def:18, mov:6, special:'pierceBolt', x:8, y:3 },
-  { id:'eagle',  name:'독수리 궁수',   emoji:'🦅', team:'enemy', weapon:'bow',   lv:3, hp:90,  atk:40, mag:5,  def:18, mov:7, special:'skyBow', drop:'w_bow_eagle', x:5, y:1 },
-  { id:'owl',    name:'부엉이 술사',   emoji:'🦉', team:'enemy', weapon:'staff', lv:3, hp:85,  atk:12, mag:48, def:16, mov:6, maxMp:100, skills:['wind','heal'], special:'owlVeil', drop:'w_staff_owl', x:6, y:2 },
-];
-
 const S = {};
-const FX = {                      // UI hooks; the UI replaces these
+const FX = {
   sleep: () => Promise.resolve(),
   popup() {}, log() {}, flash() {}, area() {}, onKill() {}, changed() {}, focus() {},
+  focusTile: () => Promise.resolve(), talk: () => Promise.resolve(), banner: () => Promise.resolve(), spawned() {},
 };
 let rng = Math.random;
 
-function makeUnit(d) {
-  const u = Object.assign({ hitBonus:0, passives:[], skills:[], maxMp:0, manual:false, prince:false, lv:1, grow:null, special:null, drop:null }, d,
-    { base:{ hp:d.hp, atk:d.atk, mag:d.mag, def:d.def }, maxHp:d.hp, mp:d.maxMp || 0, exp:0, rage:0, sp:null,
-      equip:{ weapon:null, armor:null, acc:null }, acted:false, buffs:[], tempAtk:0, aiMode:'global',
-      anchor:{ x:d.x, y:d.y }, anchorFor:null, dx:d.x, dy:d.y, flash:0 });
+function makeUnit(defId, place) {
+  const p = Object.assign({}, place || {}); delete p.unit; delete p.activeIn;
+  const d = Object.assign({}, UNIT_DEFS[defId], p);
+  const u = Object.assign({ hitBonus:0, passives:[], skills:[], maxMp:0, manual:false, prince:false, lv:1, grow:null, special:null, drop:null, ai:null, elite:false },
+    d, { defId, look:LOOKS[defId], base:{ hp:d.hp, atk:d.atk, mag:d.mag, def:d.def }, maxHp:d.hp, mp:d.maxMp || 0, exp:0, rage:0, sp:null,
+      equip:{ weapon:null, armor:null, acc:null }, acted:false, buffs:[], tempAtk:0, aiMode:'global', activeTurn:d.activeTurn || 0,
+      anchor:{ x:d.x, y:d.y }, anchorFor:null, dx:d.x, dy:d.y, flash:0, face:d.team === 'ally' ? 1 : -1, uid:defId + '_' + d.x + '_' + d.y });
+  u.id = u.uid;
   delete u.gear;
   for (const id of d.gear || []) equipRaw(u, id);
   return u;
 }
 function resetState() {
-  Object.assign(S, { turn:1, phase:'player', units:ROSTER.map(makeUnit), items:{ potion:3, ether:2 }, bag:[],
-    globalMode:'attack', allManual:false, over:null, log:[], speed:1 });
+  Object.assign(S, { turn:1, phase:'player', units:[], escaped:[], items:{ potion:4, ether:0 }, bag:[],
+    globalMode:'escort', allManual:false, over:null, log:[], speed:S.speed || 1, objective:'north', fired:{}, kills:0 });
+  for (const a of STAGE.allies) S.units.push(makeUnit(a.unit, a));
+  for (const e of STAGE.enemies) S.units.push(makeUnit(e.unit, e));
 }
 
 const round2 = v => Math.round(v * 100) / 100;
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const inB = (x, y) => x >= 0 && y >= 0 && x < COLS && y < ROWS;
-const isWall = (x, y) => MAP[y][x] === '#';
-const isExit = (x, y) => MAP[y][x] === 'E';
+const terrainAt = (x, y) => ART.TERRAIN[MAP[y][x]] || ART.TERRAIN['.'];
+const tileCost = (x, y) => terrainAt(x, y).cost;
+const isWall = (x, y) => tileCost(x, y) === 0;
+const isExitTile = (x, y) => S.objective === 'east' && MAP[y][x] === 'X';
 const man = (ax, ay, bx, by) => Math.abs(ax - bx) + Math.abs(ay - by);
 const keyOf = (x, y) => y * COLS + x;
 const W = u => WEAPONS[u.weapon];
@@ -437,12 +1032,16 @@ const atkOf = u => (u.atk + gearSum(u, 'atk')) * (1 + buffSum(u, 'atk') + (u.tem
 const defOf = u => u.def + gearSum(u, 'def') + (W(u).defBonus || 0) + buffSum(u, 'def');
 const magOf = u => u.mag + gearSum(u, 'mag');
 const movOf = u => u.mov + gearSum(u, 'mov') + spv(u, 'movAdd');
+const moveBudget = u => movOf(u) * CFG.moveUnit + CFG.moveSlack;
 const rangeOf = u => (W(u).range || 0) + spv(u, 'rangeAdd');
 const hitsOf = u => round2(((W(u).hits || 0) + (u.hitBonus || 0) + gearSum(u, 'hits')) * (spv(u, 'hitsMul') || 1));
 const critOf = u => (u.sp && u.sp.allCrit) ? 1 : W(u).crit;
 const specialOf = u => u.special ? SPECIALS[u.special] : null;
 const rageFull = u => !!u.special && u.rage >= CFG.rage.max;
 const gainRage = (u, n) => { if (u.hp > 0 && u.special) u.rage = Math.min(CFG.rage.max, u.rage + n); };
+const isDormant = u => u.team === 'enemy' && (u.ai === 'hold' || S.turn < u.activeTurn);
+const wait = ms => FX.sleep(ms / (S.speed || 1));
+function routeCost(route) { let c = 0; for (let i = 1; i < route.length; i++) c += tileCost(route[i].x, route[i].y); return c; }
 
 /* ---------- 레벨·경험치 ---------- */
 function levelStat(u, k) { return Math.round(u.base[k] * (1 + (u.grow ? u.grow[k] : 0) * (u.lv - 1))); }
@@ -472,12 +1071,8 @@ function gearScore(u, id) {
   if (!id) return 0;
   const g = GEAR[id], gr = u.grow || { hp:0.05, atk:0.05, mag:0.02, def:0.03 };
   const magic = W(u).kind === 'magic';
-  return (g.hp || 0) * 0.4 * (gr.hp / 0.05)
-    + (g.atk || 0) * (magic ? 0.1 : 2 * gr.atk / 0.05)
-    + (g.mag || 0) * (magic ? 2 * gr.mag / 0.05 : 0.1)
-    + (g.def || 0) * 1.5 * (gr.def / 0.04)
-    + (g.mov || 0) * 8
-    + (g.hits || 0) * (isMelee(u) ? 60 : 0);
+  return (g.hp || 0) * 0.4 * (gr.hp / 0.05) + (g.atk || 0) * (magic ? 0.1 : 2 * gr.atk / 0.05) + (g.mag || 0) * (magic ? 2 * gr.mag / 0.05 : 0.1)
+    + (g.def || 0) * 1.5 * (gr.def / 0.04) + (g.mov || 0) * 8 + (g.hits || 0) * (isMelee(u) ? 60 : 0);
 }
 function equipRaw(u, id) {
   const g = GEAR[id], old = u.equip[g.slot];
@@ -486,15 +1081,12 @@ function equipRaw(u, id) {
   if (g.hp) { u.maxHp += g.hp; u.hp += g.hp; }
   return old;
 }
-function gearText(id) {
-  const g = GEAR[id];
-  return Object.keys(STAT_NAME).filter(k => g[k]).map(k => `${STAT_NAME[k]} +${g[k]}`).join(', ');
-}
-/* 자동 착용: 같은 칸의 현재 장비보다 점수가 가장 많이 오르는 동료에게. 밀려난 장비는 다른 동료를 한 번 더 찾아본다 */
+function gearText(id) { const g = GEAR[id]; return Object.keys(STAT_NAME).filter(k => g[k]).map(k => `${STAT_NAME[k]} +${g[k]}`).join(', '); }
+function allAllies() { return S.units.filter(u => u.team === 'ally').concat(S.escaped); }
 function autoEquip(id, depth = 0) {
   let best = null, gain = 0;
-  for (const u of S.units) {
-    if (u.team !== 'ally' || !fitsGear(u, id)) continue;
+  for (const u of allAllies()) {
+    if (!fitsGear(u, id)) continue;
     const g = gearScore(u, id) - gearScore(u, u.equip[GEAR[id].slot]);
     if (g > gain) { gain = g; best = u; }
   }
@@ -505,14 +1097,9 @@ function autoEquip(id, depth = 0) {
   if (old) { if (depth < 2) autoEquip(old, depth + 1); else S.bag.push(old); }
   return best;
 }
-function acquireGear(id) {
-  FX.log(`전리품: ${GEAR[id].name}`, 'level');
-  return autoEquip(id);
-}
-const spearMul = n => CFG.spearBonus[Math.min(n, CFG.spearBonus.length - 1)];
-const wait = ms => FX.sleep(ms / (S.speed || 1));
+function acquireGear(id) { FX.log(`전리품: ${GEAR[id].name}`, 'level'); return autoEquip(id); }
 
-/* 공격횟수 분배: 통과한 적마다 1회, 남는 횟수는 마지막 적에게, 모자라면 이후 적은 타격 없음. 소수점은 그 비율 위력의 1타 */
+/* ---------- 전투 규칙 ---------- */
 function distributeHits(total, n) {
   const out = [];
   let rem = round2(total);
@@ -529,14 +1116,8 @@ function distributeHits(total, n) {
   }
   return out;
 }
-
-/* 데미지: 공격력 × 무기계수 × 보정치 × 타격값 × 배율 × 100/(100+방어력) */
-function baseHit(att, def, value, mult) {
-  return atkOf(att) * W(att).pow * value * mult * 100 / (100 + defOf(def));
-}
-function expHit(att, def, value, mult) {
-  return baseHit(att, def, value, mult) * (1 + critOf(att) * (CFG.critMul - 1));
-}
+function baseHit(att, def, value, mult) { return atkOf(att) * W(att).pow * value * mult * 100 / (100 + defOf(def)); }
+function expHit(att, def, value, mult) { return baseHit(att, def, value, mult) * (1 + critOf(att) * (CFG.critMul - 1)); }
 function calcHit(att, def, value, mult, guarded) {
   const r = CFG.rnd[0] + (CFG.rnd[1] - CFG.rnd[0]) * rng();
   const crit = rng() < critOf(att);
@@ -546,18 +1127,11 @@ function calcHit(att, def, value, mult, guarded) {
 }
 const magicDef = def => defOf(def) * CFG.magicDefRatio;
 function expMagic(c, def, coef) { return magOf(c) * coef * 100 / (100 + magicDef(def)); }
-function calcMagic(c, def, coef) {
-  const r = CFG.rnd[0] + (CFG.rnd[1] - CFG.rnd[0]) * rng();
-  return Math.max(1, Math.round(expMagic(c, def, coef) * r));
-}
+function calcMagic(c, def, coef) { const r = CFG.rnd[0] + (CFG.rnd[1] - CFG.rnd[0]) * rng(); return Math.max(1, Math.round(expMagic(c, def, coef) * r)); }
 const expHeal = (c, coef) => magOf(c) * coef;
-
-/* 반격·가드: 기본 최대 25%, 스킬 포함 최대 50% */
 function reactChances(att, def) {
-  const r = atkOf(def) / Math.max(1, atkOf(att));
-  const d = defOf(def) / Math.max(1, atkOf(att));
-  const cap = CFG.baseReactCap;
-  const canCounter = isMelee(def);
+  const r = atkOf(def) / Math.max(1, atkOf(att)), d = defOf(def) / Math.max(1, atkOf(att));
+  const cap = CFG.baseReactCap, canCounter = isMelee(def);
   const baseC = canCounter ? cap * clamp((r - 0.6) / 0.8, 0, 1) : 0;
   const baseG = cap * clamp((d - 0.2) / 0.8, 0, 1);
   const counter = canCounter ? Math.min(CFG.totalReactCap, baseC + passiveSum(def, 'counter')) : 0;
@@ -565,8 +1139,6 @@ function reactChances(att, def) {
   const guardCounter = canCounter && r >= 1.0 && d >= 0.6 ? counter * guard : 0;
   return { counter, guard, guardCounter };
 }
-
-/* 방패: 상하좌우로 붙은 아군에게, 방패병 쪽 방향에서 오는 화살만 대신 맞는다 */
 function findInterceptor(sx, sy, target) {
   const dx = sx - target.x, dy = sy - target.y;
   let best = null;
@@ -577,29 +1149,22 @@ function findInterceptor(sx, sy, target) {
   }
   return best;
 }
-
 function canStep(u, route, nx, ny) {
   if (!inB(nx, ny) || isWall(nx, ny)) return false;
-  if (route.length - 1 >= movOf(u)) return false;
   if (route.some(p => p.x === nx && p.y === ny)) return false;
+  if (routeCost(route) + tileCost(nx, ny) > moveBudget(u)) return false;
   const o = unitAt(nx, ny, u);
   if (o && o.team !== u.team && W(u).noPass) return false;
   return true;
 }
-function routeEndValid(u, route) {
-  const e = route[route.length - 1];
-  return !!e && !unitAt(e.x, e.y, u);
-}
-
-/* 경로 미리보기/실행 계획 */
+function routeEndValid(u, route) { const e = route[route.length - 1]; return !!e && !unitAt(e.x, e.y, u); }
 function computePlan(u, route, knTarget) {
   const passed = [];
   let rally = false;
   for (let i = 1; i < route.length; i++) {
     const o = unitAt(route[i].x, route[i].y, u);
     if (!o) continue;
-    if (o.team !== u.team) passed.push(o);
-    else if (hasPassive(o, 'rally')) rally = true;
+    if (o.team !== u.team) passed.push(o); else if (hasPassive(o, 'rally')) rally = true;
   }
   const melee = isMelee(u);
   const hitList = melee ? (W(u).noPass ? (knTarget ? [knTarget] : []) : passed) : [];
@@ -612,26 +1177,23 @@ function computePlan(u, route, knTarget) {
   const saved = u.tempAtk;
   u.tempAtk = rally ? CFG.rallyAtk : 0;
   const rows = encountered.map(o => {
-    const st = strikes.get(o.id) || [];
-    const ch = reactChances(u, o);
-    return { unit:o, strikes:st, base:Math.round(st.reduce((s, v) => s + baseHit(u, o, v, mult), 0)),
-      counter:ch.counter, guard:ch.guard, guardCounter:ch.guardCounter };
+    const st = strikes.get(o.id) || [], ch = reactChances(u, o);
+    return { unit:o, strikes:st, base:Math.round(st.reduce((s, v) => s + baseHit(u, o, v, mult), 0)), counter:ch.counter, guard:ch.guard, guardCounter:ch.guardCounter };
   });
   u.tempAtk = saved;
-  return { passed, strikes, mult, rows, rally,
-    total: rows.reduce((s, r) => s + r.base, 0),
-    maxCounter: rows.reduce((m, r) => Math.max(m, r.counter + r.guardCounter), 0) };
+  return { passed, strikes, mult, rows, rally, cost:routeCost(route),
+    total: rows.reduce((s, r) => s + r.base, 0), maxCounter: rows.reduce((m, r) => Math.max(m, r.counter + r.guardCounter), 0) };
 }
+const spearMul = n => CFG.spearBonus[Math.min(n, CFG.spearBonus.length - 1)];
 
 function kill(u, by) {
-  u.hp = 0;
-  u.sp = null;
+  u.hp = 0; u.sp = null;
   FX.log(`${u.name} 쓰러짐`, 'kill');
   FX.onKill(u);
+  if (by && by.team === 'ally' && u.team === 'enemy') S.kills++;
   if (by) grantExp(by, u, 'kill');
   if (u.team === 'enemy' && u.drop) acquireGear(u.drop);
 }
-
 async function resolvePass(att, def, strikes, mult) {
   const ch = reactChances(att, def);
   const noGuard = !!spv(att, 'ignoreGuard');
@@ -641,7 +1203,6 @@ async function resolvePass(att, def, strikes, mult) {
     else if (!noGuard && rng() < ch.guard) guard = true;
     else if (rng() < ch.counter) counter = true;
   } else if (rng() < ch.counter) counter = true;
-
   if (guard) FX.popup(def, '가드', 'guard');
   let total = 0, crits = 0, n = 0;
   for (const v of strikes) {
@@ -650,8 +1211,7 @@ async function resolvePass(att, def, strikes, mult) {
     def.hp = Math.max(0, def.hp - r.dmg);
     total += r.dmg; n++; if (r.crit) crits++;
     gainRage(att, CFG.rage.hit); gainRage(def, CFG.rage.hurt);
-    FX.popup(def, String(r.dmg), r.crit ? 'crit' : 'dmg');
-    FX.flash(def); FX.changed();
+    FX.popup(def, String(r.dmg), r.crit ? 'crit' : 'dmg'); FX.flash(def); FX.changed();
     await wait(210);
   }
   if (strikes.length) {
@@ -670,8 +1230,6 @@ async function resolvePass(att, def, strikes, mult) {
     if (att.hp <= 0) kill(att, def);
   }
 }
-
-/* 필살기 */
 function useRage(u) {
   const sp = specialOf(u);
   u.rage = 0;
@@ -682,47 +1240,37 @@ async function useSpecialBuff(u) {
   const sp = specialOf(u);
   if (!sp || sp.kind !== 'buff' || !rageFull(u)) return;
   useRage(u);
-  const targets = sp.area === 'team'
-    ? alive().filter(a => a.team === u.team)
+  const targets = sp.area === 'team' ? alive().filter(a => a.team === u.team)
     : [u, ...DIRS.map(([dx, dy]) => unitAt(u.x + dx, u.y + dy)).filter(a => a && a.team === u.team)];
   FX.area(targets.map(a => [a.x, a.y]), 'heal');
   await wait(260);
   for (const a of targets) {
-    if (sp.heal) {
-      const got = Math.min(Math.round(magOf(u) * sp.heal), a.maxHp - a.hp);
-      if (got > 0) { a.hp += got; FX.popup(a, `+${got}`, 'heal'); }
-    }
-    if (sp.buff) {
-      a.buffs = a.buffs.filter(b => b.src !== u.special);
-      a.buffs.push(Object.assign({ src:u.special }, sp.buff));
-    }
+    if (sp.heal) { const got = Math.min(Math.round(magOf(u) * sp.heal), a.maxHp - a.hp); if (got > 0) { a.hp += got; FX.popup(a, `+${got}`, 'heal'); } }
+    if (sp.buff) { a.buffs = a.buffs.filter(b => b.src !== u.special); a.buffs.push(Object.assign({ src:u.special }, sp.buff)); }
   }
   FX.changed();
   await wait(360);
 }
-
 async function execMove(u, route, knTarget) {
   const plan = computePlan(u, route, knTarget);
   let rallied = false;
   for (let i = 1; i < route.length; i++) {
     const t = route[i];
+    if (t.x !== u.x) u.face = t.x > u.x ? 1 : -1;
     u.x = t.x; u.y = t.y;
-    FX.changed();
+    FX.focus(u, true); FX.changed();
     await wait(105);
     const o = unitAt(t.x, t.y, u);
     if (!o) continue;
     if (o.team === u.team) {
-      if (!rallied && hasPassive(o, 'rally')) {
-        rallied = true; u.tempAtk = CFG.rallyAtk;
-        FX.popup(u, '격려 +15%', 'buff');
-        FX.log(`${u.name}, ${o.name}의 격려로 공격력 +15%`, 'sys');
-      }
+      if (!rallied && hasPassive(o, 'rally')) { rallied = true; u.tempAtk = CFG.rallyAtk; FX.popup(u, '격려 +15%', 'buff'); FX.log(`${u.name}, ${o.name}의 격려로 공격력 +15%`, 'sys'); }
       continue;
     }
     await resolvePass(u, o, plan.strikes.get(o.id) || [], plan.mult);
     if (u.hp <= 0) break;
   }
   if (u.hp > 0 && knTarget && knTarget.hp > 0) {
+    if (knTarget.x !== u.x) u.face = knTarget.x > u.x ? 1 : -1;
     await wait(80);
     await resolvePass(u, knTarget, plan.strikes.get(knTarget.id) || [], 1);
   }
@@ -730,11 +1278,10 @@ async function execMove(u, route, knTarget) {
   if (u.sp && u.sp.kind === 'charge') u.sp = null;
   FX.changed();
 }
-
-/* 사격. sp = 필살 사격(위력 배율, 방패 무시)일 때만 넘긴다 */
 async function execShot(att, target, sp) {
   const icp = sp && sp.pierce ? null : findInterceptor(att.x, att.y, target);
   const recv = icp || target;
+  if (target.x !== att.x) att.face = target.x > att.x ? 1 : -1;
   if (sp) useRage(att);
   FX.area([[target.x, target.y]], 'dmg');
   await wait(sp ? 300 : 160);
@@ -750,14 +1297,10 @@ async function execShot(att, target, sp) {
   await wait(300);
   if (recv.hp <= 0) kill(recv, att);
 }
-
 function crossTiles(tx, ty) { return [[tx, ty], [tx + 1, ty], [tx - 1, ty], [tx, ty + 1], [tx, ty - 1]].filter(([x, y]) => inB(x, y)); }
 function skillAreaTiles(sk, tx, ty) { return sk.shape === 'cross' ? crossTiles(tx, ty) : [[tx, ty]]; }
-
-/* 스킬 대상이 될 수 있는 칸 목록 */
 function skillTargets(u, sid) {
-  const sk = SKILLS[sid];
-  const out = [];
+  const sk = SKILLS[sid], out = [];
   if (sk.type === 'mana') return [[u.x, u.y]];
   for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
     if (man(x, y, u.x, u.y) > sk.range) continue;
@@ -768,10 +1311,10 @@ function skillTargets(u, sid) {
   }
   return out;
 }
-
 async function execSkill(u, sid, tx, ty) {
   const sk = SKILLS[sid];
   u.mp -= sk.mp;
+  if (tx !== u.x) u.face = tx > u.x ? 1 : -1;
   FX.changed();
   if (sk.type === 'dmg') {
     const tiles = skillAreaTiles(sk, tx, ty);
@@ -786,8 +1329,7 @@ async function execSkill(u, sid, tx, ty) {
       const d = calcMagic(u, o, sk.coef);
       o.hp = Math.max(0, o.hp - d);
       gainRage(u, CFG.rage.magic); gainRage(o, CFG.rage.hurt);
-      FX.popup(o, String(d), 'magic'); FX.flash(o);
-      FX.log(`  ${o.name} ${d}`, 'hit');
+      FX.popup(o, String(d), 'magic'); FX.flash(o); FX.log(`  ${o.name} ${d}`, 'hit');
       hitAny = hitAny || o;
       if (o.hp <= 0) dead.push(o);
     }
@@ -800,32 +1342,25 @@ async function execSkill(u, sid, tx, ty) {
     if (t) {
       const amt = Math.round(expHeal(u, sk.coef) * (CFG.rnd[0] + (CFG.rnd[1] - CFG.rnd[0]) * rng()));
       const got = Math.min(amt, t.maxHp - t.hp);
-      t.hp += got;
-      gainRage(u, CFG.rage.support); grantExp(u, u, 'act');
-      FX.area([[tx, ty]], 'heal'); FX.popup(t, `+${got}`, 'heal');
-      FX.log(`${u.name} ${sk.name} → ${t.name} +${got}`, 'heal');
+      t.hp += got; gainRage(u, CFG.rage.support); grantExp(u, u, 'act');
+      FX.area([[tx, ty]], 'heal'); FX.popup(t, `+${got}`, 'heal'); FX.log(`${u.name} ${sk.name} → ${t.name} +${got}`, 'heal');
     }
     await wait(320);
   } else if (sk.type === 'buff') {
     const t = unitAt(tx, ty);
     if (t) {
-      t.buffs = t.buffs.filter(b => b.src !== sid);
-      t.buffs.push({ atk:sk.atkUp, turns:sk.turns, src:sid });
+      t.buffs = t.buffs.filter(b => b.src !== sid); t.buffs.push({ atk:sk.atkUp, turns:sk.turns, src:sid });
       gainRage(u, CFG.rage.support); grantExp(u, u, 'act');
-      FX.area([[tx, ty]], 'heal'); FX.popup(t, '공격력 +20%', 'buff');
-      FX.log(`${u.name} ${sk.name} → ${t.name} 공격력 +20% (2턴)`, 'heal');
+      FX.area([[tx, ty]], 'heal'); FX.popup(t, '공격력 +20%', 'buff'); FX.log(`${u.name} ${sk.name} → ${t.name} 공격력 +20% (2턴)`, 'heal');
     }
     await wait(300);
   } else if (sk.type === 'mana') {
     const got = Math.min(sk.amount, u.maxMp - u.mp);
-    u.mp += got;
-    FX.popup(u, `마나 +${got}`, 'mana');
-    FX.log(`${u.name} ${sk.name} · 마나 +${got}`, 'sys');
+    u.mp += got; FX.popup(u, `마나 +${got}`, 'mana'); FX.log(`${u.name} ${sk.name} · 마나 +${got}`, 'sys');
     await wait(300);
   }
   FX.changed();
 }
-
 function useItem(u, kind) {
   const it = ITEMS[kind];
   if (!S.items[kind]) return false;
@@ -835,7 +1370,6 @@ function useItem(u, kind) {
   FX.changed();
   return true;
 }
-
 function startTurn() {
   S.turn++;
   for (const u of alive()) {
@@ -846,27 +1380,71 @@ function startTurn() {
   }
   FX.changed();
 }
-
 function checkEnd() {
   if (S.over) return S.over;
-  const p = prince();
-  if (!p || p.hp <= 0) S.over = 'lose';
-  else if (!alive().some(u => u.team === 'enemy')) S.over = 'win';
-  else if (isExit(p.x, p.y)) S.over = 'escape';
+  if (S.escaped.some(u => u.prince)) S.over = 'escape';
+  else { const p = prince(); if (!p || p.hp <= 0) S.over = 'lose'; }
   return S.over;
 }
 
-/* ---------- AI ---------- */
-function effMode(u) {
-  if (u.team === 'enemy') return 'enemy';
-  return u.aiMode === 'global' ? S.globalMode : u.aiMode;
+/* ---------- 스테이지 이벤트·탈출 ---------- */
+function freeTileNear(x, y) {
+  const seen = new Set([keyOf(x, y)]), q = [[x, y]];
+  for (let i = 0; i < q.length; i++) {
+    const [cx, cy] = q[i];
+    if (!isWall(cx, cy) && !unitAt(cx, cy)) return [cx, cy];
+    for (const [dx, dy] of DIRS) { const nx = cx + dx, ny = cy + dy; if (inB(nx, ny) && !seen.has(keyOf(nx, ny))) { seen.add(keyOf(nx, ny)); q.push([nx, ny]); } }
+  }
+  return [x, y];
 }
+async function fireEvent(ev) {
+  S.fired[ev.id] = true;
+  if (ev.focus) await FX.focusTile(ev.focus[0], ev.focus[1]);
+  for (const s of ev.spawn || []) {
+    const [x, y] = freeTileNear(s.x, s.y);
+    const u = makeUnit(s.unit, Object.assign({}, s, { x, y }));
+    u.uid = u.id = `${s.unit}_${ev.id}_${x}_${y}`;
+    u.activeTurn = S.turn + (s.activeIn || 0);
+    S.units.push(u);
+    FX.spawned(u);
+  }
+  if (ev.objective) S.objective = ev.objective;
+  FX.changed();
+  if (ev.banner) await FX.banner(ev.banner, 'event');
+  if (ev.spawn) FX.log(`${ev.banner || '적 증원'}`, 'event');
+  if (ev.objective) FX.log(`목표: ${STAGE.objectives[ev.objective].text}`, 'event');
+  if (ev.talk) await FX.talk(ev.talk);
+}
+async function runStartEvents() { for (const ev of STAGE.events) if (ev.at === 'start' && !S.fired[ev.id]) await fireEvent(ev); }
+async function runTurnEvents() { for (const ev of STAGE.events) if (ev.turn === S.turn && !S.fired[ev.id]) await fireEvent(ev); }
+async function runZoneEvents() {
+  for (const ev of STAGE.events) {
+    if (ev.allyRow == null || S.fired[ev.id]) continue;
+    if (alive().some(u => u.team === 'ally' && u.y <= ev.allyRow)) await fireEvent(ev);
+  }
+}
+function tryEscape(u) {
+  if (!u || u.team !== 'ally' || u.hp <= 0 || !isExitTile(u.x, u.y)) return false;
+  S.units = S.units.filter(x => x !== u);
+  S.escaped.push(u);
+  FX.popup(u, '탈출!', 'level');
+  FX.log(`${u.name} 탈출`, 'event');
+  checkEnd();
+  return true;
+}
+async function afterAllyMove(u) {
+  if (tryEscape(u)) return true;
+  await runZoneEvents();
+  return false;
+}
+
+/* ---------- AI ---------- */
+function effMode(u) { if (u.team === 'enemy') return 'enemy'; return u.aiMode === 'global' ? S.globalMode : u.aiMode; }
 function syncAnchors() {
   for (const u of S.units) {
     if (u.team !== 'ally') continue;
-    if (effMode(u) === 'formation') {
-      if (u.anchorFor !== 'formation') { u.anchor = { x:u.x, y:u.y }; u.anchorFor = 'formation'; }
-    } else u.anchorFor = null;
+    if (effMode(u) === 'formation') { if (u.anchorFor !== 'formation') { u.anchor = { x:u.x, y:u.y }; u.anchorFor = 'formation'; } }
+    else u.anchorFor = null;
   }
 }
 function distField(sources) {
@@ -874,64 +1452,61 @@ function distField(sources) {
   for (const s of sources) { const k = keyOf(s.x, s.y); d[k] = 0; q.push(k); }
   for (let i = 0; i < q.length; i++) {
     const k = q[i], x = k % COLS, y = (k / COLS) | 0;
-    for (const [dx, dy] of DIRS) {
-      const nx = x + dx, ny = y + dy;
-      if (!inB(nx, ny) || isWall(nx, ny)) continue;
-      const nk = keyOf(nx, ny);
-      if (d[nk] > d[k] + 1) { d[nk] = d[k] + 1; q.push(nk); }
-    }
+    for (const [dx, dy] of DIRS) { const nx = x + dx, ny = y + dy; if (!inB(nx, ny) || isWall(nx, ny)) continue; const nk = keyOf(nx, ny); if (d[nk] > d[k] + 1) { d[nk] = d[k] + 1; q.push(nk); } }
   }
   return d;
 }
+/* 지형 비용 기반 도달 범위 (다익스트라) */
 function reach(u, blockOpp) {
-  const dist = new Map(), par = new Map(), sk = keyOf(u.x, u.y);
+  const dist = new Map(), par = new Map(), sk = keyOf(u.x, u.y), budget = moveBudget(u);
   dist.set(sk, 0);
-  const q = [sk], mov = movOf(u);
-  for (let i = 0; i < q.length; i++) {
-    const k = q[i], d = dist.get(k);
-    if (d >= mov) continue;
-    const x = k % COLS, y = (k / COLS) | 0;
+  const open = [sk], done = new Set();
+  while (open.length) {
+    let bi = 0; for (let i = 1; i < open.length; i++) if (dist.get(open[i]) < dist.get(open[bi])) bi = i;
+    const k = open.splice(bi, 1)[0];
+    if (done.has(k)) continue;
+    done.add(k);
+    const d = dist.get(k), x = k % COLS, y = (k / COLS) | 0;
     for (const [dx, dy] of DIRS) {
       const nx = x + dx, ny = y + dy;
       if (!inB(nx, ny) || isWall(nx, ny)) continue;
+      const nd = d + tileCost(nx, ny);
+      if (nd > budget) continue;
       const nk = keyOf(nx, ny);
-      if (dist.has(nk)) continue;
       const o = unitAt(nx, ny, u);
       if (o && o.team !== u.team && blockOpp) continue;
-      dist.set(nk, d + 1); par.set(nk, k); q.push(nk);
+      if (!dist.has(nk) || nd < dist.get(nk)) { dist.set(nk, nd); par.set(nk, k); open.push(nk); }
     }
   }
   return { dist, par };
 }
-function pathTo(R, k) {
-  const path = [];
-  for (let c = k; c !== undefined; c = R.par.get(c)) path.push({ x:c % COLS, y:(c / COLS) | 0 });
-  return path.reverse();
-}
+function pathTo(R, k) { const path = []; for (let c = k; c !== undefined; c = R.par.get(c)) path.push({ x:c % COLS, y:(c / COLS) | 0 }); return path.reverse(); }
+function objectiveTiles() { const ch = STAGE.objectives[S.objective].tile, out = []; for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) if (MAP[y][x] === ch) out.push({ x, y }); return out; }
 function aiCtx(u) {
   const mode = effMode(u);
   const opps = alive().filter(o => o.team !== u.team);
+  const activeOpps = opps.filter(o => !isDormant(o));
   const P = prince();
-  const df = distField(opps);
-  let endOk = () => true, goal = null;
+  const df = distField(opps.length ? opps : [{ x:u.x, y:u.y }]);
+  let endOk = () => true, goal = null, objDF = null;
   if (mode === 'formation') { goal = u.anchor; endOk = (x, y) => man(x, y, goal.x, goal.y) <= 2; }
   if (mode === 'escort' && P && P.hp > 0 && P !== u) {
     goal = { x:P.x, y:P.y };
-    // 호위: 왕자 3칸 안에서 끝낸다. 단, 왕자 4칸 안까지 들어온 적을 치는 경로는 5칸까지 허용
-    endOk = (x, y, passed) => {
-      const d = man(x, y, goal.x, goal.y);
-      if (d <= 3) return true;
-      return d <= 5 && !!passed && passed.some(o => man(o.x, o.y, goal.x, goal.y) <= 4);
-    };
+    endOk = (x, y, passed) => { const d = man(x, y, goal.x, goal.y); if (d <= 3) return true; return d <= 5 && !!passed && passed.some(o => man(o.x, o.y, goal.x, goal.y) <= 4); };
   }
+  if (mode === 'escape') objDF = distField(objectiveTiles());
   const weight = o => {
     let w = 1;
-    if (u.team === 'enemy' && o.prince) w = 1.3;
+    if (u.team === 'enemy' && o.prince) w = CFG.enemyPrinceWeight;
     if (mode === 'escort' && P && man(o.x, o.y, P.x, P.y) <= 4) w *= 1.3;
+    if (mode === 'escape') w *= 0.12;
+    if (o.elite && u.team === 'ally') w *= 0.3;
     return w;
   };
+  const threat = (x, y) => activeOpps.reduce((n, o) => n + (man(o.x, o.y, x, y) <= movOf(o) + 1 ? 1 : 0), 0);
   const pos = (x, y) => {
-    const near = Math.min(df[keyOf(x, y)], 20);
+    const k = keyOf(x, y), near = Math.min(df[k], 20);
+    if (objDF) return -4 * Math.min(objDF[k], 60) - 1.5 * threat(x, y);
     if (goal) return -0.6 * man(x, y, goal.x, goal.y) - 0.15 * near;
     return -1.0 * near;
   };
@@ -943,30 +1518,23 @@ function fallbackMove(u, C) {
   for (const [k] of R.dist) {
     const x = k % COLS, y = (k / COLS) | 0;
     if (unitAt(x, y, u)) continue;
-    const s = C.goal ? -man(x, y, C.goal.x, C.goal.y) : -Math.min(C.df[k], 20);
+    const s = C.goal ? -man(x, y, C.goal.x, C.goal.y) : C.pos(x, y);
     if (!best || s > best.score) best = { score:s, route:pathTo(R, k) };
   }
   return best || { score:0, route:[{ x:u.x, y:u.y }] };
 }
-
 function planMelee(u, C) {
-  const total = hitsOf(u);
-  const pre = new Map();
-  for (const o of C.opps) {
-    const ch = reactChances(u, o);
-    pre.set(o.id, { e1:expHit(u, o, 1, 1), guard:ch.guard, counter:ch.counter + ch.guardCounter, cdmg:expHit(o, u, 1, 1), w:C.weight(o) });
-  }
+  const total = hitsOf(u), pre = new Map();
+  for (const o of C.opps) { const ch = reactChances(u, o); pre.set(o.id, { e1:expHit(u, o, 1, 1), guard:ch.guard, counter:ch.counter + ch.guardCounter, cdmg:expHit(o, u, 1, 1), w:C.weight(o) }); }
   const scoreTargets = (list, mult0) => {
     if (!list.length) return 0;
     const dist = distributeHits(total, list.length);
     const struck = dist.filter(s => s.length).length;
-    const mult = mult0 != null ? mult0 : (W(u).spear ? spearMul(struck) : 1);
+    const mult = mult0 != null ? mult0 : (W(u).spear ? spearMul(struck) + (struck >= 2 ? spv(u, 'spearAdd') : 0) : 1);
     let s = 0, risk = 0;
     list.forEach((o, i) => {
-      const p = pre.get(o.id);
-      const sum = dist[i].reduce((a, b) => a + b, 0);
-      const e = p.e1 * sum * mult * (1 - p.guard * CFG.guardCut);
-      const killed = e >= o.hp;
+      const p = pre.get(o.id), sum = dist[i].reduce((a, b) => a + b, 0);
+      const e = p.e1 * sum * mult * (1 - p.guard * CFG.guardCut), killed = e >= o.hp;
       s += Math.min(e, o.hp) * p.w + (killed ? 25 * p.w : 0);
       if (!killed) risk += p.counter * p.cdmg;
     });
@@ -974,49 +1542,42 @@ function planMelee(u, C) {
     if (risk > u.hp * 0.7) s -= 40;
     return s;
   };
-
   let best = null;
   if (W(u).noPass) {
     const R = reach(u, true);
     for (const [k] of R.dist) {
       const x = k % COLS, y = (k / COLS) | 0;
       if (unitAt(x, y, u)) continue;
-      const base = C.pos(x, y);
       let pick = null, ps = 0;
-      for (const o of C.opps) {
-        if (man(o.x, o.y, x, y) !== 1 || !C.endOk(x, y, [o])) continue;
-        const s = scoreTargets([o], 1);
-        if (!pick || s > ps) { pick = o; ps = s; }
-      }
+      for (const o of C.opps) { if (man(o.x, o.y, x, y) !== 1 || !C.endOk(x, y, [o])) continue; const s = scoreTargets([o], 1); if (!pick || s > ps) { pick = o; ps = s; } }
       if (!pick && !C.endOk(x, y)) continue;
-      const score = base + (pick ? ps : 0);
+      const score = C.pos(x, y) + (pick ? ps : 0);
       if (!best || score > best.score) best = { score, route:pathTo(R, k), knTarget:pick };
     }
     return best || fallbackMove(u, C);
   }
-
   const oppAt = new Map(C.opps.map(o => [keyOf(o.x, o.y), o]));
-  const route = [{ x:u.x, y:u.y }];
-  const visited = new Set([keyOf(u.x, u.y)]);
-  const passed = [];
+  const route = [{ x:u.x, y:u.y }], visited = new Set([keyOf(u.x, u.y)]), passed = [];
+  const budget = moveBudget(u);
   let nodes = 0;
-  const MAXN = 150000, mov = movOf(u);
-  const dfs = (x, y, depth) => {
+  const MAXN = 150000;
+  const dfs = (x, y, cost) => {
     if (++nodes > MAXN) return;
     if (!unitAt(x, y, u) && C.endOk(x, y, passed)) {
-      const s = scoreTargets(passed) + C.pos(x, y) - depth * 0.01;
+      const s = scoreTargets(passed) + C.pos(x, y) - route.length * 0.01;
       if (!best || s > best.score) best = { score:s, route:route.slice() };
     }
-    if (depth >= mov) return;
     for (const [dx, dy] of DIRS) {
       const nx = x + dx, ny = y + dy;
       if (!inB(nx, ny) || isWall(nx, ny)) continue;
       const k = keyOf(nx, ny);
       if (visited.has(k)) continue;
+      const nc = cost + tileCost(nx, ny);
+      if (nc > budget) continue;
       visited.add(k); route.push({ x:nx, y:ny });
       const o = oppAt.get(k);
       if (o) passed.push(o);
-      dfs(nx, ny, depth + 1);
+      dfs(nx, ny, nc);
       if (o) passed.pop();
       route.pop(); visited.delete(k);
     }
@@ -1024,18 +1585,15 @@ function planMelee(u, C) {
   dfs(u.x, u.y, 0);
   return best || fallbackMove(u, C);
 }
-
 function planRanged(u, C) {
-  const R = reach(u, true);
-  const range = rangeOf(u);
-  const pow = u.sp && u.sp.kind === 'shot' ? u.sp.powMul : 1;
-  const pierce = !!(u.sp && u.sp.pierce);
+  const R = reach(u, true), range = rangeOf(u);
+  const pow = u.sp && u.sp.kind === 'shot' ? u.sp.powMul : 1, pierce = !!(u.sp && u.sp.pierce);
   let best = null;
   for (const [k] of R.dist) {
     const x = k % COLS, y = (k / COLS) | 0;
     if (unitAt(x, y, u) || !C.endOk(x, y)) continue;
-    const threat = C.opps.filter(o => isMelee(o) && man(o.x, o.y, x, y) <= 2).length;
-    const posS = (C.goal ? C.pos(x, y) : -0.8 * Math.abs(Math.min(C.df[k], 20) - range)) - 4 * threat;
+    const threat = C.opps.filter(o => isMelee(o) && !isDormant(o) && man(o.x, o.y, x, y) <= 2).length;
+    const posS = (C.goal || C.mode === 'escape' ? C.pos(x, y) : -0.8 * Math.abs(Math.min(C.df[k], 20) - range)) - 4 * threat;
     let shot = null, shotS = 0;
     for (const o of C.opps) {
       const d = man(o.x, o.y, x, y);
@@ -1050,74 +1608,47 @@ function planRanged(u, C) {
   }
   return best || fallbackMove(u, C);
 }
-
 function planMage(u, C) {
-  const R = reach(u, true);
-  const friends = alive().filter(a => a.team === u.team);
+  const R = reach(u, true), friends = alive().filter(a => a.team === u.team);
   let best = null;
   for (const [k] of R.dist) {
     const x = k % COLS, y = (k / COLS) | 0;
     if (unitAt(x, y, u) || !C.endOk(x, y)) continue;
-    const threat = C.opps.filter(o => isMelee(o) && man(o.x, o.y, x, y) <= 2).length;
-    const posS = (C.goal ? C.pos(x, y) : -0.5 * Math.abs(Math.min(C.df[k], 20) - 3)) - 5 * threat;
+    const threat = C.opps.filter(o => isMelee(o) && !isDormant(o) && man(o.x, o.y, x, y) <= 2).length;
+    const posS = (C.goal || C.mode === 'escape' ? C.pos(x, y) : -0.5 * Math.abs(Math.min(C.df[k], 20) - 3)) - 5 * threat;
     let act = null, actS = 0;
     for (const sid of u.skills) {
       const sk = SKILLS[sid];
       if (u.mp < sk.mp) continue;
       if (sk.type === 'dmg' && sk.shape === 'single') {
-        for (const o of C.opps) {
-          if (man(o.x, o.y, x, y) > sk.range) continue;
-          const e = expMagic(u, o, sk.coef);
-          const s = Math.min(e, o.hp) * C.weight(o) + (e >= o.hp ? 25 : 0) - sk.mp * 0.15;
-          if (s > actS) { actS = s; act = { type:'skill', id:sid, target:o }; }
-        }
+        for (const o of C.opps) { if (man(o.x, o.y, x, y) > sk.range) continue; const e = expMagic(u, o, sk.coef); const s = Math.min(e, o.hp) * C.weight(o) + (e >= o.hp ? 25 : 0) - sk.mp * 0.15; if (s > actS) { actS = s; act = { type:'skill', id:sid, target:o }; } }
       } else if (sk.type === 'dmg' && sk.shape === 'cross') {
-        for (let ty = 0; ty < ROWS; ty++) for (let tx = 0; tx < COLS; tx++) {
+        for (let ty = Math.max(0, y - sk.range); ty <= Math.min(ROWS - 1, y + sk.range); ty++) for (let tx = Math.max(0, x - sk.range); tx <= Math.min(COLS - 1, x + sk.range); tx++) {
           if (man(tx, ty, x, y) > sk.range || isWall(tx, ty)) continue;
           let s = 0, n = 0;
-          for (const o of C.opps) {
-            if (man(o.x, o.y, tx, ty) > 1) continue;
-            const e = expMagic(u, o, sk.coef);
-            s += Math.min(e, o.hp) * C.weight(o) + (e >= o.hp ? 25 : 0); n++;
-          }
+          for (const o of C.opps) { if (man(o.x, o.y, tx, ty) > 1) continue; const e = expMagic(u, o, sk.coef); s += Math.min(e, o.hp) * C.weight(o) + (e >= o.hp ? 25 : 0); n++; }
           s -= sk.mp * 0.15;
           if (n && s > actS) { actS = s; act = { type:'skill', id:sid, tx, ty }; }
         }
       } else if (sk.type === 'heal') {
-        for (const a of friends) {
-          const ax = a === u ? x : a.x, ay = a === u ? y : a.y;
-          if (man(ax, ay, x, y) > sk.range) continue;
-          const miss = a.maxHp - a.hp;
-          if (miss < 20) continue;
-          const s = Math.min(expHeal(u, sk.coef), miss) * (a.prince ? 1.5 : 1.1) * (a.hp / a.maxHp < 0.5 ? 1.5 : 1);
-          if (s > actS) { actS = s; act = { type:'skill', id:sid, target:a }; }
-        }
+        for (const a of friends) { const ax = a === u ? x : a.x, ay = a === u ? y : a.y; if (man(ax, ay, x, y) > sk.range) continue; const miss = a.maxHp - a.hp; if (miss < 20) continue; const s = Math.min(expHeal(u, sk.coef), miss) * (a.prince ? 1.5 : 1.1) * (a.hp / a.maxHp < 0.5 ? 1.5 : 1); if (s > actS) { actS = s; act = { type:'skill', id:sid, target:a }; } }
       } else if (sk.type === 'buff') {
-        for (const a of friends) {
-          if (a === u || !isMelee(a) || buffSum(a, 'atk') > 0 || man(a.x, a.y, x, y) > sk.range) continue;
-          if (14 > actS) { actS = 14; act = { type:'skill', id:sid, target:a }; }
-        }
-      } else if (sk.type === 'mana') {
-        const s = u.mp < 35 ? 20 : 0;
-        if (s > actS) { actS = s; act = { type:'skill', id:sid, target:u }; }
-      }
+        for (const a of friends) { if (a === u || !isMelee(a) || buffSum(a, 'atk') > 0 || man(a.x, a.y, x, y) > sk.range) continue; if (14 > actS) { actS = 14; act = { type:'skill', id:sid, target:a }; } }
+      } else if (sk.type === 'mana') { const s = u.mp < 35 ? 20 : 0; if (s > actS) { actS = s; act = { type:'skill', id:sid, target:u }; } }
     }
     const score = actS + posS;
     if (!best || score > best.score) best = { score, route:pathTo(R, k), action:act };
   }
   return best || fallbackMove(u, C);
 }
-
 function planFor(u) {
   const C = aiCtx(u);
-  if (!C.opps.length) return { route:[{ x:u.x, y:u.y }] };
+  if (!C.opps.length && C.mode !== 'escape') return { route:[{ x:u.x, y:u.y }] };
   const kind = W(u).kind;
   if (kind === 'melee') return planMelee(u, C);
   if (kind === 'ranged') return planRanged(u, C);
   return planMage(u, C);
 }
-
-/* AI 필살기: buff는 적이 가까우면 즉시, charge/shot은 강화한 계획이 실제로 적을 칠 때만 쓴다 */
 function planHits(u, plan) {
   if (!plan) return false;
   if (plan.action && plan.action.type === 'shot') return true;
@@ -1126,29 +1657,23 @@ function planHits(u, plan) {
 }
 async function aiTakeTurn(u) {
   if (u.hp <= 0 || S.over) return;
+  if (isDormant(u)) { u.acted = true; return; }
   FX.focus(u);
+  if (u.team === 'ally' && effMode(u) !== 'escape' && u.hp / u.maxHp < 0.4 && S.items.potion > 0 && alive().some(o => o.team !== u.team && !isDormant(o) && man(o.x, o.y, u.x, u.y) <= 10)) {
+    useItem(u, 'potion'); u.acted = true; await wait(300); FX.changed(); return;
+  }
   const sp = rageFull(u) ? specialOf(u) : null;
-  if (sp && sp.kind === 'buff') {
-    const near = alive().some(o => o.team !== u.team && man(o.x, o.y, u.x, u.y) <= 7);
-    if (near) await useSpecialBuff(u);
-  }
-  let plan;
-  let armed = false;
-  if (sp && sp.kind !== 'buff') {
-    u.sp = sp;
-    plan = planFor(u);
-    if (planHits(u, plan)) armed = true;
-    else { u.sp = null; plan = null; }
-  }
+  if (sp && sp.kind === 'buff') { const near = alive().some(o => o.team !== u.team && !isDormant(o) && man(o.x, o.y, u.x, u.y) <= 7); if (near) await useSpecialBuff(u); }
+  let plan = null, armed = false;
+  if (sp && sp.kind !== 'buff') { u.sp = sp; plan = planFor(u); if (planHits(u, plan)) armed = true; else { u.sp = null; plan = null; } }
   if (!plan) plan = planFor(u);
   if (armed && sp.kind === 'charge') useRage(u);
   await execMove(u, plan.route, plan.knTarget || null);
+  if (u.team === 'ally' && u.hp > 0) { if (await afterAllyMove(u)) { u.sp = null; return; } }
   if (u.hp > 0 && plan.action && !checkEnd()) {
     const a = plan.action;
-    if (a.type === 'shot') {
-      const d = a.target.hp > 0 ? man(a.target.x, a.target.y, u.x, u.y) : 0;
-      if (d >= 1 && d <= rangeOf(u)) await execShot(u, a.target, armed && sp.kind === 'shot' ? sp : null);
-    } else if (a.type === 'skill') {
+    if (a.type === 'shot') { const d = a.target.hp > 0 ? man(a.target.x, a.target.y, u.x, u.y) : 0; if (d >= 1 && d <= rangeOf(u)) await execShot(u, a.target, armed && sp.kind === 'shot' ? sp : null); }
+    else if (a.type === 'skill') {
       const sk = SKILLS[a.id];
       let tx = a.tx, ty = a.ty;
       if (a.target) { tx = a.target.x; ty = a.target.y; }
@@ -1161,11 +1686,11 @@ async function aiTakeTurn(u) {
   checkEnd();
   FX.changed();
 }
-
 async function runAI(list) {
   for (const u of list) {
     if (S.over) return;
-    if (u.hp <= 0) continue;
+    if (u.hp <= 0 || !S.units.includes(u)) continue;
+    if (isDormant(u)) { u.acted = true; continue; }
     FX.focus(u);
     await wait(240);
     await aiTakeTurn(u);
@@ -1174,7 +1699,8 @@ async function runAI(list) {
 function autoAllies() { return S.units.filter(u => u.team === 'ally' && u.hp > 0 && !isManual(u)); }
 function enemyOrder() {
   const allies = alive().filter(u => u.team === 'ally');
-  return alive().filter(u => u.team === 'enemy')
+  if (!allies.length) return [];
+  return alive().filter(u => u.team === 'enemy' && !isDormant(u))
     .sort((a, b) => Math.min(...allies.map(o => man(o.x, o.y, a.x, a.y))) - Math.min(...allies.map(o => man(o.x, o.y, b.x, b.y))));
 }
 //#CORE-END
@@ -1182,215 +1708,283 @@ function enemyOrder() {
 /* ================= UI ================= */
 const $ = s => document.querySelector(s);
 const cvs = $('#board'), ctx = cvs.getContext('2d');
-const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-let T = 34, DPR = 1;
-const UI = { mode:'idle', sel:null, inspect:null, route:[], kn:null, dragging:false, busy:false, reachSet:null, plan:null,
-  sub:null, skill:null, targets:null, tsel:null, popups:[], areas:[], hinted:false };
+const reduceMotion = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
+let VW = 360, VH = 480, T = 40, PX = 2.5, DPR = 1, zoomed = false;
+const CAM = { x:0, y:0, tx:null, ty:null };
+const UI = { mode:'idle', sel:null, inspect:null, route:[], kn:null, busy:false, reachSet:null, plan:null, sub:null, skill:null, special:false, armed:false,
+  targets:null, tsel:null, tpreview:null, tsummary:'', popups:[], areas:[], ptr:null, lastTap:null, edge:null, lastPt:null, talking:false, tileInfo:null };
 const C = {};
 function readColors() {
   const cs = getComputedStyle(document.documentElement);
-  for (const n of ['ground','panel','panel-2','line','ink','ink-dim','ember','ally','ally-deep','enemy','enemy-deep','good','mana','gold','tile-a','tile-b','wall','wall-top','grid'])
-    C[n] = cs.getPropertyValue('--' + n).trim();
+  for (const n of ['ground','panel','panel-2','line','ink','ink-dim','ember','ally','ally-deep','enemy','enemy-deep','good','mana','gold'])
+    C[n] = cs.getPropertyValue('--' + n).trim() || '#888888';
 }
 const FONT_BODY = '"IBM Plex Sans KR","Apple SD Gothic Neo","Malgun Gothic","Noto Sans KR",system-ui,sans-serif';
 const FONT_NUM = '"IBM Plex Mono",ui-monospace,monospace';
-const FONT_EMOJI = '"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';
 
-/* hooks */
-FX.sleep = ms => new Promise(r => setTimeout(r, ms));
-FX.popup = (u, text, kind) => UI.popups.push({ x:u.x, y:u.y, text, kind, t:0 });
-FX.flash = u => { u.flash = 1; };
-FX.area = (tiles, kind) => UI.areas.push({ tiles, kind, t:0 });
-FX.log = (text, k) => { S.log.unshift({ turn:S.turn, text, k }); if (S.log.length > 400) S.log.pop(); if (!$('#logSheet').hidden) renderLog(); };
-FX.onKill = u => UI.popups.push({ x:u.x, y:u.y, text:'쓰러짐', kind:'info', t:0 });
-FX.changed = () => renderPanel();
-FX.focus = u => { UI.inspect = u; renderPanel(); };
+/* ---------- pixel caches ---------- */
+function pixelsToCanvas(px, w, h) {
+  const c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d'), img = g.createImageData(w, h);
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const col = px[y][x]; if (!col) continue;
+    const n = parseInt(col.slice(1), 16), i = (y * w + x) * 4;
+    img.data[i] = (n >> 16) & 255; img.data[i + 1] = (n >> 8) & 255; img.data[i + 2] = n & 255; img.data[i + 3] = 255;
+  }
+  g.putImageData(img, 0, 0);
+  return c;
+}
+const spriteCache = {};
+function spriteFor(look, frame, white) {
+  const key = JSON.stringify(look) + frame + (white ? 'w' : '');
+  if (!spriteCache[key]) {
+    const s = ART.buildSprite(look, frame);
+    const px = white ? s.px.map(r => r.map(c => (c && c !== ART.OUTLINE ? '#ffffff' : c))) : s.px;
+    spriteCache[key] = pixelsToCanvas(px, s.w, s.h);
+  }
+  return spriteCache[key];
+}
+let mapFrames = [];
+function buildMapFrames() {
+  mapFrames = [0, 1, 2].map(f => {
+    const px = [];
+    for (let y = 0; y < ROWS * 16; y++) px.push(new Array(COLS * 16));
+    for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
+      const t = ART.buildTile(MAP[y][x], x, y, MAP, f);
+      for (let j = 0; j < 16; j++) for (let i = 0; i < 16; i++) px[y * 16 + j][x * 16 + i] = t[j][i];
+    }
+    return pixelsToCanvas(px, COLS * 16, ROWS * 16);
+  });
+}
+function drawFace(canvas, look, size) {
+  const g = canvas.getContext('2d');
+  g.imageSmoothingEnabled = false;
+  g.clearRect(0, 0, canvas.width, canvas.height);
+  const s = spriteFor(look, 0), k = size || 2;
+  g.drawImage(s, Math.round(canvas.width / 2 - 9 * k), 1, s.width * k, s.height * k);
+}
 
-/* sizing */
+/* ---------- camera ---------- */
+function clampCam() {
+  CAM.x = clamp(CAM.x, 0, Math.max(0, COLS * T - VW));
+  CAM.y = clamp(CAM.y, 0, Math.max(0, ROWS * T - VH));
+}
+function centerOn(x, y, instant) {
+  const tx = clamp(x * T + T / 2 - VW / 2, 0, Math.max(0, COLS * T - VW)), ty = clamp(y * T + T / 2 - VH * 0.45, 0, Math.max(0, ROWS * T - VH));
+  if (instant) { CAM.x = tx; CAM.y = ty; CAM.tx = CAM.ty = null; } else { CAM.tx = tx; CAM.ty = ty; }
+}
+function ensureVisible(x, y) {
+  const sx = x * T - CAM.x, sy = y * T - CAM.y, m = T * 1.5;
+  if (sx < m || sy < m || sx > VW - m - T || sy > VH - m - T) centerOn(x, y);
+}
 function resize() {
   const r = $('#boardWrap').getBoundingClientRect();
-  T = Math.max(18, Math.floor(Math.min(r.width / COLS, r.height / ROWS)));
+  const keepCx = (CAM.x + VW / 2) / T, keepCy = (CAM.y + VH / 2) / T;
+  VW = Math.max(200, Math.floor(r.width)); VH = Math.max(200, Math.floor(r.height));
+  T = clamp(Math.round(VW / (zoomed ? 6.5 : 9.5)), 28, 72);
+  PX = T / 16;
   DPR = Math.min(3, window.devicePixelRatio || 1);
-  cvs.style.width = T * COLS + 'px';
-  cvs.style.height = T * ROWS + 'px';
-  cvs.width = Math.round(T * COLS * DPR);
-  cvs.height = Math.round(T * ROWS * DPR);
-  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  cvs.style.width = VW + 'px'; cvs.style.height = VH + 'px';
+  cvs.width = Math.round(VW * DPR); cvs.height = Math.round(VH * DPR);
+  if (isFinite(keepCx)) { CAM.x = keepCx * T - VW / 2; CAM.y = keepCy * T - VH / 2; }
+  clampCam();
 }
 
-/* drawing */
-const hash = (x, y) => { let h = x * 374761393 + y * 668265263; h = (h ^ (h >>> 13)) * 1274126177; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; };
-function hexA(hex, a) {
-  const h = hex.replace('#', '');
-  const n = parseInt(h.length === 3 ? h.split('').map(c => c + c).join('') : h, 16);
-  return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`;
-}
+/* ---------- drawing ---------- */
+function hexA(hex, a) { const n = parseInt(hex.replace('#', '').slice(0, 6), 16); return `rgba(${(n >> 16) & 255},${(n >> 8) & 255},${n & 255},${a})`; }
 function roundRect(x, y, w, h, r) { ctx.beginPath(); ctx.moveTo(x + r, y); ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r); ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath(); }
-
-function drawTiles() {
-  for (let y = 0; y < ROWS; y++) for (let x = 0; x < COLS; x++) {
-    const px = x * T, py = y * T;
-    if (isWall(x, y)) {
-      ctx.fillStyle = C.wall; ctx.fillRect(px, py, T, T);
-      ctx.fillStyle = C['wall-top']; ctx.fillRect(px + 2, py + 2, T - 4, T * 0.6);
-      ctx.fillStyle = hexA(C.ember, 0.05 + hash(x, y) * 0.06); ctx.fillRect(px + 2, py + 2, T - 4, 2);
-    } else {
-      ctx.fillStyle = hash(x, y) > 0.5 ? C['tile-a'] : C['tile-b'];
-      ctx.fillRect(px, py, T, T);
-      if (isExit(x, y)) { ctx.fillStyle = hexA(C.ember, 0.2); ctx.fillRect(px, py, T, T); }
-    }
-  }
-  ctx.strokeStyle = C.grid; ctx.lineWidth = 1;
-  ctx.beginPath();
-  for (let x = 1; x < COLS; x++) { ctx.moveTo(x * T + 0.5, 0); ctx.lineTo(x * T + 0.5, ROWS * T); }
-  for (let y = 1; y < ROWS; y++) { ctx.moveTo(0, y * T + 0.5); ctx.lineTo(COLS * T, y * T + 0.5); }
-  ctx.stroke();
-  // exit label
-  const ex = [];
-  for (let x = 0; x < COLS; x++) if (isExit(x, 0)) ex.push(x);
-  if (ex.length) {
-    ctx.fillStyle = C.ember; ctx.font = `700 ${Math.round(T * 0.3)}px ${FONT_BODY}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('탈출', ((ex[0] + ex[ex.length - 1] + 1) / 2) * T, T * 0.5);
-  }
+const sx = x => x * T - CAM.x, sy = y => y * T - CAM.y;
+function visTiles(fn) {
+  const x0 = Math.max(0, Math.floor(CAM.x / T)), x1 = Math.min(COLS - 1, Math.floor((CAM.x + VW) / T));
+  const y0 = Math.max(0, Math.floor(CAM.y / T)), y1 = Math.min(ROWS - 1, Math.floor((CAM.y + VH) / T));
+  for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) fn(x, y);
 }
-
+function drawMap(now) {
+  const f = Math.floor(now / 420) % 3, img = mapFrames[f];
+  if (!img) return;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(img, CAM.x / PX, CAM.y / PX, VW / PX, VH / PX, 0, 0, VW, VH);
+  // flames on scorched houses
+  const fl = Math.floor(now / 140);
+  visTiles((x, y) => {
+    if (MAP[y][x] !== 'h' || ART.hash(x, y, 15) >= 0.45) return;
+    const bx = sx(x), by = sy(y);
+    for (let k = 0; k < 3; k++) {
+      const fx = 3 + k * 4 + Math.floor(ART.hash(x, y, 90 + k) * 2), hgt = 3 + ((fl + k + x) % 3);
+      for (let j = 0; j < hgt; j++) {
+        ctx.fillStyle = j < 1 ? '#ffe680' : j < hgt - 1 ? '#ff9a2a' : '#e0412f';
+        ctx.fillRect(bx + (fx + (j === hgt - 1 ? ((fl + k) % 2) : 0)) * PX, by + (3 - j) * PX + T * 0.05, PX * (j < hgt - 1 ? 2 : 1), PX);
+      }
+    }
+  });
+  // grid
+  ctx.strokeStyle = 'rgba(0,0,0,0.13)'; ctx.lineWidth = 1;
+  ctx.beginPath();
+  for (let x = Math.floor(CAM.x / T) + 1; x * T < CAM.x + VW; x++) { const X = Math.round(sx(x)) + 0.5; ctx.moveTo(X, 0); ctx.lineTo(X, VH); }
+  for (let y = Math.floor(CAM.y / T) + 1; y * T < CAM.y + VH; y++) { const Y = Math.round(sy(y)) + 0.5; ctx.moveTo(0, Y); ctx.lineTo(VW, Y); }
+  ctx.stroke();
+  // objective tiles
+  const obj = STAGE.objectives[S.objective];
+  const pulse = 0.18 + 0.12 * Math.sin(now / 300);
+  visTiles((x, y) => {
+    if (MAP[y][x] !== obj.tile) return;
+    ctx.fillStyle = S.objective === 'east' ? hexA(C.gold, pulse + 0.1) : hexA(C.gold, pulse);
+    ctx.fillRect(sx(x), sy(y), T, T);
+  });
+}
 function drawOverlays(now) {
   if (UI.reachSet && UI.mode === 'route') {
-    ctx.fillStyle = hexA(C.ally, 0.13);
-    for (const k of UI.reachSet) { const x = k % COLS, y = (k / COLS) | 0; ctx.fillRect(x * T + 1, y * T + 1, T - 2, T - 2); }
+    for (const k of UI.reachSet) {
+      const x = k % COLS, y = (k / COLS) | 0;
+      const o = unitAt(x, y);
+      ctx.fillStyle = o && UI.sel && o.team !== UI.sel.team ? 'rgba(232,80,64,0.30)' : 'rgba(80,150,255,0.30)';
+      ctx.fillRect(sx(x) + 1, sy(y) + 1, T - 2, T - 2);
+    }
   }
   if (UI.mode === 'target' && UI.targets) {
     const sk = UI.skill ? SKILLS[UI.skill] : null;
     const col = sk && (sk.type === 'heal' || sk.type === 'buff') ? C.good : C.enemy;
-    ctx.fillStyle = hexA(col, 0.16);
-    for (const [x, y] of UI.targets) ctx.fillRect(x * T + 1, y * T + 1, T - 2, T - 2);
+    ctx.fillStyle = hexA(col, 0.22);
+    for (const [x, y] of UI.targets) ctx.fillRect(sx(x) + 1, sy(y) + 1, T - 2, T - 2);
     if (UI.tsel) {
       const tiles = sk ? skillAreaTiles(sk, UI.tsel[0], UI.tsel[1]) : [UI.tsel];
       ctx.strokeStyle = col; ctx.lineWidth = 2;
-      for (const [x, y] of tiles) { ctx.fillStyle = hexA(col, 0.28 + 0.08 * Math.sin(now / 160)); ctx.fillRect(x * T + 1, y * T + 1, T - 2, T - 2); ctx.strokeRect(x * T + 2, y * T + 2, T - 4, T - 4); }
+      for (const [x, y] of tiles) { ctx.fillStyle = hexA(col, 0.3 + 0.08 * Math.sin(now / 160)); ctx.fillRect(sx(x) + 1, sy(y) + 1, T - 2, T - 2); ctx.strokeRect(sx(x) + 2, sy(y) + 2, T - 4, T - 4); }
     }
   }
+  if (UI.tileInfo && UI.mode !== 'target') { ctx.strokeStyle = C.ink; ctx.lineWidth = 1.5; ctx.strokeRect(sx(UI.tileInfo.x) + 2, sy(UI.tileInfo.y) + 2, T - 4, T - 4); }
   for (const a of UI.areas) {
     const col = a.kind === 'heal' ? C.good : a.kind === 'magic' ? C.mana : C.enemy;
     ctx.fillStyle = hexA(col, 0.45 * (1 - a.t));
-    for (const [x, y] of a.tiles) ctx.fillRect(x * T, y * T, T, T);
+    for (const [x, y] of a.tiles) ctx.fillRect(sx(x), sy(y), T, T);
   }
 }
-
-function centerOf(p) { return [p.x * T + T / 2, p.y * T + T / 2]; }
+const center = p => [sx(p.x) + T / 2, sy(p.y) + T / 2];
 function drawRoute() {
   if (UI.mode !== 'route' || !UI.sel) return;
   const r = UI.route;
   if (r.length > 1) {
     ctx.save();
     ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    ctx.strokeStyle = hexA(C.ground, 0.7); ctx.lineWidth = T * 0.26;
-    ctx.beginPath(); r.forEach((p, i) => { const [cx, cy] = centerOf(p); i ? ctx.lineTo(cx, cy) : ctx.moveTo(cx, cy); }); ctx.stroke();
-    ctx.strokeStyle = C.ember; ctx.lineWidth = T * 0.14;
-    ctx.stroke();
-    for (let i = 1; i < r.length; i++) { const [cx, cy] = centerOf(r[i]); ctx.fillStyle = C.ember; ctx.beginPath(); ctx.arc(cx, cy, T * 0.07, 0, Math.PI * 2); ctx.fill(); }
-    const end = r[r.length - 1], [ex, ey] = centerOf(end);
-    const ok = routeEndValid(UI.sel, r);
+    ctx.strokeStyle = 'rgba(20,14,8,0.75)'; ctx.lineWidth = T * 0.24;
+    ctx.beginPath(); r.forEach((p, i) => { const [cx, cy] = center(p); i ? ctx.lineTo(cx, cy) : ctx.moveTo(cx, cy); }); ctx.stroke();
+    ctx.strokeStyle = C.ember; ctx.lineWidth = T * 0.12; ctx.stroke();
+    const end = r[r.length - 1], [ex, ey] = center(end), ok = routeEndValid(UI.sel, r);
     ctx.lineWidth = 2.5; ctx.strokeStyle = ok ? C.ember : C.enemy;
     ctx.beginPath(); ctx.arc(ex, ey, T * 0.36, 0, Math.PI * 2); ctx.stroke();
     if (!ok) { ctx.beginPath(); ctx.moveTo(ex - T * 0.18, ey - T * 0.18); ctx.lineTo(ex + T * 0.18, ey + T * 0.18); ctx.moveTo(ex + T * 0.18, ey - T * 0.18); ctx.lineTo(ex - T * 0.18, ey + T * 0.18); ctx.stroke(); }
     ctx.restore();
   }
   if (UI.kn) {
-    const [ax, ay] = centerOf(r[r.length - 1]), [bx, by] = centerOf(UI.kn);
+    const [ax, ay] = center(r[r.length - 1]), [bx, by] = center(UI.kn);
     ctx.save(); ctx.strokeStyle = C.enemy; ctx.lineWidth = 3; ctx.setLineDash([4, 4]);
     ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); ctx.restore();
   }
 }
-
-function drawLabels() {
-  const rows = UI.mode === 'route' && UI.plan ? UI.plan.rows : null;
-  const lab = [];
-  if (rows) for (const r of rows) {
-    const sum = round2(r.strikes.reduce((s, v) => s + v, 0));
-    lab.push({ u:r.unit, text: r.strikes.length ? `${sum}회 ~${r.base}` : '통과', hot: r.strikes.length > 0 });
+function unitTop(u) { return u.dy * T - CAM.y + T - 22 * PX; }
+function drawUnits(now) {
+  const list = alive().slice().sort((a, b) => (a.dy - b.dy) || ((a === UI.sel) - (b === UI.sel)));
+  for (const u of list) {
+    const cx = u.dx * T - CAM.x + T / 2, bottom = u.dy * T - CAM.y + T;
+    if (cx < -T * 2 || cx > VW + T * 2 || bottom < -T || bottom > VH + T * 2) continue;
+    const ally = u.team === 'ally', dim = ally && u.acted && S.phase === 'player';
+    // team ring
+    ctx.save();
+    ctx.lineWidth = Math.max(1.5, T * 0.05);
+    ctx.strokeStyle = ally ? (isManual(u) ? C.gold : C.ally) : C.enemy;
+    ctx.fillStyle = ally ? 'rgba(80,160,255,0.22)' : 'rgba(230,70,60,0.22)';
+    ctx.beginPath(); ctx.ellipse(cx, bottom - 3 * PX, T * 0.38, T * 0.13, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    if (u.elite) { ctx.beginPath(); ctx.ellipse(cx, bottom - 3 * PX, T * 0.45, T * 0.17, 0, 0, Math.PI * 2); ctx.stroke(); }
+    ctx.restore();
+    // sprite
+    const frame = (Math.floor(now / 520) + (u.uid.length % 2)) % 2;
+    const spr = spriteFor(u.look, frame);
+    ctx.save();
+    ctx.imageSmoothingEnabled = false;
+    ctx.globalAlpha = dim ? 0.5 : 1;
+    ctx.translate(cx, 0);
+    if (u.face < 0) ctx.scale(-1, 1);
+    ctx.drawImage(spr, -9 * PX, bottom - 22 * PX, 18 * PX, 24 * PX);
+    if (u.flash > 0) { ctx.globalAlpha = u.flash * 0.8; ctx.drawImage(spriteFor(u.look, frame, true), -9 * PX, bottom - 22 * PX, 18 * PX, 24 * PX); }
+    ctx.restore();
+    // bars
+    const bw = T * 0.7, bx = cx - bw / 2, by = bottom - 2;
+    const ratio = u.hp / u.maxHp;
+    ctx.fillStyle = 'rgba(10,10,14,0.85)'; ctx.fillRect(bx - 1, by - 1, bw + 2, u.rage > 0 ? 7 : 5);
+    ctx.fillStyle = ratio > 0.5 ? '#6ee07a' : ratio > 0.25 ? C.ember : C.enemy;
+    ctx.fillRect(bx, by, bw * ratio, 3);
+    if (u.rage > 0 && u.special) {
+      ctx.fillStyle = rageFull(u) ? (Math.floor(now / 200) % 2 ? C.gold : C.ember) : C.ember;
+      ctx.fillRect(bx, by + 3.5, bw * (u.rage / CFG.rage.max), 2);
+    }
+    if (u.buffs.length) { ctx.fillStyle = C.gold; ctx.fillRect(bx - 4, by - 1, 3, 3); }
+    // dormant / hold tag
+    if (!ally && isDormant(u)) {
+      const txt = u.ai === 'hold' ? '대기' : `${u.activeTurn - S.turn}턴 후`;
+      ctx.font = `600 ${Math.max(9, Math.round(T * 0.24))}px ${FONT_BODY}`;
+      const w = ctx.measureText(txt).width + 8, ty = unitTop(u) - 2;
+      ctx.fillStyle = 'rgba(17,19,26,0.85)'; roundRect(cx - w / 2, ty - T * 0.3, w, T * 0.3, 4); ctx.fill();
+      ctx.fillStyle = u.ai === 'hold' ? C['ink-dim'] : C.ember; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(txt, cx, ty - T * 0.15 + 1);
+    }
+    // selection
+    if (u === UI.sel) { ctx.strokeStyle = C.gold; ctx.lineWidth = 2; ctx.beginPath(); ctx.ellipse(cx, bottom - 3 * PX, T * 0.48 + Math.sin(now / 180) * 2, T * 0.19, 0, 0, Math.PI * 2); ctx.stroke(); }
+    else if (u === UI.inspect) { ctx.save(); ctx.setLineDash([3, 3]); ctx.strokeStyle = C.ink; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.ellipse(cx, bottom - 3 * PX, T * 0.48, T * 0.19, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore(); }
+    if (UI.kn === u) { ctx.strokeStyle = C.enemy; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.ellipse(cx, bottom - 3 * PX, T * 0.5 + Math.sin(now / 140) * 2, T * 0.2, 0, 0, Math.PI * 2); ctx.stroke(); }
   }
+}
+function drawLabels() {
+  const lab = [];
+  if (UI.mode === 'route' && UI.plan) for (const r of UI.plan.rows) { const sum = round2(r.strikes.reduce((s, v) => s + v, 0)); lab.push({ u:r.unit, text: r.strikes.length ? `${sum}회 ~${r.base}` : '통과', hot: r.strikes.length > 0 }); }
   if (UI.mode === 'target' && UI.tsel && UI.tpreview) for (const p of UI.tpreview) lab.push({ u:p.unit, text:p.text, hot:true });
-  ctx.font = `600 ${Math.max(10, Math.round(T * 0.29))}px ${FONT_NUM}`;
+  ctx.font = `600 ${Math.max(10, Math.round(T * 0.27))}px ${FONT_NUM}`;
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   for (const l of lab) {
-    const cx = l.u.dx * T + T / 2, cy = l.u.dy * T - T * 0.12;
-    const w = ctx.measureText(l.text).width + 10, h = Math.round(T * 0.42);
-    const x = clamp(cx - w / 2, 1, COLS * T - w - 1), y = Math.max(1, cy - h / 2);
-    ctx.fillStyle = hexA(C.ground, 0.92); roundRect(x, y, w, h, 5); ctx.fill();
+    const cx = l.u.dx * T - CAM.x + T / 2, cy = unitTop(l.u) - T * 0.18;
+    const w = ctx.measureText(l.text).width + 10, h = Math.round(T * 0.38);
+    const x = clamp(cx - w / 2, 1, VW - w - 1), y = Math.max(1, cy - h / 2);
+    ctx.fillStyle = 'rgba(17,19,26,0.92)'; roundRect(x, y, w, h, 5); ctx.fill();
     ctx.strokeStyle = l.hot ? C.ember : C.line; ctx.lineWidth = 1; ctx.stroke();
     ctx.fillStyle = l.hot ? C.ember : C['ink-dim']; ctx.fillText(l.text, x + w / 2, y + h / 2 + 1);
   }
 }
-
-function drawUnits(now) {
-  const list = alive().slice().sort((a, b) => (a.dy - b.dy) || ((a === UI.sel) - (b === UI.sel)));
-  for (const u of list) {
-    const cx = u.dx * T + T / 2, cy = u.dy * T + T / 2, r = T * 0.4;
-    const ally = u.team === 'ally';
-    const dim = ally && u.acted && S.phase === 'player';
-    ctx.save();
-    ctx.globalAlpha = dim ? 0.45 : 1;
-    ctx.fillStyle = ally ? C['ally-deep'] : C['enemy-deep'];
-    ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
-    ctx.lineWidth = Math.max(2, T * 0.07);
-    ctx.strokeStyle = ally ? (isManual(u) ? C.gold : C.ally) : C.enemy;
-    ctx.stroke();
-    if (u.special && u.rage > 0) {   // 분노 게이지: 토큰 바깥 호, 가득 차면 맥동
-      const full = rageFull(u);
-      ctx.save();
-      ctx.strokeStyle = C.ember; ctx.lineWidth = Math.max(1.5, T * 0.05); ctx.lineCap = 'round';
-      if (full) { ctx.shadowColor = C.ember; ctx.shadowBlur = 6 + Math.sin(now / 150) * 4; }
-      ctx.beginPath(); ctx.arc(cx, cy, r + T * 0.07, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * (u.rage / CFG.rage.max)); ctx.stroke();
-      ctx.restore();
-    }
-    ctx.font = `${Math.round(T * 0.48)}px ${FONT_EMOJI}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(u.emoji, cx, cy + T * 0.03);
-    if (u.flash > 0) { ctx.fillStyle = `rgba(255,255,255,${u.flash * 0.55})`; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill(); }
-    // weapon badge
-    const bx = cx + r * 0.78, by = cy - r * 0.78, br = T * 0.16;
-    ctx.fillStyle = C.ground; ctx.beginPath(); ctx.arc(bx, by, br, 0, Math.PI * 2); ctx.fill();
-    ctx.lineWidth = 1.2; ctx.strokeStyle = ally ? C.ally : C.enemy; ctx.stroke();
-    ctx.fillStyle = C.ink; ctx.font = `700 ${Math.round(T * 0.2)}px ${FONT_BODY}`;
-    ctx.fillText(W(u).badge, bx, by + 0.5);
-    // bars
-    const bw = T * 0.74, bxx = cx - bw / 2, byy = u.dy * T + T - T * 0.11;
-    const ratio = u.hp / u.maxHp;
-    ctx.fillStyle = hexA(C.ground, 0.85); ctx.fillRect(bxx - 1, byy - 1, bw + 2, u.maxMp ? 7 : 5);
-    ctx.fillStyle = ratio > 0.5 ? C.good : ratio > 0.25 ? C.ember : C.enemy;
-    ctx.fillRect(bxx, byy, bw * ratio, 3);
-    if (u.maxMp) { ctx.fillStyle = C.mana; ctx.fillRect(bxx, byy + 3.5, bw * (u.mp / u.maxMp), 2); }
-    if (u.buffs.length) { ctx.fillStyle = C.gold; ctx.beginPath(); ctx.arc(cx - r * 0.8, cy - r * 0.8, T * 0.07, 0, Math.PI * 2); ctx.fill(); }
-    ctx.restore();
-    if (u === UI.sel) {
-      ctx.strokeStyle = C.gold; ctx.lineWidth = 2;
-      ctx.beginPath(); ctx.arc(cx, cy, r + T * 0.15 + Math.sin(now / 180) * 1.5, 0, Math.PI * 2); ctx.stroke();
-    } else if (u === UI.inspect) {
-      ctx.save(); ctx.setLineDash([3, 3]); ctx.strokeStyle = C['ink-dim']; ctx.lineWidth = 1.5;
-      ctx.beginPath(); ctx.arc(cx, cy, r + T * 0.15, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
-    }
-    if (UI.kn === u) {
-      ctx.strokeStyle = C.enemy; ctx.lineWidth = 2.5;
-      ctx.beginPath(); ctx.arc(cx, cy, r + 4 + Math.sin(now / 140) * 1.5, 0, Math.PI * 2); ctx.stroke();
-    }
-  }
-}
-
 const POP_COLOR = { dmg:'ink', crit:'gold', counter:'enemy', guard:'ally', heal:'good', buff:'gold', mana:'mana', magic:'mana', info:'ink-dim', special:'ember', level:'gold' };
 function drawPopups() {
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   const stack = {};
   for (const p of UI.popups) {
-    const k = p.x + ',' + p.y; const idx = stack[k] = (stack[k] || 0) + 1;
+    const k = p.x + ',' + p.y, idx = stack[k] = (stack[k] || 0) + 1;
     const a = 1 - Math.max(0, (p.t - 0.6) / 0.4);
-    const cx = p.x * T + T / 2, cy = p.y * T + T * 0.35 - p.t * T * 0.55 - (idx - 1) * T * 0.08;
-    const size = Math.round(T * (p.kind === 'crit' || p.kind === 'special' ? 0.46 : 0.36));
+    const cx = p.x * T - CAM.x + T / 2, cy = p.y * T - CAM.y + T - 20 * PX - p.t * T * 0.5 - (idx - 1) * T * 0.1;
+    const size = Math.round(T * (p.kind === 'crit' || p.kind === 'special' ? 0.44 : 0.34));
     ctx.font = `700 ${size}px ${p.kind === 'dmg' || p.kind === 'crit' || p.kind === 'magic' ? FONT_NUM : FONT_BODY}`;
     ctx.globalAlpha = a;
-    ctx.lineWidth = 3; ctx.strokeStyle = C.ground; ctx.strokeText(p.text, cx, cy);
+    ctx.lineWidth = 3; ctx.strokeStyle = '#120e14'; ctx.strokeText(p.text, cx, cy);
     ctx.fillStyle = C[POP_COLOR[p.kind] || 'ink']; ctx.fillText(p.text, cx, cy);
     ctx.globalAlpha = 1;
   }
+}
+function drawObjectiveArrow(now) {
+  const tiles = objectiveTiles();
+  if (!tiles.length) return;
+  const ox = tiles.reduce((s, t) => s + t.x, 0) / tiles.length, oy = tiles.reduce((s, t) => s + t.y, 0) / tiles.length;
+  const px = ox * T + T / 2 - CAM.x, py = oy * T + T / 2 - CAM.y;
+  const label = STAGE.objectives[S.objective].label;
+  if (px > 0 && px < VW && py > 0 && py < VH) {
+    ctx.font = `700 ${Math.round(T * 0.3)}px ${FONT_BODY}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.lineWidth = 3; ctx.strokeStyle = '#120e14'; ctx.strokeText(label, px, py); ctx.fillStyle = C.gold; ctx.fillText(label, px, py);
+    return;
+  }
+  const cxv = VW / 2, cyv = VH / 2, ang = Math.atan2(py - cyv, px - cxv);
+  const m = 26, ex = clamp(cxv + Math.cos(ang) * VW, m, VW - m), ey = clamp(cyv + Math.sin(ang) * VH, m, VH - m);
+  const bob = Math.sin(now / 250) * 3;
+  ctx.save(); ctx.translate(ex + Math.cos(ang) * bob, ey + Math.sin(ang) * bob); ctx.rotate(ang);
+  ctx.fillStyle = C.gold; ctx.strokeStyle = '#120e14'; ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.moveTo(12, 0); ctx.lineTo(-6, -9); ctx.lineTo(-2, 0); ctx.lineTo(-6, 9); ctx.closePath(); ctx.stroke(); ctx.fill();
+  ctx.restore();
+  ctx.font = `700 ${Math.max(10, Math.round(T * 0.26))}px ${FONT_BODY}`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const lx = clamp(ex - Math.cos(ang) * 22, 20, VW - 20), ly = clamp(ey - Math.sin(ang) * 22, 12, VH - 12);
+  ctx.lineWidth = 3; ctx.strokeStyle = '#120e14'; ctx.strokeText(label, lx, ly); ctx.fillStyle = C.gold; ctx.fillText(label, lx, ly);
 }
 
 let lastT = performance.now();
@@ -1402,87 +1996,133 @@ function frame(now) {
   UI.popups = UI.popups.filter(p => p.t < 1);
   for (const a of UI.areas) a.t += dt * 2.2;
   UI.areas = UI.areas.filter(a => a.t < 1);
-  ctx.clearRect(0, 0, COLS * T, ROWS * T);
-  drawTiles(); drawOverlays(now); drawRoute(); drawUnits(now); drawLabels(); drawPopups();
+  if (UI.edge && UI.ptr && UI.ptr.mode === 'route') {
+    CAM.x += UI.edge.dx * dt * 420; CAM.y += UI.edge.dy * dt * 420; CAM.tx = CAM.ty = null; clampCam();
+    if (UI.lastPt) { const t = tileAtPoint(UI.lastPt); if (t) dragTo(t); }
+  }
+  if (CAM.tx != null) {
+    const kk = Math.min(1, dt * 7);
+    CAM.x += (CAM.tx - CAM.x) * kk; CAM.y += (CAM.ty - CAM.y) * kk;
+    if (Math.abs(CAM.tx - CAM.x) < 0.5 && Math.abs(CAM.ty - CAM.y) < 0.5) { CAM.x = CAM.tx; CAM.y = CAM.ty; CAM.tx = CAM.ty = null; }
+  }
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  ctx.fillStyle = '#0b0d12'; ctx.fillRect(0, 0, VW, VH);
+  drawMap(now); drawOverlays(now); drawRoute(); drawUnits(now); drawLabels(); drawPopups(); drawObjectiveArrow(now);
   requestAnimationFrame(frame);
 }
+
+/* ---------- FX hooks ---------- */
+FX.sleep = ms => new Promise(r => setTimeout(r, ms));
+FX.popup = (u, text, kind) => UI.popups.push({ x:u.x, y:u.y, text, kind, t:0 });
+FX.flash = u => { u.flash = 1; };
+FX.area = (tiles, kind) => UI.areas.push({ tiles, kind, t:0 });
+FX.log = (text, k) => { S.log.unshift({ turn:S.turn, text, k }); if (S.log.length > 400) S.log.pop(); if (!$('#logSheet').hidden) renderLog(); };
+FX.onKill = u => UI.popups.push({ x:u.x, y:u.y, text:'쓰러짐', kind:'info', t:0 });
+FX.changed = () => renderPanel();
+FX.focus = (u, moving) => { if (!moving) { UI.inspect = u; renderPanel(); } ensureVisible(u.x, u.y); };
+FX.focusTile = async (x, y) => { centerOn(x, y); await FX.sleep(reduceMotion ? 200 : 650); };
+FX.spawned = u => { UI.popups.push({ x:u.x, y:u.y, text:'!', kind:'special', t:0 }); };
+FX.banner = (text, tone) => banner(text, tone);
+FX.talk = lines => new Promise(resolve => {
+  const box = $('#talk');
+  let i = 0;
+  UI.talking = true;
+  const show = () => {
+    const l = lines[i];
+    const def = l.who ? UNIT_DEFS[l.who] : null;
+    $('#talkName').textContent = l.name || (def ? def.name : '');
+    $('#talkText').textContent = l.text;
+    const face = $('#talkFace');
+    if (def) { face.hidden = false; drawFace(face, LOOKS[l.who], 3); } else face.hidden = true;
+  };
+  const next = e => {
+    if (e) e.stopPropagation();
+    i++;
+    if (i >= lines.length) { box.hidden = true; box.removeEventListener('click', next); UI.talking = false; render(); resolve(); return; }
+    show();
+  };
+  box.addEventListener('click', next);
+  box.hidden = false;
+  show();
+});
 
 /* ---------- panel ---------- */
 function stat(label, value, up) { return `<span class="stat${up ? ' up' : ''}">${label}<b>${value}</b></span>`; }
 function renderCard() {
-  const u = UI.sel || UI.inspect || prince();
+  const u = UI.sel || UI.inspect || prince() || S.escaped[0];
   if (!u) return;
-  $('#cTok').textContent = u.emoji;
-  $('#cTok').dataset.team = u.team;
-  $('#cTok').dataset.manual = String(isManual(u));
+  const tok = $('#cTok');
+  tok.dataset.team = u.team; tok.dataset.manual = String(isManual(u));
+  drawFace(tok, u.look, 2);
   $('#cName').textContent = u.race && u.race !== u.name ? `${u.name} · ${u.race}` : u.name;
   const w = W(u);
-  $('#cSub').textContent = w.name + (w.range ? ` · 사거리 1~${w.range}` : '') + (u.hp <= 0 ? ' · 전투 불능' : '');
+  const tags = [];
+  if (u.elite) tags.push(u.boss ? '군단장' : '정예');
+  if (u.team === 'enemy' && u.ai === 'hold') tags.push('움직이지 않음');
+  else if (u.team === 'enemy' && isDormant(u)) tags.push(`${u.activeTurn - S.turn}턴 후 행동`);
+  if (S.escaped.includes(u)) tags.push('탈출함');
+  $('#cSub').textContent = [w.name + (w.range ? ` · 사거리 1~${w.range}` : ''), ...tags, u.hp <= 0 ? '전투 불능' : ''].filter(Boolean).join(' · ');
   const ctrl = $('#cCtrl');
-  if (u.team === 'enemy') { ctrl.textContent = '적 · 자동'; ctrl.dataset.kind = 'enemy'; }
-  else if (isManual(u)) { ctrl.textContent = u.acted && S.phase === 'player' ? '수동 · 행동 완료' : '수동'; ctrl.dataset.kind = 'manual'; }
+  if (u.team === 'enemy') { ctrl.textContent = '적'; ctrl.dataset.kind = 'enemy'; }
+  else if (isManual(u)) { ctrl.textContent = u.acted && S.phase === 'player' ? '수동 · 완료' : '수동'; ctrl.dataset.kind = 'manual'; }
   else { ctrl.textContent = `자동 · ${MODE_NAME[effMode(u)]}`; ctrl.dataset.kind = 'auto'; }
   $('#cHpBar').style.width = (u.hp / u.maxHp * 100) + '%';
   $('#cHp').textContent = `체력 ${u.hp}/${u.maxHp}`;
-  const mpw = $('#cMpWrap');
-  mpw.hidden = !u.maxMp;
+  $('#cMpWrap').hidden = !u.maxMp;
   if (u.maxMp) { $('#cMpBar').style.width = (u.mp / u.maxMp * 100) + '%'; $('#cMp').textContent = `마나 ${u.mp}/${u.maxMp}`; }
   const rw = $('#cRageWrap');
   rw.hidden = !u.special;
-  if (u.special) {
-    $('#cRageBar').style.width = (u.rage / CFG.rage.max * 100) + '%';
-    $('#cRage').textContent = rageFull(u) ? '분노 MAX' : `분노 ${u.rage}`;
-    rw.classList.toggle('full', rageFull(u));
-  }
-  const atkUp = buffSum(u, 'atk') > 0 || spv(u, 'atkAdd') > 0;
+  if (u.special) { $('#cRageBar').style.width = (u.rage / CFG.rage.max * 100) + '%'; $('#cRage').textContent = rageFull(u) ? '분노 MAX' : `분노 ${u.rage}`; rw.classList.toggle('full', rageFull(u)); }
+  const ter = terrainAt(u.x, u.y);
   let h = `<span class="stat lv">Lv<b>${u.lv}</b>${u.team === 'ally' ? `<b style="color:var(--ink-dim);font-weight:500">${u.exp}%</b>` : ''}</span>`;
-  h += stat('공격력', Math.round(atkOf(u)), atkUp) + stat('마력', magOf(u)) + stat('방어력', defOf(u), buffSum(u, 'def') > 0) + stat('이동', movOf(u), spv(u, 'movAdd') > 0);
+  h += stat('공격력', Math.round(atkOf(u)), buffSum(u, 'atk') > 0 || spv(u, 'atkAdd') > 0) + stat('마력', magOf(u)) + stat('방어력', defOf(u), buffSum(u, 'def') > 0) + stat('이동', movOf(u), spv(u, 'movAdd') > 0);
   if (w.kind === 'melee') h += stat('공격횟수', hitsOf(u).toFixed(1), spv(u, 'hitsMul') > 1);
   h += stat('치명', Math.round(critOf(u) * 100) + '%', critOf(u) >= 1);
+  h += `<span class="stat">${ter.name}<b>${ter.pct}%</b></span>`;
   if (u.special) h += `<span class="stat passive">필살 ${specialOf(u).name}</span>`;
   for (const p of u.passives) h += `<span class="stat passive">${PASSIVES[p].name}</span>`;
   for (const slot of ['weapon', 'armor', 'acc']) if (u.equip[slot]) h += `<span class="stat gear"><em>${SLOT_NAME[slot]}</em>${GEAR[u.equip[slot]].name}</span>`;
   $('#cStats').innerHTML = h;
 }
-
 function pct(v) { return Math.round(v * 100) + '%'; }
 function renderPreview() {
   const el = $('#preview');
   if (S.over) { el.textContent = ''; return; }
+  if (UI.talking) { el.textContent = '대화 중'; return; }
   if (S.phase !== 'player') { el.textContent = S.phase === 'enemy' ? '적이 움직이고 있어요.' : '자동 동료가 작전대로 움직이고 있어요.'; return; }
   if (UI.busy) { el.textContent = '진행 중…'; return; }
   const u = UI.sel;
   if (UI.mode === 'route' && u) {
     if (UI.sub === 'items') { el.textContent = `${u.name}에게 쓸 아이템을 고르세요. 사용하면 이동 없이 행동이 끝나요.`; return; }
     const p = UI.plan, steps = UI.route.length - 1;
-    let s = (UI.armed ? `필살 <b>${specialOf(u).name}</b> · ` : '') + `경로 <b>${steps}/${movOf(u)}</b>`;
+    const used = (routeCost(UI.route) / CFG.moveUnit).toFixed(1);
+    let s = (UI.armed ? `필살 <b>${specialOf(u).name}</b> · ` : '') + `이동력 <b>${used}/${movOf(u)}</b> · ${steps}칸`;
     const hitRows = p ? p.rows.filter(r => r.strikes.length) : [];
     if (p && p.rows.length) {
       s += hitRows.length ? ` · 타격 ${hitRows.length}명 · 예상 <b>${p.total}</b>` : ` · 통과 ${p.rows.length}명`;
       if (p.mult > 1) s += ` · 창 <b>×${p.mult}</b>`;
       if (p.maxCounter > 0) s += ` · 반격 최대 ${pct(p.maxCounter)}`;
-    } else if (W(u).noPass && !UI.kn) s += ' · 적 쪽으로 끌면 공격 대상 지정';
+    } else if (W(u).noPass && !UI.kn) s += ' · 적 쪽으로 끌면 공격 대상';
     else if (steps === 0) s += ' · 끌어서 경로를 그리세요';
     if (p && p.rally) s += ' · 격려 +15%';
-    if (!routeEndValid(u, UI.route)) s += ' · <span class="warn">유닛이 있는 칸에서는 멈출 수 없어요</span>';
+    if (!routeEndValid(u, UI.route)) s += ' · <span class="warn">유닛이 있는 칸에선 못 멈춰요</span>';
+    else if (steps > 0 || UI.kn) s += ' · 끝 칸 두 번 누르면 출발';
     el.innerHTML = s;
     return;
   }
   if (UI.mode === 'action' && u) {
-    el.textContent = W(u).kind === 'ranged'
-      ? `이동 완료. 사거리 1~${W(u).range}칸 안의 적을 쏠 수 있어요.${rageFull(u) ? ` 필살 사격은 ${rangeOf(Object.assign({}, u, { sp:specialOf(u) }))}칸까지.` : ''}`
-      : `이동 완료. 스킬을 고르세요. 마나 ${u.mp}/${u.maxMp}`;
+    el.textContent = W(u).kind === 'ranged' ? `이동 완료. 사거리 1~${W(u).range}칸 안의 적을 쏠 수 있어요.${rageFull(u) ? ` 필살 사격은 ${rangeOf(Object.assign({}, u, { sp:specialOf(u) }))}칸까지.` : ''}` : `이동 완료. 스킬을 고르세요. 마나 ${u.mp}/${u.maxMp}`;
     return;
   }
-  if (UI.mode === 'target' && u) {
-    if (!UI.tsel) { el.textContent = '대상을 누르세요. 한 번 더 누르면 실행돼요.'; return; }
-    el.innerHTML = UI.tsummary || '';
+  if (UI.mode === 'target' && u) { if (!UI.tsel) { el.textContent = '대상을 누르세요. 한 번 더 누르면 실행돼요.'; return; } el.innerHTML = UI.tsummary || ''; return; }
+  if (UI.tileInfo) {
+    const t = terrainAt(UI.tileInfo.x, UI.tileInfo.y);
+    el.innerHTML = t.cost ? `${t.name} · 이동력 <b>${t.pct}%</b>` : `${t.name} · 지날 수 없음`;
     return;
   }
   const left = S.units.filter(x => isManual(x) && x.hp > 0 && !x.acted).length;
-  el.innerHTML = left ? `금색 테두리 유닛을 누른 채 끌어서 경로를 그리세요 · 남은 수동 <b>${left}</b>` : '수동 유닛이 모두 행동했어요. 턴을 종료하세요.';
+  el.innerHTML = left ? `금색 테두리 유닛을 누른 채 끌어 경로를 그리세요 · 남은 수동 <b>${left}</b>` : '수동 유닛이 모두 행동했어요. 턴을 종료하세요.';
 }
-
 function btn(label, onClick, o = {}) {
   const b = document.createElement('button');
   b.type = 'button';
@@ -1496,9 +2136,9 @@ function renderActions() {
   const box = $('#actions');
   box.textContent = '';
   if (S.over) return;
-  if (S.phase !== 'player' || UI.busy) {
+  if (S.phase !== 'player' || UI.busy || UI.talking) {
     const s = document.createElement('span'); s.className = 'busy-note';
-    s.textContent = S.phase === 'enemy' ? '적 페이즈' : S.phase === 'ally' ? '동맹 페이즈' : '행동 중';
+    s.textContent = UI.talking ? '대화를 눌러 넘기세요' : S.phase === 'enemy' ? '적 페이즈' : S.phase === 'ally' ? '동맹 페이즈' : '행동 중';
     box.append(s); return;
   }
   const u = UI.sel;
@@ -1510,25 +2150,16 @@ function renderActions() {
         btn('뒤로', () => { UI.sub = null; render(); }, { ghost:true }));
       return;
     }
-    const p = UI.plan;
-    const hitting = p && p.rows.some(r => r.strikes.length);
-    const label = UI.kn ? '공격' : hitting ? '돌격' : '이동';
-    box.append(btn(label, confirmMove, { primary:true, disabled:!routeEndValid(u, UI.route) }));
+    const p = UI.plan, hitting = p && p.rows.some(r => r.strikes.length);
+    box.append(btn(UI.kn ? '공격' : hitting ? '돌격' : '이동', confirmMove, { primary:true, disabled:!routeEndValid(u, UI.route) }));
     const sp = specialOf(u);
-    if (sp && sp.kind !== 'shot') {
-      const txt = sp.kind === 'charge' ? (UI.armed ? `필살 해제` : `필살 · ${sp.name}`) : `필살 · ${sp.name}`;
-      box.append(btn(txt, toggleSpecial, { disabled:!rageFull(u), small: rageFull(u) ? null : `${u.rage}%` }));
-    }
-    box.append(
-      btn('아이템', () => { UI.sub = 'items'; render(); }),
-      btn('대기', () => finishUnit(u)),
-      btn('취소', deselect, { ghost:true }));
+    if (sp && sp.kind !== 'shot') box.append(btn(sp.kind === 'charge' && UI.armed ? '필살 해제' : `필살 · ${sp.name}`, toggleSpecial, { disabled:!rageFull(u), small: rageFull(u) ? null : `${u.rage}%` }));
+    box.append(btn('아이템', () => { UI.sub = 'items'; render(); }), btn('대기', () => finishUnit(u)), btn('취소', deselect, { ghost:true }));
     return;
   }
   if (UI.mode === 'action' && u) {
     if (W(u).kind === 'ranged') {
-      const any = alive().some(o => o.team !== u.team && inRange(u, o));
-      box.append(btn('공격', () => enterTarget(null), { primary:true, disabled:!any }));
+      box.append(btn('공격', () => enterTarget(null), { primary:true, disabled:!alive().some(o => o.team !== u.team && inRange(u, o)) }));
       const sp = specialOf(u);
       if (sp && sp.kind === 'shot') {
         const spRange = rangeOf(Object.assign({}, u, { sp }));
@@ -1537,8 +2168,7 @@ function renderActions() {
       }
     } else {
       for (const sid of u.skills) {
-        const sk = SKILLS[sid];
-        const ok = u.mp >= sk.mp && (sk.type === 'mana' || skillTargets(u, sid).length > 0);
+        const sk = SKILLS[sid], ok = u.mp >= sk.mp && (sk.type === 'mana' || skillTargets(u, sid).length > 0);
         box.append(btn(sk.name, () => sk.type === 'mana' ? runSkill(sid, u.x, u.y) : enterTarget(sid), { small: sk.mp ? sk.mp : '0', disabled:!ok }));
       }
     }
@@ -1558,28 +2188,23 @@ function renderHeader() {
   const chip = $('#phaseChip');
   chip.dataset.phase = S.phase;
   chip.textContent = `턴 ${S.turn} · ${S.phase === 'player' ? '아군' : S.phase === 'ally' ? '동맹' : '적'}`;
+  $('#objText').textContent = STAGE.objectives[S.objective].text;
+  $('#objMeta').textContent = `탈출 ${S.escaped.length}/${STAGE.allies.length} · 처치 ${S.kills}`;
 }
-function renderPanel() { renderCard(); renderPreview(); }
+function renderPanel() { renderHeader(); renderCard(); renderPreview(); }
 function render() { renderHeader(); renderCard(); renderPreview(); renderActions(); }
 
 /* ---------- interaction ---------- */
-function tileFromEvent(e) {
-  const r = cvs.getBoundingClientRect();
-  const x = Math.floor((e.clientX - r.left) / T), y = Math.floor((e.clientY - r.top) / T);
-  return inB(x, y) ? { x, y } : null;
-}
-function canAct() { return S.phase === 'player' && !UI.busy && !S.over; }
+function localPoint(e) { const r = cvs.getBoundingClientRect(); return { x:e.clientX - r.left, y:e.clientY - r.top }; }
+function tileAtPoint(p) { const x = Math.floor((p.x + CAM.x) / T), y = Math.floor((p.y + CAM.y) / T); return inB(x, y) ? { x, y } : null; }
+function canAct() { return S.phase === 'player' && !UI.busy && !S.over && !UI.talking; }
 function displayReach(u) { return new Set(reach(u, !!W(u).noPass).dist.keys()); }
 function refreshPlan() { UI.plan = UI.sel ? computePlan(UI.sel, UI.route, UI.kn) : null; }
 function hideToast() { $('#toast').hidden = true; }
-
-function disarm() {
-  if (UI.sel && !UI.busy) UI.sel.sp = null;
-  UI.armed = false;
-}
+function disarm() { if (UI.sel && !UI.busy) UI.sel.sp = null; UI.armed = false; }
 function selectUnit(u) {
   disarm();
-  UI.sel = u; UI.inspect = u; UI.mode = 'route'; UI.route = [{ x:u.x, y:u.y }]; UI.kn = null; UI.sub = null;
+  UI.sel = u; UI.inspect = u; UI.mode = 'route'; UI.route = [{ x:u.x, y:u.y }]; UI.kn = null; UI.sub = null; UI.tileInfo = null;
   UI.reachSet = displayReach(u); refreshPlan(); hideToast(); render();
 }
 function deselect() {
@@ -1587,15 +2212,12 @@ function deselect() {
   Object.assign(UI, { sel:null, mode:'idle', route:[], kn:null, reachSet:null, plan:null, sub:null, targets:null, tsel:null, skill:null, special:false, tpreview:null });
   render();
 }
-/* 필살기 버튼: 돌격형은 이번 이동에 장전/해제, 버프형은 즉시 발동 */
 async function toggleSpecial() {
   const u = UI.sel, sp = u && specialOf(u);
   if (!sp || !rageFull(u)) return;
   if (sp.kind === 'charge') {
-    UI.armed = !UI.armed;
-    u.sp = UI.armed ? sp : null;
-    const mov = movOf(u);
-    if (UI.route.length - 1 > mov) UI.route.length = mov + 1;
+    UI.armed = !UI.armed; u.sp = UI.armed ? sp : null;
+    while (UI.route.length > 1 && routeCost(UI.route) > moveBudget(u)) UI.route.pop();
     UI.reachSet = displayReach(u); refreshPlan(); render();
     return;
   }
@@ -1605,76 +2227,113 @@ async function toggleSpecial() {
   UI.reachSet = displayReach(u); refreshPlan(); render();
 }
 function tryStep(nx, ny) {
-  const u = UI.sel, r = UI.route;
-  const prev = r[r.length - 2];
+  const u = UI.sel, r = UI.route, prev = r[r.length - 2];
   if (prev && prev.x === nx && prev.y === ny) { r.pop(); UI.kn = null; return true; }
-  if (W(u).noPass && inB(nx, ny)) {
-    const o = unitAt(nx, ny, u);
-    if (o && o.team !== u.team) { UI.kn = o; return false; }
-  }
+  if (W(u).noPass && inB(nx, ny)) { const o = unitAt(nx, ny, u); if (o && o.team !== u.team) { UI.kn = o; return false; } }
   if (!canStep(u, r, nx, ny)) return false;
   r.push({ x:nx, y:ny }); UI.kn = null;
   return true;
 }
 function dragTo(t) {
   const r = UI.route;
+  if (!UI.sel || !r.length) return;
   const idx = r.findIndex(p => p.x === t.x && p.y === t.y);
-  if (idx >= 0) {
-    if (idx < r.length - 1) { r.length = idx + 1; UI.kn = null; }
-  } else {
-    for (let guard = 0; guard < 24; guard++) {
+  if (idx >= 0) { if (idx < r.length - 1) { r.length = idx + 1; UI.kn = null; } }
+  else {
+    for (let guard = 0; guard < 30; guard++) {
       const last = r[r.length - 1];
       if (last.x === t.x && last.y === t.y) break;
       const dx = Math.sign(t.x - last.x), dy = Math.sign(t.y - last.y);
       const order = Math.abs(t.x - last.x) >= Math.abs(t.y - last.y) ? [[dx, 0], [0, dy]] : [[0, dy], [dx, 0]];
       let moved = false;
-      for (const [sx, sy] of order) { if (!sx && !sy) continue; if (tryStep(last.x + sx, last.y + sy)) { moved = true; break; } }
+      for (const [ax, ay] of order) { if (!ax && !ay) continue; if (tryStep(last.x + ax, last.y + ay)) { moved = true; break; } }
       if (!moved) break;
     }
   }
   refreshPlan(); renderPreview(); renderActions();
 }
-
+function isDoubleTap(t) {
+  const now = performance.now(), lt = UI.lastTap;
+  const hit = lt && lt.x === t.x && lt.y === t.y && now - lt.t < 420;
+  UI.lastTap = hit ? null : { x:t.x, y:t.y, t:now };
+  return hit;
+}
+function routeConfirmable() {
+  const u = UI.sel;
+  if (!u || !routeEndValid(u, UI.route)) return false;
+  if (UI.route.length > 1 || UI.kn) return true;
+  return W(u).kind !== 'melee';
+}
 cvs.addEventListener('pointerdown', e => {
-  const t = tileFromEvent(e);
-  if (!t) return;
+  if (UI.ptr) return;
+  const p = localPoint(e), t = tileAtPoint(p);
+  UI.ptr = { id:e.pointerId, sx:p.x, sy:p.y, cx:CAM.x, cy:CAM.y, moved:false, mode:'pan', tile:t };
+  UI.lastPt = p;
+  try { cvs.setPointerCapture(e.pointerId); } catch (err) {}
+  if (!t || !canAct()) return;
   const u = unitAt(t.x, t.y);
-  if (!canAct()) { if (u) FX.focus(u); return; }
   if (UI.mode === 'idle') {
-    if (u && isManual(u) && !u.acted) { selectUnit(u); UI.dragging = true; cvs.setPointerCapture(e.pointerId); }
-    else if (u) { UI.inspect = u; render(); }
+    if (u && isManual(u) && !u.acted) { selectUnit(u); UI.ptr.mode = 'route'; }
     return;
   }
   if (UI.mode === 'route') {
-    if (UI.sub) { UI.sub = null; }
+    if (UI.sub) UI.sub = null;
     const r = UI.route, last = r[r.length - 1];
-    const inRoute = r.some(p => p.x === t.x && p.y === t.y);
-    if (inRoute) { dragTo(t); UI.dragging = true; cvs.setPointerCapture(e.pointerId); return; }
-    if (u && isManual(u) && !u.acted && u !== UI.sel) { selectUnit(u); UI.dragging = true; cvs.setPointerCapture(e.pointerId); return; }
-    if (man(t.x, t.y, last.x, last.y) === 1) { dragTo(t); UI.dragging = true; cvs.setPointerCapture(e.pointerId); return; }
-    if (u) { UI.inspect = u; renderCard(); }
+    if (last.x === t.x && last.y === t.y) {
+      if (isDoubleTap(t) && routeConfirmable()) { UI.ptr.mode = 'none'; confirmMove(); return; }
+      UI.ptr.mode = 'route'; return;
+    }
+    if (UI.kn && UI.kn.x === t.x && UI.kn.y === t.y) {
+      if (isDoubleTap(t)) { UI.ptr.mode = 'none'; confirmMove(); return; }
+      UI.ptr.mode = 'none'; return;
+    }
+    if (r.some(q => q.x === t.x && q.y === t.y)) { dragTo(t); UI.ptr.mode = 'route'; return; }
+    if (u && isManual(u) && !u.acted && u !== UI.sel) { selectUnit(u); UI.ptr.mode = 'route'; return; }
+    if (man(t.x, t.y, last.x, last.y) === 1) { dragTo(t); if (UI.kn && UI.kn.x === t.x && UI.kn.y === t.y) isDoubleTap(t); UI.ptr.mode = 'route'; return; }
+  }
+});
+cvs.addEventListener('pointermove', e => {
+  const P = UI.ptr;
+  if (!P || P.id !== e.pointerId) return;
+  const p = localPoint(e);
+  UI.lastPt = p;
+  if (P.mode === 'route') {
+    const t = tileAtPoint(p); if (t) dragTo(t);
+    const m = 32;
+    UI.edge = { dx: p.x < m ? -1 : p.x > VW - m ? 1 : 0, dy: p.y < m ? -1 : p.y > VH - m ? 1 : 0 };
+    if (!UI.edge.dx && !UI.edge.dy) UI.edge = null;
     return;
   }
-  if (UI.mode === 'target') {
-    const valid = UI.targets && UI.targets.some(([x, y]) => x === t.x && y === t.y);
-    if (valid) {
+  if (P.mode === 'pan') {
+    if (!P.moved && Math.hypot(p.x - P.sx, p.y - P.sy) > 8) P.moved = true;
+    if (P.moved) { CAM.x = P.cx - (p.x - P.sx); CAM.y = P.cy - (p.y - P.sy); CAM.tx = CAM.ty = null; clampCam(); }
+  }
+});
+function endPointer(e) {
+  const P = UI.ptr;
+  if (!P || P.id !== e.pointerId) return;
+  UI.ptr = null; UI.edge = null;
+  if (P.mode === 'pan' && !P.moved && P.tile) handleTap(P.tile);
+  else if (P.mode === 'route') render();
+}
+cvs.addEventListener('pointerup', endPointer);
+cvs.addEventListener('pointercancel', endPointer);
+cvs.addEventListener('wheel', e => { e.preventDefault(); CAM.x += e.deltaX; CAM.y += e.deltaY; CAM.tx = CAM.ty = null; clampCam(); }, { passive:false });
+function handleTap(t) {
+  const u = unitAt(t.x, t.y);
+  if (UI.mode === 'target' && canAct()) {
+    if (UI.targets && UI.targets.some(([x, y]) => x === t.x && y === t.y)) {
       if (UI.tsel && UI.tsel[0] === t.x && UI.tsel[1] === t.y) { commitTarget(); return; }
       UI.tsel = [t.x, t.y]; buildTargetPreview(); render(); return;
     }
-    if (u) { UI.inspect = u; renderCard(); }
-    return;
   }
-  if (u) { UI.inspect = u; renderCard(); }
-});
-cvs.addEventListener('pointermove', e => {
-  if (!UI.dragging || UI.mode !== 'route') return;
-  const t = tileFromEvent(e);
-  if (t) dragTo(t);
-});
-const endDrag = () => { if (UI.dragging) { UI.dragging = false; render(); } };
-cvs.addEventListener('pointerup', endDrag);
-cvs.addEventListener('pointercancel', endDrag);
-
+  if (UI.mode === 'route' && UI.sel && W(UI.sel).noPass && u && u.team !== UI.sel.team) {
+    const last = UI.route[UI.route.length - 1];
+    if (man(u.x, u.y, last.x, last.y) === 1) { UI.kn = u; isDoubleTap(t); refreshPlan(); render(); return; }
+  }
+  if (u) { UI.inspect = u; UI.tileInfo = null; render(); return; }
+  if (UI.mode === 'idle') { UI.tileInfo = { x:t.x, y:t.y }; render(); }
+}
 function inRange(u, o) { const d = man(u.x, u.y, o.x, o.y); return d >= 1 && d <= rangeOf(u); }
 
 async function confirmMove() {
@@ -1682,14 +2341,15 @@ async function confirmMove() {
   if (!u || !routeEndValid(u, UI.route)) return;
   const route = UI.route.slice(), kn = UI.kn;
   if (UI.armed) { useRage(u); UI.armed = false; }
-  UI.busy = true; UI.mode = 'moving'; UI.reachSet = null; UI.route = []; UI.kn = null; UI.plan = null;
+  UI.busy = true; UI.mode = 'moving'; UI.reachSet = null; UI.route = []; UI.kn = null; UI.plan = null; UI.lastTap = null;
   render();
   await execMove(u, route, kn);
+  let escaped = false;
+  if (u.hp > 0) escaped = await afterAllyMove(u);
   UI.busy = false;
   if (afterAction()) return;
-  if (u.hp <= 0) { finishUnit(null); return; }
-  if (W(u).kind === 'melee') finishUnit(u);
-  else { UI.mode = 'action'; render(); }
+  if (u.hp <= 0 || escaped) { finishUnit(null); return; }
+  if (W(u).kind === 'melee') finishUnit(u); else { UI.mode = 'action'; render(); }
 }
 function finishUnit(u) {
   if (u) { u.acted = true; u.sp = null; }
@@ -1698,11 +2358,7 @@ function finishUnit(u) {
   if (u) UI.inspect = u;
   render();
 }
-function doItem(kind) {
-  const u = UI.sel;
-  if (!u || !useItem(u, kind)) return;
-  finishUnit(u);
-}
+function doItem(kind) { const u = UI.sel; if (!u || !useItem(u, kind)) return; finishUnit(u); }
 function enterTarget(sid, special) {
   const u = UI.sel;
   UI.skill = sid; UI.special = !!special; UI.mode = 'target'; UI.tsel = null; UI.tpreview = null;
@@ -1714,8 +2370,7 @@ function buildTargetPreview() {
   const u = UI.sel, [tx, ty] = UI.tsel;
   UI.tpreview = []; UI.tsummary = '';
   if (!UI.skill) {
-    const sp = UI.special ? specialOf(u) : null;
-    const target = unitAt(tx, ty);
+    const sp = UI.special ? specialOf(u) : null, target = unitAt(tx, ty);
     const icp = sp && sp.pierce ? null : findInterceptor(u.x, u.y, target), recv = icp || target;
     const b = Math.round(baseHit(u, recv, 1, sp ? sp.powMul : 1));
     UI.tpreview.push({ unit:recv, text:`~${b}` });
@@ -1726,17 +2381,12 @@ function buildTargetPreview() {
   const sk = SKILLS[UI.skill];
   if (sk.type === 'dmg') {
     let total = 0;
-    for (const [x, y] of skillAreaTiles(sk, tx, ty)) {
-      const o = unitAt(x, y);
-      if (!o || o.team === u.team) continue;
-      const e = Math.round(expMagic(u, o, sk.coef)); total += e;
-      UI.tpreview.push({ unit:o, text:`~${e}` });
-    }
-    UI.tsummary = `${sk.name} · 마력 ${u.mag} × ${Math.round(sk.coef * 100)}% · 예상 합계 <b>${total}</b> · 마나 ${sk.mp}`;
+    for (const [x, y] of skillAreaTiles(sk, tx, ty)) { const o = unitAt(x, y); if (!o || o.team === u.team) continue; const e = Math.round(expMagic(u, o, sk.coef)); total += e; UI.tpreview.push({ unit:o, text:`~${e}` }); }
+    UI.tsummary = `${sk.name} · 마력 ${magOf(u)} × ${Math.round(sk.coef * 100)}% · 예상 합계 <b>${total}</b> · 마나 ${sk.mp}`;
   } else if (sk.type === 'heal') {
-    const t = unitAt(tx, ty), h = Math.round(expHeal(u, sk.coef));
-    UI.tpreview.push({ unit:t, text:`+${Math.min(h, t.maxHp - t.hp)}` });
-    UI.tsummary = `${sk.name} → ${t.name} · 회복 약 <b>${h}</b> · 마나 ${sk.mp}`;
+    const t = unitAt(tx, ty), hh = Math.round(expHeal(u, sk.coef));
+    UI.tpreview.push({ unit:t, text:`+${Math.min(hh, t.maxHp - t.hp)}` });
+    UI.tsummary = `${sk.name} → ${t.name} · 회복 약 <b>${hh}</b> · 마나 ${sk.mp}`;
   } else if (sk.type === 'buff') {
     const t = unitAt(tx, ty);
     UI.tpreview.push({ unit:t, text:'공격력 +20%' });
@@ -1762,12 +2412,7 @@ async function runSkill(sid, tx, ty) {
   if (afterAction()) return;
   finishUnit(u);
 }
-function afterAction() {
-  const r = checkEnd();
-  if (r) { showResult(r); return true; }
-  render();
-  return false;
-}
+function afterAction() { const r = checkEnd(); if (r) { showResult(r); return true; } render(); return false; }
 
 async function banner(text, tone) {
   const b = $('#banner');
@@ -1793,24 +2438,23 @@ async function endTurn() {
   if (S.over) return showResult(S.over);
   startTurn();
   S.phase = 'player';
-  UI.inspect = prince();
+  const p = prince();
+  UI.inspect = p;
   render();
   await banner(`턴 ${S.turn}`, 'player');
+  await runTurnEvents();
+  if (p) centerOn(p.x, p.y);
   UI.busy = false;
   render();
 }
-
 function showResult(r) {
   UI.busy = false;
   const box = $('#resultBox');
   box.dataset.r = r === 'lose' ? 'lose' : 'win';
-  $('#resultTitle').textContent = r === 'lose' ? '패배' : '승리';
-  const lost = S.units.filter(u => u.team === 'ally' && u.hp <= 0).length;
+  $('#resultTitle').textContent = r === 'lose' ? '패배' : '탈출 성공';
   $('#resultText').textContent = r === 'lose'
-    ? `왕자가 쓰러졌습니다. ${S.turn}턴 동안 버텼어요.`
-    : r === 'escape'
-      ? `${S.turn}턴 만에 왕자가 왕도를 빠져나갔습니다. 쓰러진 동료 ${lost}명.`
-      : `${S.turn}턴 만에 추격대를 모두 물리쳤습니다. 쓰러진 동료 ${lost}명.`;
+    ? `왕자가 쓰러졌습니다. ${S.turn}턴 동안 버텼어요. 처치한 적 ${S.kills}.`
+    : `${S.turn}턴 만에 왕자가 왕도를 빠져나갔습니다. 탈출 ${S.escaped.length}/${STAGE.allies.length}명 · 처치한 적 ${S.kills}.`;
   $('#result').hidden = false;
   render();
 }
@@ -1818,9 +2462,7 @@ function showResult(r) {
 /* ---------- sheets ---------- */
 function openSheet(id) { document.querySelectorAll('.sheet-back').forEach(s => { s.hidden = s.id !== id; }); }
 function closeSheets() { document.querySelectorAll('.sheet-back').forEach(s => { s.hidden = true; }); }
-document.querySelectorAll('.sheet-back').forEach(s => {
-  s.addEventListener('click', e => { if (e.target === s || e.target.closest('[data-close]')) closeSheets(); });
-});
+document.querySelectorAll('.sheet-back').forEach(s => { s.addEventListener('click', e => { if (e.target === s || (e.target.closest && e.target.closest('[data-close]'))) closeSheets(); }); });
 function segment(el, options, current, onPick) {
   el.textContent = '';
   for (const [val, label] of options) {
@@ -1831,89 +2473,84 @@ function segment(el, options, current, onPick) {
   }
 }
 function renderTactics() {
-  segment($('#globalSeg'), [['attack', '공격'], ['formation', '진형방어'], ['escort', '주인공 호위']], S.globalMode, v => {
-    S.globalMode = v; syncAnchors(); renderTactics(); render();
-  });
+  segment($('#globalSeg'), [['attack', '공격'], ['formation', '진형방어'], ['escort', '주인공 호위']], S.globalMode, v => { S.globalMode = v; syncAnchors(); renderTactics(); render(); });
   const list = $('#tacList');
   list.textContent = '';
-  for (const u of S.units.filter(x => x.team === 'ally')) {
-    const row = document.createElement('div');
-    row.className = 'tac-row';
-    const who = document.createElement('div');
-    who.className = 'tac-who';
-    const ctl = u.manual ? '수동' : S.allManual ? '테스트 중 수동' : `자동 · ${MODE_NAME[effMode(u)]}`;
-    who.innerHTML = `<em>${u.emoji}</em>${u.name} Lv ${u.lv}<span>${W(u).name} · ${ctl}${u.hp <= 0 ? ' · 전투 불능' : ''}</span>`;
-    const st = document.createElement('div');
-    st.className = 'tac-stats';
+  for (const u of allAllies()) {
+    const row = document.createElement('div'); row.className = 'tac-row';
+    const who = document.createElement('div'); who.className = 'tac-who';
+    const face = document.createElement('canvas'); face.className = 'px'; face.width = 28; face.height = 28;
+    drawFace(face, u.look, 1.5);
+    const ctl = S.escaped.includes(u) ? '탈출함' : u.manual ? '수동' : S.allManual ? '테스트 중 수동' : `자동 · ${MODE_NAME[effMode(u)]}`;
+    const label = document.createElement('div');
+    label.innerHTML = `${u.name} Lv ${u.lv} <span>${W(u).name} · ${ctl}${u.hp <= 0 ? ' · 전투 불능' : ''}</span>`;
+    who.append(face, label);
+    const st = document.createElement('div'); st.className = 'tac-stats';
     st.innerHTML = `경험치 <b>${u.exp}/100</b> 체력 <b>${u.hp}/${u.maxHp}</b> 공격력 <b>${Math.round(atkOf(u))}</b> 마력 <b>${magOf(u)}</b> 방어력 <b>${defOf(u)}</b> 이동 <b>${movOf(u)}</b>`
       + (isMelee(u) ? ` 공격횟수 <b>${hitsOf(u).toFixed(1)}</b>` : '') + ` 분노 <b>${u.rage}</b>`
       + ` 성장 <b>체${Math.round(u.grow.hp * 100)} 공${Math.round(u.grow.atk * 100)} 마${Math.round(u.grow.mag * 100)} 방${Math.round(u.grow.def * 100)}</b>`;
-    const gear = document.createElement('div');
-    gear.className = 'tac-gear';
+    const gear = document.createElement('div'); gear.className = 'tac-gear';
     gear.innerHTML = ['weapon', 'armor', 'acc'].map(s => `<span><em>${SLOT_NAME[s]}</em>${u.equip[s] ? `${GEAR[u.equip[s]].name} (${gearText(u.equip[s])})` : '없음'}</span>`).join('');
     row.append(who, st, gear);
-    if (!u.manual) {
-      const seg = document.createElement('div');
-      seg.className = 'seg small';
-      segment(seg, [['global', '전체 따름'], ['attack', '공격'], ['formation', '방어'], ['escort', '호위']], u.aiMode, v => {
-        u.aiMode = v; syncAnchors(); renderTactics(); render();
-      });
+    if (!u.manual && !S.escaped.includes(u)) {
+      const seg = document.createElement('div'); seg.className = 'seg small';
+      segment(seg, [['global', '전체 따름'], ['attack', '공격'], ['formation', '방어'], ['escort', '호위']], u.aiMode, v => { u.aiMode = v; syncAnchors(); renderTactics(); render(); });
       row.append(seg);
     }
     list.append(row);
   }
-  $('#bagList').textContent = S.bag.length ? S.bag.map(id => `${GEAR[id].name} (${gearText(id)})`).join(' · ') : '비어 있어요. 적이 떨어뜨린 장비 중 아무도 쓸 수 없는 것이 여기에 모입니다.';
+  $('#bagList').textContent = S.bag.length ? S.bag.map(id => `${GEAR[id].name} (${gearText(id)})`).join(' · ') : '비어 있어요. 아무도 쓸 수 없는 전리품이 여기에 모입니다.';
 }
 function renderLog() {
   const ul = $('#logList');
   ul.textContent = '';
   if (!S.log.length) { const li = document.createElement('li'); li.textContent = '아직 기록이 없어요.'; ul.append(li); return; }
   for (const e of S.log.slice(0, 200)) {
-    const li = document.createElement('li');
-    li.dataset.k = e.k || '';
+    const li = document.createElement('li'); li.dataset.k = e.k || '';
     const t = document.createElement('span'); t.textContent = 'T' + e.turn;
     const m = document.createElement('div'); m.textContent = e.text;
     li.append(t, m); ul.append(li);
   }
 }
 function renderMenu() {
-  segment($('#speedSeg'), [[1, '보통'], [2.2, '빠르게'], [4, '아주 빠르게']], S.speed, v => {
-    S.speed = v; try { localStorage.setItem('rondo.speed', String(v)); } catch (e) {}
-    renderMenu();
-  });
+  segment($('#speedSeg'), [[1, '보통'], [2.2, '빠르게'], [4, '아주 빠르게']], S.speed, v => { S.speed = v; try { localStorage.setItem('rondo.speed', String(v)); } catch (e) {} renderMenu(); });
   $('#allManual').setAttribute('aria-checked', String(S.allManual));
 }
 $('#btnTactics').addEventListener('click', () => { renderTactics(); openSheet('tacticsSheet'); });
 $('#btnLog').addEventListener('click', () => { renderLog(); openSheet('logSheet'); });
 $('#btnMenu').addEventListener('click', () => { renderMenu(); openSheet('menuSheet'); });
-$('#allManual').addEventListener('click', () => {
-  S.allManual = !S.allManual;
-  if (UI.sel && !isManual(UI.sel)) deselect();
-  renderMenu(); render();
-});
+$('#allManual').addEventListener('click', () => { S.allManual = !S.allManual; if (UI.sel && !isManual(UI.sel)) deselect(); renderMenu(); render(); });
 $('#btnRestart').addEventListener('click', () => { closeSheets(); newBattle(); });
 $('#btnAgain').addEventListener('click', newBattle);
+$('#btnCenter').addEventListener('click', () => { const u = UI.sel || prince(); if (u) centerOn(u.x, u.y); });
+$('#btnZoom').addEventListener('click', () => { zoomed = !zoomed; $('#btnZoom').textContent = zoomed ? '축소' : '확대'; resize(); });
 
-function newBattle() {
+async function newBattle() {
   const keepSpeed = S.speed || 1, keepManual = !!S.allManual;
   resetState();
   S.speed = keepSpeed; S.allManual = keepManual;
-  Object.assign(UI, { mode:'idle', sel:null, inspect:prince(), route:[], kn:null, dragging:false, busy:false, reachSet:null, plan:null, sub:null, skill:null, special:false, armed:false, targets:null, tsel:null, tpreview:null, popups:[], areas:[] });
+  Object.assign(UI, { mode:'idle', sel:null, inspect:prince(), route:[], kn:null, busy:true, reachSet:null, plan:null, sub:null, skill:null, special:false, armed:false,
+    targets:null, tsel:null, tpreview:null, popups:[], areas:[], ptr:null, lastTap:null, edge:null, tileInfo:null });
   $('#result').hidden = true;
-  FX.log('1화 왕도 탈출 시작. 왕자를 탈출 지점까지 데려가세요.', 'sys');
+  const p = prince();
+  centerOn(p.x, p.y, true);
+  FX.log('1화 왕도 탈출 시작', 'event');
+  render();
+  await runStartEvents();
+  UI.busy = false;
   const toast = $('#toast');
-  toast.textContent = '왕자(🐯)를 누른 채 위로 끌어 경로를 그려보세요';
+  toast.textContent = '왕자를 누른 채 위로 끌어 경로를 그리고, 끝 칸을 두 번 누르면 출발해요';
   toast.hidden = false;
   render();
 }
 
 /* boot */
 readColors();
-resetState();
 try { const sp = parseFloat(localStorage.getItem('rondo.speed')); if (sp) S.speed = sp; } catch (e) {}
-newBattle();
-new ResizeObserver(resize).observe($('#boardWrap'));
+buildMapFrames();
 resize();
+new ResizeObserver(() => resize()).observe($('#boardWrap'));
+newBattle();
 requestAnimationFrame(frame);
 if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => render());
 </script>
