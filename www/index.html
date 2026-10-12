@@ -43,20 +43,22 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .app{height:100%;max-width:640px;margin:0 auto;padding-inline:16px;display:flex;flex-direction:column;gap:6px}
 
 .top{display:flex;align-items:center;gap:6px;padding-block:10px 0}
-.chapter{flex:1;min-width:0;margin:0;font-family:var(--font-display);font-weight:800;font-size:1.2rem;letter-spacing:.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.chapter small{font-family:var(--font-num);font-weight:500;font-size:.7rem;color:var(--ember);letter-spacing:.08em;margin-right:6px;vertical-align:2px}
+.chapter{flex:1;min-width:0;margin:0;font-family:var(--font-display);font-weight:800;font-size:1.05rem;line-height:1.15;letter-spacing:.01em;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:keep-all}
+.chapter small{font-family:var(--font-num);font-weight:500;font-size:.66rem;color:var(--ember);letter-spacing:.06em;margin-right:5px;vertical-align:2px}
 .phase-chip{font-family:var(--font-num);font-size:.7rem;padding:4px 8px;border-radius:999px;border:1px solid var(--line);color:var(--ink-dim);white-space:nowrap;font-variant-numeric:tabular-nums}
 .phase-chip[data-phase="player"]{color:var(--ally);border-color:var(--ally)}
 .phase-chip[data-phase="ally"]{color:var(--good);border-color:var(--good)}
 .phase-chip[data-phase="enemy"]{color:var(--enemy);border-color:var(--enemy)}
 .icon-btn{background:none;border:1px solid var(--line);border-radius:8px;min-height:34px;padding:0 9px;font-size:.8rem;font-weight:600;color:var(--ink);cursor:pointer}
-.objective{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--ink-dim);min-height:20px;white-space:nowrap;overflow:hidden}
-.objective b{color:var(--ember);font-weight:600;overflow:hidden;text-overflow:ellipsis}
-.objective span{margin-left:auto;font-family:var(--font-num);font-size:.7rem;flex:0 0 auto}
+.objective{display:grid;grid-template-columns:auto 1fr auto;align-items:start;column-gap:8px;font-size:.76rem;color:var(--ink-dim);min-height:20px;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:5px 8px}
+.objective b{color:var(--ember);font-weight:600;line-height:1.35;word-break:keep-all}
+.objective span{font-family:var(--font-num);font-size:.68rem;white-space:nowrap;line-height:1.5}
 
 .board-wrap{flex:1;min-height:0;position:relative;overflow:hidden;border-radius:6px;box-shadow:0 0 0 1px var(--line);background:#0b0d12}
 #board{display:block;position:absolute;inset:0;touch-action:none}
 .board-tools{position:absolute;right:8px;top:8px;display:flex;flex-direction:column;gap:6px;z-index:3}
+.board-tools.hide .zt{display:none}
+.tool-toggle{width:30px;height:30px;font-size:.85rem;opacity:.8;align-self:flex-end}
 .tool:disabled{opacity:.35}
 .tool{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:rgb(17 19 26 / .82);color:var(--ink);font-size:.72rem;font-weight:700;cursor:pointer}
 .banner{position:absolute;left:0;right:0;top:40%;transform:translateY(-50%);display:grid;place-items:center;pointer-events:none;opacity:0;z-index:4}
@@ -89,7 +91,7 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 #cTok[data-manual="true"]{border-color:var(--gold)}
 .who{flex:1;min-width:0;display:flex;flex-direction:column;line-height:1.25}
 .who b{font-size:.95rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.who span{font-size:.75rem;color:var(--ink-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who span{font-size:.72rem;color:var(--ink-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ctrl{font-size:.7rem;font-weight:600;padding:3px 8px;border-radius:999px;border:1px solid var(--line);color:var(--ink-dim);white-space:nowrap}
 .ctrl[data-kind="manual"]{color:var(--gold);border-color:var(--gold)}
 .ctrl[data-kind="enemy"]{color:var(--enemy);border-color:var(--enemy)}
@@ -108,14 +110,19 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .radar .ax{fill:var(--ink-dim);font-size:9px;font-family:var(--font-body)}
 .radar .ax b,.radar .val{fill:var(--ink);font-family:var(--font-num);font-size:8.5px}
 .radar .val.up{fill:var(--gold)}
-.traitline{font-size:.72rem;color:var(--ink-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.traitline{font-size:.68rem;line-height:1.3;color:var(--ink-dim);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:keep-all;cursor:pointer}
 .traitline b{color:var(--gold);font-weight:700;margin-right:4px}
 .traitline .t2{color:var(--ink-dim)}
-.who .lvtag{font-family:var(--font-num);font-size:.78rem;color:var(--gold);margin-left:6px}
+.who b{display:flex;align-items:baseline;gap:6px;min-width:0}
+.who b .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.who .lvtag{flex:0 0 auto;font-family:var(--font-num);font-size:.78rem;color:var(--gold)}
 .statpop{position:absolute;right:8px;bottom:8px;z-index:8;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:.75rem;color:var(--ink-dim);box-shadow:0 6px 16px rgb(0 0 0 / .45);min-width:170px}
 .statpop div{display:flex;justify-content:space-between;gap:12px;font-variant-numeric:tabular-nums}
 .statpop b{color:var(--ink);font-family:var(--font-num)}
 .statpop .g{color:#6aa8ff}.statpop .t{color:var(--gold)}
+.statpop{max-width:min(320px,92%);max-height:70%;overflow:auto}
+.statpop .pd{margin:6px 0 0;line-height:1.4;color:var(--ink)}
+.statpop .pd b{margin-right:4px}
 .stats{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;white-space:nowrap}
 .stats::-webkit-scrollbar{display:none}
 .stat{flex:0 0 auto;font-size:.72rem;color:var(--ink-dim);background:var(--panel-2);border-radius:6px;padding:3px 7px}
@@ -302,14 +309,14 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
     <button class="icon-btn" id="btnLog" type="button">기록</button>
     <button class="icon-btn" id="btnMenu" type="button">설정</button>
   </header>
-  <div class="objective" id="objective">목표 <b id="objText"></b><span id="objMeta"></span></div>
+  <div class="objective" id="objective"><i style="font-style:normal">목표</i><b id="objText"></b><span id="objMeta"></span></div>
 
   <main class="board-wrap" id="boardWrap">
     <canvas id="board" class="px" aria-label="전투 맵. 유닛을 누른 채 끌어 경로를 그리고, 빈 곳을 끌면 화면이 움직입니다."></canvas>
     <div class="board-tools">
-      <button class="tool" id="btnCenter" type="button" aria-label="왕자 위치로">왕자</button>
-      <button class="tool" id="btnZoomIn" type="button" aria-label="확대">＋</button>
-      <button class="tool" id="btnZoomOut" type="button" aria-label="축소">－</button>
+      <button class="tool tool-toggle" id="btnTools" type="button" aria-label="확대·축소 버튼 숨기기/보이기">⇕</button>
+      <button class="tool zt" id="btnZoomIn" type="button" aria-label="확대">＋</button>
+      <button class="tool zt" id="btnZoomOut" type="button" aria-label="축소">－</button>
     </div>
     <div class="banner" id="banner"><span id="bannerText"></span></div>
     <div class="toast" id="toast" hidden></div>
@@ -383,7 +390,7 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
       <h3>소리</h3>
       <label class="vol"><span>배경음악</span><input type="range" id="volMusic" min="0" max="100" step="5"><b id="volMusicV"></b></label>
       <label class="vol"><span>효과음</span><input type="range" id="volSfx" min="0" max="100" step="5"><b id="volSfxV"></b></label>
-      <p class="credit">음악: Google Gemini(Lyria)로 생성 · 효과음: 게임 안에서 직접 합성 · 버전 1.05</p>
+      <p class="credit">음악: Google Gemini(Lyria)로 생성 · 효과음: 게임 안에서 직접 합성 · 버전 1.05.1</p>
     </div>
     <div>
       <h3>캐릭터 그래픽</h3>
@@ -416,7 +423,7 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 </div>
 
 <div class="title" id="title">
-  <div class="title-sub">ROUTE MOVE SRPG · 가제 · v1.05</div>
+  <div class="title-sub">ROUTE MOVE SRPG · 가제 · v1.05.1</div>
   <h1>동물왕국 전기</h1>
   <canvas id="titleArt" width="720" height="240" aria-hidden="true"></canvas>
   <p id="titleCh">1화 · 왕도 탈출</p>
@@ -1782,7 +1789,7 @@ const STAGE2 = {
 /* ---------- 3화 강 건너의 검은 깃털 ---------- */
 const STAGE3 = {
   idx:2, no:3, title:'강 건너의 검은 깃털', recapLabel:'CHAPTER 2 · 2화 요약', startObjective:'rout',
-  win:{ rout:true }, reward:{ gold:500 }, sortieMax:6, recruit:['medic'], guests:['medic'], fog:null, lvScale:true,
+  win:{ rout:true }, reward:{ gold:500 }, sortieMax:6, recruit:['medic'], guests:['medic'], guestStart:[ { unit:'medic', x:14, y:41 } ], fog:null, lvScale:true,
   expCap:260, clearExp:60,
   adminRoster:{ lv:4, ids:['tiger','boar','horse','deer','finn'] },
   map: ["fffffffffff::fffffffffff", "fffffffffff::fffffffffff", "fffffffffff::fffffffffff", "ff.........::.........ff", "f..........::..........f", ".......c...::...c.......", "....c......::......c....", "...........::...........", ".........f.::.f.........", "...c.......::.......c...", "...........::...........", "..r.....r..::..r.....r..", "...........::...........", "...........::...........", "..f........::........f..", "...ppppppp.::.ppppppp...", "f..........::..........f", ".....r.....::.....r.....", "...........::...........", "~s~~~~~~~~~=~~~~~~~~~~~~", "~s~~~~~~~~~=~~~~~~~~~~~~", "~s~~~~~~~~~=~~~~~~~~~~~~", "~s~~~~~~~~~=~~~~~~~~~~~~", "f..ffffffff:ffffffffffff", "f..ffffffff:ffffffffffff", "f......ffff:ffffffffffff", "f......ffff:ffff.....fff", "fff....ffff:ffff.....fff", "fffffffffff:ffff.....fff", "ffffrffffff:ffffffffffff", "ffffffffff....ffffffffff", "ffffffffff....fffffrffff", "fffff....ff:ffffffffffff", "fffff....ff:fff....fffff", "fffff....ff:fff....fffff", "fffffffffff:ffffffffffff", "ffffffff........ffffffff", "ffffff............ffffff", "ffffff............ffffff", "ffffff..........r.ffffff", "ffffff.r..........ffffff", "ffffff............ffffff", "ffffff............ffffff", "ffffffffffffffffffffffff"],
@@ -1826,7 +1833,7 @@ const STAGE3 = {
       { who:'finn', text:'저 강만 건너면 국경 요새까지 하루 거리야. 근데… 다리 건너편에 검은 깃털이 잔뜩 있어.' },
       { who:'horse', text:'흑익대… 조류군의 돌격대입니다. 다리는 한 사람씩밖에 못 건너는 외나무다리군요.' },
       { who:'boar', text:'숲속에도 뭔가 숨어 있습니다. 등 뒤부터 정리하시지요.' } ] },
-    { id:'medic', at:'start', join:'medic', joinAuto:true, banner:'치유병 합류', spawn:[ { unit:'medic', x:14, y:41 } ], talk:[
+    { id:'medic', at:'start', join:'medic', joinAuto:true, banner:'치유병 합류', talk:[
       { who:'medic', text:'왕자님…! 살아 계셨군요. 왕도 위생대의 치유병입니다. 숲에 숨어 있었어요.' },
       { who:'tiger', text:'다친 데는 없어?' },
       { who:'medic', text:'저는 괜찮습니다. 치유와 축복 정도는 할 수 있어요. 데려가 주세요!' } ] },
@@ -1863,7 +1870,7 @@ const STAGE3 = {
 /* ---------- 4화 요새 잠입 ---------- */
 const STAGE4 = {
   idx:3, no:4, title:'요새 잠입', recapLabel:'CHAPTER 3 · 3화 요약', startObjective:'infiltrate',
-  win:{ allEscape:true }, reward:{ gold:500 }, sortieMax:5, recruit:['mage'], guests:['mage'], fog:null, lvScale:true,
+  win:{ allEscape:true }, reward:{ gold:500 }, sortieMax:5, recruit:['mage'], guests:['mage'], guestStart:[ { unit:'mage', x:9, y:40 } ], fog:null, lvScale:true,
   stealth:true, allManual:true, expCap:220, clearExp:70,
   adminRoster:{ lv:5, ids:['tiger','boar','horse','deer','finn'] },
   map: ["oooooooooooooooooooooooo", "oooooooooooooooooooooooo", "oooooooooooooooooooooooo", "oooooooooooooooooooooooo", "oooooooooooooooooooooooo", "HHHHHHHHHHHHHHHHHHHHHHHH", "HHNHHHHHHHHNNHHHHHHHHHHH", "rrrrrrrrrr::::rrrrrrrrrr", "rrrrrrrrrr::::rrrrrrrrrr", "rrrrrrrrrr::::rrrrrrrrrr", "pp:pppppppp::ppppppp:ppp", "ff....................ff", "........c......c........", "....c..............c....", "........................", "...........cc...........", "...........::...........", ".....c.....::.....c.....", "...........::...........", ".........r.::.r.........", "f..........::..........f", ".......f...::...f.......", "...r.......::.......r...", "...........::...........", "...........::...........", "pppp:pppppp::pppppp:pppp", "fffffffffff::fffffffffff", "fffffffffff::fffffffffff", "fff....ffrf::frff....fff", "fff....ffff::ffff....fff", "fff....ffff::ffff....fff", "~~~ffffffff::ffffffff~~~", "ffffffff........ffffffff", "ffffffff........ffffffff", "ffff..fffff::fffff..ffff", "ffff..ffffffffffff..ffff", "ffff..ffffffffffff..ffff", "fffffff..........fffffff", "fffffff..........fffffff", "ffrffff..........ffffrff", "fffffff..........fffffff", "fffffff..........fffffff", "fffffff..........fffffff", "ffffffffffffffffffffffff"],
@@ -1907,7 +1914,7 @@ const STAGE4 = {
       { who:'horse', text:'정면 돌파는 무리입니다. 철갑 감시병까지 있어요.' },
       { who:'boar', text:'붉게 보이는 곳이 놈들의 시야입니다. 금색 화살표는 매 턴 고개를 돌리는 놈이고요.' },
       { who:'tiger', text:'들켜도 그 녀석을 그 턴 안에 쓰러뜨리면 경보는 안 울린다… 철갑병은 한 턴에 못 쓰러뜨려. 그쪽 시야는 피하자.' } ] },
-    { id:'mage', at:'start', join:'mage', joinAuto:true, banner:'마법병 합류', spawn:[ { unit:'mage', x:9, y:40 } ], talk:[
+    { id:'mage', at:'start', join:'mage', joinAuto:true, banner:'마법병 합류', talk:[
       { who:'mage', text:'쉿…! 왕국군이시죠? 요새를 정찰하던 왕국 마법병입니다. 혼자서는 들어갈 수가 없었어요.' },
       { who:'mage', text:'제 화염탄이라면 까마귀 감시병 정도는 소리 없이 한 방에 쓰러뜨릴 수 있습니다.' },
       { who:'tiger', text:'든든하군. 같이 가자. 성벽 진입로까지 아무도 깨우지 말고.' } ] },
@@ -2129,6 +2136,12 @@ function resetState() {
   Object.assign(S, { stage:STAGE.idx, turn:1, phase:'player', units:[], escaped:[], items:Object.assign({ potion:0, ether:0 }, CAMP.items), bag:(CAMP.bag || []).slice(),
     globalMode:'escort', allManual:false, over:null, log:[], speed:S.speed || 1, objective:STAGE.startObjective || 'north', fired:{}, kills:0, met:{}, fallen:null, deployed:0, retreats:[], alarm:0, loseReason:'', thiefGold:0 });
   for (const u of deployAllies()) S.units.push(u);
+  // 처음부터 함께 있는 합류 동료(3화 치유병·4화 마법병): 전투 시작과 동시에 자동으로 배치
+  for (const g of STAGE.guestStart || []) {
+    const lv = (S.units.find(o => o.prince) || { lv:1 }).lv;
+    const u = unitFromRecord(recOf(g.unit) || newRecord(g.unit, lv), { x:g.x, y:g.y });
+    u.manual = false; u.uid = u.id = `${g.unit}_guest`; S.units.push(u);
+  }
   if (STAGE.allManual) S.allManual = true;
   S.deployed = S.units.length;
   const P = prince();
@@ -2777,10 +2790,11 @@ async function execSkill(u, sid, tx, ty) {
   }
   FX.changed();
 }
-function useItem(u, kind) {
+function useItem(u, kind, user) {
   const it = ITEMS[kind];
   if (!S.items[kind]) return false;
-  u.didAct = true; FX.sfx('heal');
+  (user || u).didAct = true; FX.sfx('heal');
+  if (user && user !== u) FX.log(`${user.name} → ${u.name}에게 ${it.name}`, 'heal');
   if (it.hp) { const got = Math.min(it.hp, u.maxHp - u.hp); u.hp += got; FX.popup(u, `+${got}`, 'heal'); FX.log(`${u.name} ${it.name} · 체력 +${got}`, 'heal'); }
   if (it.mp) { const got = Math.min(it.mp, u.maxMp - u.mp); u.mp += got; FX.popup(u, `마나 +${got}`, 'mana'); FX.log(`${u.name} ${it.name} · 마나 +${got}`, 'sys'); }
   S.items[kind]--;
@@ -3192,6 +3206,8 @@ let VW = 360, VH = 480, T = 40, PX = 2.5, DPR = 1;
 /* 화면에 가로로 보이는 칸 수. 숫자가 클수록 축소 */
 const ZOOMS = [24, 18, 14, 11, 8.5, 6.5];   // 가로에 보이는 칸 수 (24 = 맵 가로 전체)
 let zoomIdx = (() => { try { const v = parseInt(localStorage.getItem('rondo.zoom2'), 10); return v >= 0 && v < ZOOMS.length ? v : 2; } catch (e) { return 2; } })();
+/* 가로에 보이는 칸 수(연속값): 버튼은 단계별, 두 손가락은 자유롭게 */
+let zoomCols = (() => { try { const v = parseFloat(localStorage.getItem('rondo.zoomc')); return v >= 6.5 && v <= 24 ? v : ZOOMS[zoomIdx]; } catch (e) { return ZOOMS[zoomIdx]; } })();
 const CAM = { x:0, y:0, tx:null, ty:null };
 const UI = { mode:'idle', sel:null, inspect:null, route:[], kn:null, busy:false, reachSet:null, plan:null, sub:null, skill:null, special:false, armed:false,
   targets:null, tsel:null, tpreview:null, tsummary:'', popups:[], areas:[], ptr:null, lastTap:null, edge:null, lastPt:null, talking:false, tileInfo:null };
@@ -3349,7 +3365,7 @@ function resize() {
   const r = $('#boardWrap').getBoundingClientRect();
   const keepCx = (CAM.x + VW / 2) / T, keepCy = (CAM.y + VH / 2) / T;
   VW = Math.max(200, Math.floor(r.width)); VH = Math.max(200, Math.floor(r.height));
-  T = clamp(Math.round(VW / ZOOMS[zoomIdx]), 14, 80);
+  T = clamp(Math.round(VW / zoomCols), 14, 80);
   PX = T / 16;
   DPR = Math.min(3, window.devicePixelRatio || 1);
   cvs.style.width = VW + 'px'; cvs.style.height = VH + 'px';
@@ -3450,7 +3466,7 @@ function drawOverlays(now) {
   }
   if (UI.mode === 'target' && UI.targets) {
     const sk = UI.skill ? SKILLS[UI.skill] : null;
-    const col = sk && (sk.type === 'heal' || sk.type === 'buff') ? C.good : C.enemy;
+    const col = UI.item || (sk && (sk.type === 'heal' || sk.type === 'buff')) ? C.good : C.enemy;
     ctx.fillStyle = hexA(col, 0.22);
     for (const [x, y] of UI.targets) ctx.fillRect(sx(x) + 1, sy(y) + 1, T - 2, T - 2);
     if (UI.tsel) {
@@ -3836,12 +3852,12 @@ function toggleManual(u) {
   render();
 }
 function renderCard() {
-  const u = UI.sel || UI.inspect || prince() || S.escaped[0];
+  const u = (UI.peek && UI.peek.hp > 0 ? UI.peek : null) || UI.sel || UI.inspect || prince() || S.escaped[0];
   if (!u) return;
   const tok = $('#cTok');
   tok.dataset.team = u.team; tok.dataset.manual = String(isManual(u));
   drawFace(tok, u);
-  $('#cName').innerHTML = `${u.race && u.race !== u.name ? `${u.name} · ${u.race}` : u.name}<span class="lvtag">Lv ${u.lv}</span>`;
+  $('#cName').innerHTML = `<span class="nm">${u.race && u.race !== u.name ? `${u.name} · ${u.race}` : u.name}</span><span class="lvtag">Lv ${u.lv}</span>`;
   const w = W(u);
   const tags = [];
   if (u.elite) tags.push(u.boss ? '군단장' : '정예');
@@ -3851,7 +3867,7 @@ function renderCard() {
   else if (u.team === 'enemy' && isDormant(u)) tags.push(`${u.activeTurn - S.turn}턴 후 행동`);
   if (S.escaped.includes(u)) tags.push('탈출함');
   if (u.injured) tags.push('부상 · 체력·방어 -20%');
-  $('#cSub').textContent = [w.name + (w.range ? ` · 사거리 1~${w.range}` : ''), ...tags, u.hp <= 0 ? '전투 불능' : ''].filter(Boolean).join(' · ');
+  $('#cSub').textContent = [UI.peek === u && UI.sel ? `보는 중 (선택: ${UI.sel.name})` : '', w.name + (w.range ? ` · 사거리 1~${w.range}` : ''), ...tags, u.hp <= 0 ? '전투 불능' : ''].filter(Boolean).join(' · ');
   const ctrl = $('#cCtrl');
   ctrl.dataset.toggle = canToggleManual(u) ? '1' : '';
   if (u.team === 'enemy') { ctrl.textContent = '적'; ctrl.dataset.kind = 'enemy'; }
@@ -3905,12 +3921,15 @@ function drawRadar(u) {
 }
 function toggleStatPop() {
   const old = document.querySelector('.statpop'); if (old) { old.remove(); return; }
-  const u = UI.sel || UI.inspect || prince(); if (!u) return;
+  const u = (UI.peek && UI.peek.hp > 0 ? UI.peek : null) || UI.sel || UI.inspect || prince(); if (!u) return;
   const pop = document.createElement('div'); pop.className = 'statpop';
   const row = (lab, pr) => `<div><span>${lab}</span><b>${pr[0]}${pr[1] ? ` <span class="g">+${pr[1]}</span>` : ''}${pr[2] ? ` <span class="t">${pr[2] > 0 ? '+' : ''}${pr[2]}</span>` : ''}</b></div>`;
   pop.innerHTML = `<div style="margin-bottom:4px"><span>기본 <span class="g">+장비</span> <span class="t">+특성·버프</span></span></div>`
     + row('체력', statParts(u, 'hp')) + row('공격력', statParts(u, 'atk')) + row('마력', statParts(u, 'mag')) + row('방어력', statParts(u, 'def')) + row('이동', statParts(u, 'mov'))
     + `<div><span>치명</span><b>${Math.round(critOf(u) * 100)}%</b></div>`;
+  const tr = traitOf(u), T0 = tr && TRAITS[tr], sp = specialOf(u);
+  if (T0) pop.innerHTML += `<p class="pd"><b class="t">특성 ${T0.name}</b> ${T0.desc}${T0.cc ? ` · 클래스 체인지 후: ${T0.cc}${u.cls ? '' : ' (잠김)'}` : ''}</p>`;
+  if (sp) pop.innerHTML += `<p class="pd"><b class="t">${sp.awakened ? '각성' : '필살'} ${sp.name}</b> ${sp.desc}. 분노가 100이 되면 쓸 수 있어요 (지금 ${u.rage}).</p>`;
   pop.addEventListener('click', () => pop.remove());
   document.querySelector('.panel').append(pop);
 }
@@ -3922,7 +3941,7 @@ function renderPreview() {
   if (UI.busy) { el.textContent = '진행 중…'; return; }
   const u = UI.sel;
   if (UI.mode === 'route' && u) {
-    if (UI.sub === 'items') { el.textContent = `${u.name}에게 쓸 아이템을 고르세요. 사용하면 이동 없이 행동이 끝나요.`; return; }
+    if (UI.sub === 'items') { el.textContent = `아이템을 고르세요. 자신이나 주변 1칸(대각선 포함) 아군에게 쓸 수 있고, 쓰면 이동 없이 행동이 끝나요.`; return; }
     const p = UI.plan, steps = UI.route.length - 1;
     const used = (routeCost(UI.route) / CFG.moveUnit).toFixed(1);
     let s = (UI.armed ? `필살 <b>${specialOf(u).name}</b> · ` : '') + `이동력 <b>${used}/${movOf(u)}</b> · ${steps}칸`;
@@ -3943,7 +3962,7 @@ function renderPreview() {
     el.textContent = W(u).kind === 'ranged' ? `이동 완료. 사거리 1~${W(u).range}칸 안의 적을 쏠 수 있어요(멀수록 강함). 다른 아군을 눌러 먼저 움직여도 돼요.${rageFull(u) ? ` 필살 사격은 ${rangeOf(Object.assign({}, u, { sp:specialOf(u) }))}칸까지.` : ''}` : `이동 완료. 스킬을 고르세요. 마나 ${u.mp}/${u.maxMp}`;
     return;
   }
-  if (UI.mode === 'target' && u) { if (!UI.tsel) { el.textContent = '대상을 누르세요. 한 번 더 누르면 실행돼요.'; return; } el.innerHTML = UI.tsummary || ''; return; }
+  if (UI.mode === 'target' && u) { if (!UI.tsel) { el.textContent = UI.item ? '아이템을 쓸 아군을 누르세요 (자신·주변 1칸).' : '대상을 누르세요. 한 번 더 누르면 실행돼요.'; return; } el.innerHTML = UI.tsummary || ''; return; }
   if (UI.tileInfo) {
     const t = terrainAt(UI.tileInfo.x, UI.tileInfo.y);
     el.innerHTML = t.cost ? `${t.name} · 이동력 <b>${t.pct}%</b>` : `${t.name} · 지날 수 없음`;
@@ -3974,8 +3993,8 @@ function renderActions() {
   if (UI.mode === 'route' && u) {
     if (UI.sub === 'items') {
       box.append(
-        btn('회복약', () => doItem('potion'), { small:'×' + S.items.potion, disabled:!S.items.potion || u.hp >= u.maxHp }),
-        btn('마나 물약', () => doItem('ether'), { small:'×' + S.items.ether, disabled:!S.items.ether || !u.maxMp || u.mp >= u.maxMp }),
+        btn('회복약', () => enterItem('potion'), { small:'×' + S.items.potion, disabled:!S.items.potion || !itemTargets(u, 'potion').length }),
+        btn('마나 물약', () => enterItem('ether'), { small:'×' + S.items.ether, disabled:!S.items.ether || !itemTargets(u, 'ether').length }),
         btn('뒤로', () => { UI.sub = null; render(); }, { ghost:true }));
       return;
     }
@@ -4006,8 +4025,8 @@ function renderActions() {
   }
   if (UI.mode === 'target' && u) {
     box.append(
-      btn(UI.skill ? '시전' : UI.special ? '필살 발사' : '발사', commitTarget, { primary:true, disabled:!UI.tsel }),
-      btn('뒤로', () => { u.sp = null; Object.assign(UI, { mode:'action', targets:null, tsel:null, skill:null, special:false, tpreview:null }); render(); }, { ghost:true }));
+      btn(UI.item ? '사용' : UI.skill ? '시전' : UI.special ? '필살 발사' : '발사', commitTarget, { primary:true, disabled:!UI.tsel }),
+      btn('뒤로', () => { u.sp = null; const wasItem = !!UI.item; Object.assign(UI, { mode:wasItem ? 'route' : 'action', item:null, sub:wasItem ? 'items' : null, targets:null, tsel:null, skill:null, special:false, tpreview:null }); render(); }, { ghost:true }));
     return;
   }
   const left = S.units.some(x => isManual(x) && x.hp > 0 && !x.acted);
@@ -4034,7 +4053,7 @@ function localPoint(e) { const r = cvs.getBoundingClientRect(); return { x:e.cli
 function tileAtPoint(p) { const x = Math.floor((p.x + CAM.x) / T), y = Math.floor((p.y + CAM.y) / T); return inB(x, y) ? { x, y } : null; }
 function canAct() { return S.phase === 'player' && !UI.busy && !S.over && !UI.talking; }
 function displayReach(u) { return new Set(reach(u, !!W(u).noPass).dist.keys()); }
-function refreshPlan() { UI.plan = UI.sel ? computePlan(UI.sel, UI.route, UI.kn) : null; UI.reachLeft = UI.sel && UI.route.length ? reachLeft(UI.sel, UI.route) : null; }
+function refreshPlan() { UI.peek = null; UI.plan = UI.sel ? computePlan(UI.sel, UI.route, UI.kn) : null; UI.reachLeft = UI.sel && UI.route.length ? reachLeft(UI.sel, UI.route) : null; }
 /* 경로 끝 칸에서 남은 이동력으로 더 갈 수 있는 칸 (이미 지난 칸 제외) */
 function reachLeft(u, route) {
   const end = route[route.length - 1], budget = moveBudget(u) - routeCost(route), on = new Set(route.map(p => keyOf(p.x, p.y)));
@@ -4055,7 +4074,7 @@ function reachLeft(u, route) {
 function hideToast() { $('#toast').hidden = true; }
 function disarm() { if (UI.sel && !UI.busy) UI.sel.sp = null; UI.armed = false; }
 function selectUnit(u) {
-  disarm();
+  disarm(); UI.peek = null;
   if (u.movedThisTurn && !u.acted) {   // 이동은 끝냈고 사격·스킬만 남은 유닛: 바로 행동 고르기로
     Object.assign(UI, { sel:u, inspect:u, mode:'action', route:[], kn:null, sub:null, tileInfo:null, reachSet:null, plan:null, targets:null, tsel:null, skill:null, special:false, tpreview:null });
     hideToast(); render(); return;
@@ -4064,8 +4083,8 @@ function selectUnit(u) {
   UI.reachSet = displayReach(u); refreshPlan(); hideToast(); render();
 }
 function deselect() {
-  disarm();
-  Object.assign(UI, { sel:null, mode:'idle', route:[], kn:null, reachSet:null, plan:null, sub:null, targets:null, tsel:null, skill:null, special:false, tpreview:null });
+  disarm(); UI.peek = null;
+  Object.assign(UI, { sel:null, mode:'idle', route:[], kn:null, reachSet:null, plan:null, sub:null, targets:null, tsel:null, skill:null, special:false, tpreview:null, item:null });
   render();
 }
 async function toggleSpecial() {
@@ -4185,7 +4204,7 @@ function endPointer(e) {
 }
 cvs.addEventListener('pointerup', endPointer);
 cvs.addEventListener('pointercancel', endPointer);
-cvs.addEventListener('wheel', e => { e.preventDefault(); CAM.x += e.deltaX; CAM.y += e.deltaY; CAM.tx = CAM.ty = null; clampCam(); }, { passive:false });
+cvs.addEventListener('wheel', e => { e.preventDefault(); if (e.ctrlKey) { setZoomCols(zoomCols * (1 + e.deltaY * 0.01), localPoint(e)); return; } CAM.x += e.deltaX; CAM.y += e.deltaY; CAM.tx = CAM.ty = null; clampCam(); }, { passive:false });
 function handleTap(t) {
   const u0 = unitAt(t.x, t.y), u = u0 && seenByPlayer(u0) ? u0 : null;
   if (UI.mode === 'target' && canAct()) {
@@ -4198,7 +4217,8 @@ function handleTap(t) {
     const last = UI.route[UI.route.length - 1];
     if (man(u.x, u.y, last.x, last.y) === 1) { UI.kn = u; isDoubleTap(t); refreshPlan(); render(); return; }
   }
-  if (u) { UI.inspect = u; UI.tileInfo = null; render(); return; }
+  if (u) { if (UI.sel && u !== UI.sel) UI.peek = u; else { UI.peek = null; UI.inspect = u; } UI.tileInfo = null; render(); return; }
+  UI.peek = null;
   if (UI.mode === 'idle') { UI.tileInfo = { x:t.x, y:t.y }; render(); }
 }
 function inRange(u, o) { const d = man(u.x, u.y, o.x, o.y); return d >= 1 && d <= rangeOf(u); }
@@ -4222,12 +4242,24 @@ async function confirmMove() {
 function finishUnit(u) {
   if (u) { u.acted = true; u.sp = null; u.movedThisTurn = false; }
   UI.armed = false;
-  Object.assign(UI, { sel:null, mode:'idle', route:[], kn:null, reachSet:null, plan:null, sub:null, targets:null, tsel:null, skill:null, special:false, tpreview:null });
+  Object.assign(UI, { sel:null, mode:'idle', route:[], kn:null, reachSet:null, plan:null, sub:null, targets:null, tsel:null, skill:null, special:false, tpreview:null, item:null });
   if (u) UI.inspect = u;
   render();
   saveGame();
 }
 function doItem(kind) { const u = UI.sel; if (!u || !useItem(u, kind)) return; finishUnit(u); }
+/* 아이템: 자신 또는 주변 1칸(대각선 포함) 아군에게 */
+function itemTargets(u, kind) {
+  const it = ITEMS[kind];
+  return alive().filter(a => a.team === u.team && cheb(a, u) <= 1 && (it.hp ? a.hp < a.maxHp : a.maxMp && a.mp < a.maxMp));
+}
+function enterItem(kind) {
+  const u = UI.sel; if (!u) return;
+  const ts = itemTargets(u, kind); if (!ts.length) return;
+  Object.assign(UI, { mode:'target', item:kind, skill:null, special:false, sub:null, targets:ts.map(a => [a.x, a.y]), tsel:null, tpreview:null });
+  if (ts.length === 1) { UI.tsel = [ts[0].x, ts[0].y]; buildTargetPreview(); }
+  render();
+}
 function enterTarget(sid, special) {
   const u = UI.sel;
   UI.skill = sid; UI.special = !!special; UI.mode = 'target'; UI.tsel = null; UI.tpreview = null;
@@ -4239,6 +4271,7 @@ function enterTarget(sid, special) {
 function buildTargetPreview() {
   const u = UI.sel, [tx, ty] = UI.tsel;
   UI.tpreview = []; UI.tsummary = '';
+  if (UI.item) { const t = unitAt(tx, ty), it = ITEMS[UI.item]; if (t) { const g = it.hp ? Math.min(it.hp, t.maxHp - t.hp) : Math.min(it.mp, t.maxMp - t.mp); UI.tpreview.push({ unit:t, text:`+${g}` }); UI.tsummary = `${it.name} → ${t.name} · ${it.hp ? '체력' : '마나'} <b>+${g}</b> · 남은 ${S.items[UI.item]}개`; } return; }
   if (!UI.skill) {
     const sp = UI.special ? specialOf(u) : null, target = unitAt(tx, ty);
     const icp = sp && sp.pierce ? null : findInterceptor(u.x, u.y, target), recv = icp || target;
@@ -4267,6 +4300,7 @@ async function commitTarget() {
   const u = UI.sel;
   if (!u || !UI.tsel) return;
   const [tx, ty] = UI.tsel, sid = UI.skill, special = UI.special;
+  if (UI.item) { const kind = UI.item, t = unitAt(tx, ty); UI.item = null; UI.targets = null; UI.tsel = null; UI.tpreview = null; if (t && useItem(t, kind, u)) finishUnit(u); else render(); return; }
   UI.busy = true; UI.targets = null; UI.tsel = null; UI.tpreview = null; UI.special = false; render();
   if (sid) await execSkill(u, sid, tx, ty);
   else { const t = unitAt(tx, ty); if (t) await execShot(u, t, special ? specialOf(u) : null); }
@@ -4417,17 +4451,47 @@ $('#btnRestart').addEventListener('click', () => { closeSheets(); newBattle(); }
 $('#btnAdmin').addEventListener('click', () => openAdmin());
 $('#btnAgain').addEventListener('click', () => newBattle());
 $('#cRadar').addEventListener('click', e => { e.stopPropagation(); toggleStatPop(); });
+$('#cTrait').addEventListener('click', e => { e.stopPropagation(); toggleStatPop(); });
 $('#cCtrl').addEventListener('click', e => { e.stopPropagation(); toggleManual(UI.sel || UI.inspect); });
-$('#btnCenter').addEventListener('click', () => { const u = UI.sel || prince(); if (u) centerOn(u.x, u.y); });
+function setToolsHidden(h) { const bt = $('#btnTools'); if (bt.parentNode && bt.parentNode.classList) bt.parentNode.classList.toggle('hide', h); bt.setAttribute('aria-pressed', String(h)); bt.textContent = h ? '±' : '⇕'; try { localStorage.setItem('rondo.tools', h ? '1' : '0'); } catch (e) {} }
+$('#btnTools').addEventListener('click', () => { const bt = $('#btnTools'); setToolsHidden(bt.getAttribute('aria-pressed') !== 'true'); });
+try { setToolsHidden(localStorage.getItem('rondo.tools') === '1'); } catch (e) { setToolsHidden(false); }
 function setZoom(i) {
   zoomIdx = clamp(i, 0, ZOOMS.length - 1);
-  try { localStorage.setItem('rondo.zoom2', String(zoomIdx)); } catch (e) {}
-  $('#btnZoomIn').disabled = zoomIdx >= ZOOMS.length - 1; $('#btnZoomOut').disabled = zoomIdx <= 0;
-  resize();
+  setZoomCols(ZOOMS[zoomIdx]);
 }
-$('#btnZoomIn').addEventListener('click', () => setZoom(zoomIdx + 1));
-$('#btnZoomOut').addEventListener('click', () => setZoom(zoomIdx - 1));
-setZoom(zoomIdx);
+function setZoomCols(zc, mid) {
+  zoomCols = clamp(zc, ZOOMS[ZOOMS.length - 1], ZOOMS[0]);
+  try { localStorage.setItem('rondo.zoomc', String(zoomCols)); localStorage.setItem('rondo.zoom2', String(zoomIdx)); } catch (e) {}
+  $('#btnZoomIn').disabled = zoomCols <= ZOOMS[ZOOMS.length - 1] + 0.01; $('#btnZoomOut').disabled = zoomCols >= ZOOMS[0] - 0.01;
+  if (mid && VW) {   // 손가락 사이 지점을 그대로 두고 확대·축소
+    const wx = (CAM.x + mid.x) / T, wy = (CAM.y + mid.y) / T;
+    resize(); CAM.x = wx * T - mid.x; CAM.y = wy * T - mid.y; CAM.tx = CAM.ty = null; clampCam();
+  } else resize();
+}
+$('#btnZoomIn').addEventListener('click', () => { const i = ZOOMS.findIndex(z => z < zoomCols - 0.01); if (i >= 0) setZoom(i); });
+$('#btnZoomOut').addEventListener('click', () => { let i = -1; ZOOMS.forEach((z, k) => { if (z > zoomCols + 0.01) i = k; }); if (i >= 0) setZoom(i); });
+/* 두 손가락 확대·축소 */
+const TOUCHES = new Map();
+let PINCH = null;
+const tdist = () => { const [a, b] = [...TOUCHES.values()]; return Math.hypot(a.x - b.x, a.y - b.y) || 1; };
+const tmid = () => { const [a, b] = [...TOUCHES.values()]; return { x:(a.x + b.x) / 2, y:(a.y + b.y) / 2 }; };
+cvs.addEventListener('pointerdown', e => {
+  TOUCHES.set(e.pointerId, localPoint(e));
+  if (TOUCHES.size === 2) {
+    PINCH = { d0:tdist(), z0:zoomCols };
+    if (UI.ptr) { UI.ptr = null; UI.edge = null; render(); }   // 한 손가락 동작(경로·화면 이동)은 멈춘다
+  }
+});
+cvs.addEventListener('pointermove', e => {
+  if (!TOUCHES.has(e.pointerId)) return;
+  TOUCHES.set(e.pointerId, localPoint(e));
+  if (PINCH && TOUCHES.size >= 2) setZoomCols(PINCH.z0 * PINCH.d0 / tdist(), tmid());
+});
+const endTouch = e => { TOUCHES.delete(e.pointerId); if (TOUCHES.size < 2) PINCH = null; };
+cvs.addEventListener('pointerup', endTouch);
+cvs.addEventListener('pointercancel', endTouch);
+setZoomCols(zoomCols);
 
 /* ---------- 전투 시작 ---------- */
 let mapStage = -1;
