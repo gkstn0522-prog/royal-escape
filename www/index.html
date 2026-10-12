@@ -211,6 +211,11 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .title-menu .btn{width:100%;min-height:48px;font-size:1rem}
 .title-note{min-height:20px;font-size:.78rem;color:var(--ember)}
 .recap{position:fixed;inset:0;z-index:16;background:#0c0d12;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;padding-inline:24px}
+.duel-note{max-width:440px;color:var(--ink-dim);font-size:.85rem;line-height:1.5;text-align:center;margin:0}
+.duel-note b{color:var(--ember)}
+.duel-list{display:flex;flex-direction:column;gap:8px;width:min(420px,100%)}
+.duel-list .btn{justify-content:flex-start;text-align:left;flex-wrap:wrap;white-space:normal;gap:2px 10px}
+.duel-list .btn small{white-space:normal;line-height:1.4}
 .recap h2{margin:0;font-family:var(--font-display);font-weight:800;font-size:1.4rem;color:var(--gold);letter-spacing:.2em}
 .recap-lines{max-width:34em;display:flex;flex-direction:column;gap:12px}
 .recap-lines p{margin:0;font-family:var(--font-display);font-weight:700;font-size:1rem;line-height:1.7;color:var(--ink);opacity:0;transform:translateY(6px);transition:opacity .6s,transform .6s}
@@ -390,7 +395,7 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
       <h3>소리</h3>
       <label class="vol"><span>배경음악</span><input type="range" id="volMusic" min="0" max="100" step="5"><b id="volMusicV"></b></label>
       <label class="vol"><span>효과음</span><input type="range" id="volSfx" min="0" max="100" step="5"><b id="volSfxV"></b></label>
-      <p class="credit">음악: Google Gemini(Lyria)로 생성 · 효과음: 게임 안에서 직접 합성 · 버전 1.05.1</p>
+      <p class="credit">음악: Google Gemini(Lyria)로 생성 · 효과음: 게임 안에서 직접 합성 · 버전 1.06</p>
     </div>
     <div>
       <h3>캐릭터 그래픽</h3>
@@ -423,7 +428,7 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 </div>
 
 <div class="title" id="title">
-  <div class="title-sub">ROUTE MOVE SRPG · 가제 · v1.05.1</div>
+  <div class="title-sub">ROUTE MOVE SRPG · 가제 · v1.06</div>
   <h1>동물왕국 전기</h1>
   <canvas id="titleArt" width="720" height="240" aria-hidden="true"></canvas>
   <p id="titleCh">1화 · 왕도 탈출</p>
@@ -497,6 +502,15 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
     </div></div>
     <p id="admNote" style="color:var(--ember)"></p>
   </div>
+</div>
+
+<div class="recap" id="duelPick" hidden>
+  <div class="recap-chapter">명예의 결투 · 대표 선택</div>
+  <h2 style="letter-spacing:.06em">누가 나설까?</h2>
+  <p class="duel-note">레오스는 나설 수 없고, 근접 동료만 고를 수 있어요. 상대 코르닉스는 이동 6, <b>자신보다 빠른 상대</b>에게 강한 기병 사냥꾼입니다. <b>6턴 안에</b> 쓰러뜨리지 못하면 카라스가 결투를 끝내 버려요.</p>
+  <div class="duel-list" id="duelList"></div>
+  <button class="btn ghost" type="button" id="duelRefuse">결투를 거절한다</button>
+  <p class="duel-note" id="duelRefuseNote">거절하면 결투 없이 바로 6-2화가 시작돼요. 사기가 떨어져 <b>아군 전원 공격력·마력 -10%</b>, 코르닉스도 적 본대와 함께 진격해 옵니다.</p>
 </div>
 
 <div class="wmap" id="wmap" hidden>
@@ -1399,7 +1413,7 @@ const SKILLS = {
   feather: { name:'깃털 폭풍', type:'dmg', shape:'cross',  coef:1.3, mp:30, range:4 },
 };
 const PASSIVES = { rally:{ name:'왕의 격려' }, wall:{ name:'철벽', guard:0.15 }, riposte:{ name:'역습', counter:0.15 } };
-const ITEMS = { potion:{ name:'회복약', hp:60 }, ether:{ name:'마나 물약', mp:40 } };
+const ITEMS = { potion:{ name:'회복약', hp:60 }, ether:{ name:'마나 물약', mp:40 }, cure:{ name:'치료제', camp:true } };   // 치료제는 재정비에서만 (부상 회복)
 const SPECIALS = {
   tigerDance:  { name:'백호난무',     kind:'charge', desc:'이번 돌격의 타격 위력 2배', hitsMul:2 },
   ironWall:    { name:'철벽 진형',    kind:'buff',   desc:'자신과 상하좌우 아군 방어력 +20, 가드 +15%p (2턴)', area:'adjacent', buff:{ def:20, guard:0.15, turns:2 } },
@@ -1412,6 +1426,7 @@ const SPECIALS = {
   dive:        { name:'급강하',       kind:'charge', desc:'이번 돌격의 모든 타격이 치명타', allCrit:true },
   whirl:       { name:'회오리 창',    kind:'charge', desc:'이번 이동 +2칸, 창 보너스 +0.2', movAdd:2, spearAdd:0.2 },
   owlVeil:     { name:'밤의 장막',    kind:'buff',   desc:'아군 전원 방어력 +15 (2턴)', area:'team', buff:{ def:15, turns:2 } },
+  javelin:     { name:'궁극의 투창술', kind:'javelin', desc:'사거리 10 투창, 위력 2배. 상대가 자신보다 빠르면 이동 1 차이마다 피해 +25%', powMul:2, range:10, javelin:true },
   whiteFang:   { name:'백호의 발톱',  kind:'charge', desc:'이번 돌격 공격력 +40%, 이동 +1칸', atkAdd:0.4, movAdd:1 },
   forestAegis: { name:'숲의 가호',    kind:'buff',   desc:'아군 전원 방어력 +15, 체력 회복(마력 × 40%) (2턴)', area:'team', heal:0.4, buff:{ def:15, turns:2 } },
   boomerangX:  { name:'회전 부메랑',  kind:'shot',   desc:'위력 2배, 방패 대리피격 무시', powMul:2, pierce:true },
@@ -1463,6 +1478,20 @@ const GEAR = {
   acc_gallus_spur: { name:'갈루스의 며느리발톱', slot:'acc', atk:3, hits:0.2 },
   acc_columba_lyre:{ name:'콜롬바의 리라',     slot:'acc', mag:3, evade:0.08 },
   /* 회차 보상 */
+  /* 5화 이후 상점 (상급) */
+  w_1h_knight:   { name:'기사단장의 검',   slot:'weapon', type:'1h',        atk:9 },
+  w_spear_lance: { name:'기병 장창',       slot:'weapon', type:'spear',     atk:9 },
+  w_2h_giant:    { name:'거인의 대검',     slot:'weapon', type:'2h',        atk:11 },
+  w_bow_long:    { name:'명궁의 장궁',     slot:'weapon', type:'bow',       atk:9 },
+  w_xbow_heavy:  { name:'중석궁',          slot:'weapon', type:'xbow',      atk:8 },
+  w_staff_sage:  { name:'현자의 지팡이',   slot:'weapon', type:'staff',     mag:10 },
+  w_boom_iron:   { name:'전투 부메랑',     slot:'weapon', type:'boomerang', atk:8 },
+  w_dagger_storm:{ name:'폭풍 쌍단검',     slot:'weapon', type:'dagger',    atk:8 },
+  arm_knight:    { name:'기사단 갑옷',     slot:'armor', def:12, hp:25 },
+  arm_sage:      { name:'현자의 로브',     slot:'armor', def:5, mag:6 },
+  acc_ring_power:{ name:'힘의 반지',       slot:'acc', atk:6 },
+  acc_amulet:    { name:'생명의 부적',     slot:'acc', hp:40 },
+  acc_wind:      { name:'바람의 장식끈',   slot:'acc', mov:1, evade:0.05 },
   acc_ring_royal:  { name:'왕도의 반지',       slot:'acc', atk:4, def:4, hp:20 },
   acc_ring_tyrant: { name:'패도의 반지',       slot:'acc', atk:10, hits:0.2 },
 };
@@ -1474,8 +1503,11 @@ const PRICE = {
   w_dagger_twin:180, w_dagger_night:430, w_boom_wood:150, w_boom_steel:400, w_bomb_powder:180,
   arm_leather:100, arm_chain:260, arm_robe:160, arm_crow:220, arm_scale:420, arm_plate:700,
   acc_feather:450, acc_boots:400, acc_ring_mana:380, acc_charm:350,
+  w_1h_knight:950, w_spear_lance:950, w_2h_giant:1050, w_bow_long:950, w_xbow_heavy:900, w_staff_sage:950, w_boom_iron:900, w_dagger_storm:900,
+  arm_knight:1100, arm_sage:900, acc_ring_power:1000, acc_amulet:900, acc_wind:1100, w_bow_eagle:560, cure:300,
   acc_karas_ring:1200, acc_falco_plume:1200, acc_garuda_crest:1400, acc_noah_seal:1400, acc_gallus_spur:1200, acc_columba_lyre:1200, acc_ring_royal:2000, acc_ring_tyrant:2000,
 };
+const SHOP_GEAR2 = ['w_1h_knight','w_spear_lance','w_2h_giant','w_bow_long','w_bow_eagle','w_xbow_heavy','w_staff_sage','w_boom_iron','w_dagger_storm','arm_knight','arm_sage','acc_ring_power','acc_amulet','acc_wind'];   // 5화 클리어 후 입고
 const SHOP_GEAR = ['w_1h_guard','w_spear_knight','w_2h_iron','w_bow_hunt','w_xbow_light','w_staff_oak','w_dagger_twin','w_boom_wood','w_bomb_powder','w_spear_steel','w_boom_steel','arm_leather','arm_chain','arm_robe','arm_scale','acc_boots','acc_ring_mana','acc_charm'];
 const PASSIVE_DESC = { rally:'아군이 지나가면 그 이동 동안 공격력 +15%', wall:'가드 확률 +15%p', riposte:'반격 확률 +15%p' };
 const WEAPON_DESC = {
@@ -1586,6 +1618,9 @@ const UNIT_DEFS = {
   belial:     { name:'베리알', race:'인간', title:'원정군 수석 마법사', age:'나이 미상', species:'human', lookAlias:'humanHeavy', team:'enemy', weapon:'staff', lv:12, hp:300, atk:10, mag:80, def:50, mov:5, maxMp:150, skills:['fire','blaze','medit'], elite:true, boss:true },
   crowCaptain:  { name:'까마귀 정찰대장', species:'crow', lookAlias:'crowInf', team:'enemy', weapon:'2h', lv:6, hp:240, atk:44, mag:5, def:34, mov:6, special:'dive', boss:true, drop:'w_boom_steel' },
   blackWing:    { name:'흑익 대장 코르비', species:'crow', lookAlias:'crowInf', team:'enemy', weapon:'2h', lv:7, hp:320, atk:52, mag:5, def:40, mov:6, special:'dive', boss:true, drop:'w_dagger_night' },
+  crowCommander:{ name:'코르닉스', race:'까마귀', title:'카라스 군 중대장 · 기병 사냥꾼', species:'crow', lookAlias:'crowInf', team:'enemy', weapon:'spear', lv:12, hp:235, atk:62, mag:5, def:45, mov:6, special:'javelin', boss:true, elite:true },
+  crowRook:     { name:'떼까마귀 루크', race:'떼까마귀', title:'카라스 친위대장', species:'crow', lookAlias:'crowInf', team:'enemy', weapon:'2h', lv:8, hp:300, atk:56, mag:5, def:38, mov:6, special:'dive', boss:true, elite:true },
+  crowJackdaw:  { name:'갈까마귀 잭도', race:'갈까마귀', title:'카라스 친위대장', species:'crow', lookAlias:'crowInf', team:'enemy', weapon:'spear', lv:8, hp:270, atk:52, mag:5, def:34, mov:7, special:'whirl', boss:true, elite:true },
   eagleGuard:   { name:'흰독수리 수문병', species:'eagle', lookAlias:'eagleIron', team:'enemy', weapon:'1hs', lv:6, hp:240, atk:50, mag:5, def:62, mov:4, passives:['wall'] },
   hawkLancer:   { name:'매 창기병', species:'hawk', lookAlias:'hawkRider', team:'enemy', weapon:'spear', lv:6, hp:200, atk:48, mag:5, def:40, mov:8, special:'whirl' },
   fortCaptain:  { name:'요새 수비대장 아퀼라', species:'eagle', lookAlias:'eagleIron', team:'enemy', weapon:'2h', lv:8, hp:460, atk:60, mag:5, def:70, mov:5, special:'dive', boss:true, drop:'arm_scale' },
@@ -2031,19 +2066,173 @@ const STAGE5 = {
     { who:'rea', text:'오빠, 나도 같이 싸울게. 아버지와 어머니의 몫까지.' },
     { text:'레아가 동료가 되었다.' } ],
 };
-const STAGES = [STAGE1, STAGE2, STAGE3, STAGE4, STAGE5];
+/* ---------- 6-1화 명예의 결투: 1대1 (레오스 출전 불가, 근접만) ---------- */
+const STAGE6A = {
+  idx:5, no:6, sub:'6-1', title:'초원의 명예 결투', recapLabel:'CHAPTER 5 · 5화 요약', startObjective:'duel',
+  win:{ boss:'crowCommander', turnLimit:6 }, limitText:'6턴 안에 결판이 나지 않았다. 카라스가 결투를 멋대로 끝내 버렸다.', duel:true, reward:{ gold:300 }, sortieMax:1, fog:null, mortal:['crowCommander'], expCap:150, clearExp:60,
+  adminRoster:{ lv:11, ids:['tiger','boar','horse','deer','finn'] },
+  map: ["r........r", "..........", "....r.....", "..........", "..........", "..........", "..........", ".....r....", "..........", "r........r"],
+  recap: {
+    title:'5화 요약',
+    lines:[
+      '국경 요새 맨 북쪽 감옥에서 레오스는 마침내 레아를 구해 냈다.',
+      '날이 밝기 직전, 일행은 서쪽 비상문으로 요새를 빠져나왔다.',
+      '그러나 공주를 빼앗긴 조류군은 가만있지 않았다. 까마귀 보병대장 카라스가 전 병력을 이끌고 초원까지 쫓아왔다.',
+      '그리고 카라스는 뜻밖의 제안을 해 왔다. 대표 한 명씩, 명예를 건 결투를.',
+    ],
+  },
+  objectives: { duel: { text:'6턴 안에 중대장 코르닉스를 쓰러뜨려라 (진다면 큰 대가를 치른다)', label:null, tile:null } },
+  allies: [ { x:1, y:4 } ],
+  enemies: [ { unit:'crowCommander', x:8, y:5, lv:12, rage:45 } ],
+  events: [
+    { id:'open', at:'start', objective:'duel', talk:[
+      { text:'초원 한가운데, 양 군대가 둥글게 둘러선 작은 결투장.' },
+      { who:'karas', text:'호랑이 새끼, 쓸데없는 피는 흘리지 말자. 대표끼리 겨뤄서 지는 쪽이 물러나는 거다. 왕자는 빠져라, 그건 공정하지 않으니까.' },
+      { who:'boar', text:'…저 까마귀가 순순히 약속을 지킬 리 없습니다. 하지만 지면 사기가 꺾입니다.' },
+      { who:'karas', text:'단, 해가 기울기 전에 끝내라. 그때까지 결판이 안 나면… 내 마음대로 하겠다. 크크.' },
+      { who:'crowCommander', text:'중대장 코르닉스. 기병 사냥이 내 전문이지. 발 빠른 놈일수록 내 창에 더 깊이 박힌다.' },
+      { who:'rea', text:'…빠른 상대일수록 강해진다면, 나는 같은 속도로 정면에서 베면 돼.' } ] },
+  ],
+  defeat: [
+    { who:'crowCommander', text:'끝이다. 기병이든 보병이든 내 창 앞에선 다 똑같지.' },
+    { who:'karas', text:'하하! 결투는 우리의 승리다. 자, 이제 약속대로… 아니, 약속 따윈 없었던 걸로 하지. 전군, 진격!' },
+    { text:'결투에서 졌다. 쓰러진 동료는 다음 싸움에 나설 수 없고, 코르닉스가 적의 선봉에 선다.' } ],
+  defeatAlt: [
+    { who:'karas', text:'시간 다 됐다! 결판이 안 났으니 무승부… 아니, 우리 승리로 하지. 결투에 지친 녀석은 쉬게 해 줘라.' },
+    { who:'boar', text:'처음부터 시간을 끌 생각이었군…!' },
+    { text:'결투는 패배로 끝났다. 지친 대표는 다음 싸움에 나설 수 없고, 코르닉스가 적의 선봉에 선다.' } ],
+  victory: [
+    { who:'crowCommander', text:'크윽… 같은 속도로… 정면에서… 이런 검은…' },
+    { who:'karas', text:'…코르닉스가? 쳇, 상관없다. 전군, 진격하라! 결투 따위 처음부터 시간 벌기였다!' },
+    { who:'tiger', text:'역시 함정이었군. 하지만 우리 사기는 하늘을 찌른다. 모두, 간다!' },
+    { text:'결투 승리! 6-2화에서 아군 전원 공격력·마력 +10%, 코르닉스는 전장에 나오지 않는다.' } ],
+};
+
+/* ---------- 6-2화 지는 까마귀: 초원 전면전 ---------- */
+const STAGE6 = {
+  idx:6, no:6, sub:'6-2', title:'지는 까마귀', recapLabel:'CHAPTER 6-1 · 결투 이후', startObjective:'karas',
+  win:{ boss:'karas' }, reward:{ gold:900 }, sortieMax:8, aiReach:60,   // 넓은 초원: 멀리 있는 적도 곧장 진격해 온다
+  guests:['hound'], fog:null, lvScale:true, mortal:['karas'],
+  secret:{ boss:'karas', by:'prince', drop:'acc_karas_ring' },   // 숨겨진 목표: 레오스가 직접 카라스를 쓰러뜨리면 카라스의 반지
+  expCap:320, clearExp:90,
+  adminRoster:{ lv:11, ids:['tiger','boar','horse','deer','finn'] },
+  map: ["fff......ffffff......fff", "fff..................fff", "........................", "........................", "........................", "........................", ".................r......", "......r.................", "........................", "....................fff.", "....................fff.", "..........rrrr......fff.", ".........rrrrrr.....fff.", ".fff......rrrr..........", ".fff....................", ".fff....................", ".fff....................", "........................", "........................", "........................", "sssss..ssss..ssss..sssss", "sssss..ssss..ssss..sssss", "........................", "........................", "........................", "..............ff........", "..............ff........", "...rrr........ff........", "...rrr..................", "...rrr............rrr...", "..................rrr...", "..................rrr...", "........................", ".......ff...............", ".......ff...............", ".......ff...............", "........................", "............r......fff..", "...........rr......fff..", "...................fff..", "........................", "........................", "........................", "........................"],
+  recap: {
+    title:'결투 이후',
+    lines:[
+      '명예의 결투가 어떻게 끝나든, 카라스는 처음부터 약속을 지킬 생각이 없었다.',
+      '남쪽 지평선을 검게 물들이며 카라스의 전 병력이 초원으로 쏟아져 들어온다.',
+    ],
+    byFlag: {
+      duelWon:     '결투에서 이긴 일행의 사기는 하늘을 찌른다. 아군 전원 공격력·마력 +10%, 코르닉스는 전장에 없다.',
+      duelLost:    '결투에서 졌다. 쓰러진 대표는 싸울 수 없고, 코르닉스가 본대와 함께 진격한다.',
+      duelRefused: '결투를 거절한 일행에게 까마귀들의 비웃음이 쏟아진다. 사기 저하로 아군 전원 공격력·마력 -10%, 코르닉스도 본대와 함께 진격한다.',
+    },
+  },
+  objectives: {
+    karas: { text:'까마귀 보병대장 카라스를 쓰러뜨려라', label:null, tile:null },
+  },
+  allies: [
+    { x:4, y:2 }, { x:3, y:3 }, { x:5, y:3 }, { x:4, y:4 },              // 왼쪽: 레오스 외 3명
+    { unit:'rea', x:19, y:2 }, { x:18, y:3 }, { x:20, y:3 }, { x:19, y:4 }, // 오른쪽: 레아 외 3명
+  ],
+  enemies: [
+    // 선봉: 카라스 친위대장 둘이 이끈다 (처음부터 움직인다)
+    { unit:'crowRook',    x:8,  y:31, lv:9, group:'karasGuard' },
+    { unit:'crowJackdaw', x:15, y:31, lv:9, group:'karasGuard' },
+    { unit:'crowInf',   x:5,  y:30, name:'까마귀 선봉 A', lv:7 },
+    { unit:'crowInf',   x:7,  y:29, name:'까마귀 선봉 B', lv:7 },
+    { unit:'crowInf',   x:13, y:30, name:'까마귀 선봉 D', lv:7 },
+    { unit:'crowInf',   x:16, y:29, name:'까마귀 선봉 E', lv:7, drop:'acc_charm' },
+    { unit:'birdSpear', x:9,  y:32, name:'흑창병 A', lv:7 },
+    { unit:'birdSpear', x:17, y:32, name:'흑창병 D', lv:7 },
+    { unit:'birdGreat', x:6,  y:32, name:'흑대검병 A', lv:7 },
+    { unit:'birdGreat', x:19, y:33, name:'흑대검병 B', lv:7 },
+    // 본대 (3턴부터)
+    { unit:'crowInf',   x:4,  y:36, name:'까마귀 본대 A', lv:7, activeTurn:4 },
+    { unit:'crowInf',   x:13, y:35, name:'까마귀 본대 C', lv:7, activeTurn:4 },
+    { unit:'crowInf',   x:17, y:36, name:'까마귀 본대 D', lv:7, activeTurn:4 },
+    { unit:'birdSpear', x:15, y:35, name:'흑창병 F', lv:7, activeTurn:4 },
+    { unit:'birdXbow',  x:6,  y:37, name:'매 석궁병 A', lv:7, activeTurn:4, drop:'w_xbow_light' },
+    { unit:'birdXbow',  x:12, y:39, name:'매 석궁병 B', lv:7, activeTurn:4 },
+    { unit:'birdXbow',  x:17, y:38, name:'매 석궁병 C', lv:7, activeTurn:4 },
+    { unit:'sparrow',   x:9,  y:38, name:'참새 궁수 A', lv:7, activeTurn:4 },
+    { unit:'sparrow',   x:15, y:38, name:'참새 궁수 B', lv:7, activeTurn:4, drop:'w_bow_sparrow' },
+    { unit:'parrot',    x:10, y:39, name:'앵무새 군의관 A', lv:7, activeTurn:4 },
+    { unit:'parrot',    x:14, y:39, name:'앵무새 군의관 B', lv:7, activeTurn:4, drop:'acc_ring_mana' },
+    // 측면 기병 (4턴부터)
+    { unit:'hawkRider', x:1,  y:38, name:'매 기갑병 A', lv:7, activeTurn:6 },
+    { unit:'hawkRider', x:22, y:38, name:'매 기갑병 B', lv:7, activeTurn:6 },
+    // 카라스와 근위대: 친위대장이 모두 쓰러지거나 카라스가 공격받으면 출격
+    { unit:'karas',     x:11, y:41, lv:11, hp:280, atk:50, ai:'wake', wakeGroup:'karas', boss:true, elite:true },
+    // 결투에서 졌거나 거절했으면 중대장 코르닉스도 본대와 함께 진격한다 (4턴부터)
+    { unit:'crowCommander', x:11, y:35, lv:12, hp:200, atk:54, activeTurn:4, ifFlag:'captain' },
+    { unit:'birdGreat', x:10, y:42, name:'카라스 근위병 A', lv:9, ai:'wake', wakeGroup:'karas' },
+    { unit:'birdGreat', x:12, y:42, name:'카라스 근위병 B', lv:9, ai:'wake', wakeGroup:'karas' },
+  ],
+  events: [
+    { id:'open', at:'start', objective:'karas', talk:[
+      { text:'끝없이 펼쳐진 초원. 숨을 곳 하나 없다.' },
+      { who:'horse', text:'남쪽 지평선이 검게 물들었습니다… 전부 까마귀입니다.' },
+      { who:'karas', text:'공주를 훔쳐 간 쥐새끼들! 여기서 전부 짓밟아 주마. 친위대, 앞장서라!' },
+      { who:'tiger', text:'도망칠 곳은 없어. 여기서 끝낸다. 왼쪽은 내가, 오른쪽은 레아가 맡는다!' },
+      { who:'rea', text:'맡겨 줘, 오빠. 이번엔 내가 지킬 차례야.' },
+      { who:'boar', text:'친위대장 둘이 앞장섭니다. 놈들을 쓰러뜨리면 카라스가 직접 나올 겁니다.' } ] },
+    { id:'mainBody', turn:4, focus:[11, 36], banner:'카라스 본대 진격', talk:[
+      { who:'karas', text:'궁병대, 쏴라! 군의관은 쓰러진 놈부터 일으켜 세워라!' } ] },
+    { id:'west', turn:5, focus:[1, 16], banner:'서쪽에서 까마귀 증원', spawn:[
+      { unit:'crowInf',   x:0, y:15, name:'까마귀 증원 A', lv:7, activeIn:1 },
+      { unit:'crowInf',   x:0, y:17, name:'까마귀 증원 B', lv:7, activeIn:1 },
+      { unit:'birdSpear', x:1, y:12, name:'흑창병 H', lv:7, activeIn:1 },
+      { unit:'birdXbow',  x:0, y:11, name:'매 석궁병 D', lv:7, activeIn:1 } ], talk:[
+      { who:'finn', text:'서쪽 덤불에서 또 나와! 우릴 감싸려는 거야!' } ] },
+    { id:'hound', turn:5, focus:[22, 18], banner:'동쪽에서 낯선 군대', spawn:[
+      { unit:'hound',        x:23, y:17, lockAuto:true, aiMode:'attack' },
+      { unit:'animalSword',  x:23, y:16, name:'하운드 부대 검사', lockAuto:true, aiMode:'attack' },
+      { unit:'animalSpear',  x:23, y:18, name:'하운드 부대 창병', lockAuto:true, aiMode:'attack' },
+      { unit:'animalBow',    x:22, y:19, name:'하운드 부대 궁수', lockAuto:true, aiMode:'attack' } ], talk:[
+      { text:'동쪽 언덕 너머에서 갑옷 차림의 개 무사와 동물 병사들이 달려 내려온다.' },
+      { who:'hound', text:'까마귀 냄새가 진동하는군. 부하들, 저 검은 날개들을 쓸어라.' },
+      { who:'rea', text:'저 사람… 우리 편이야?' } ] },
+    { id:'houndTalk', near:{ a:['tiger', 'rea'], b:'hound', d:1 }, flag:'houndPromise', talk:[
+      { who:'hound', text:'…그 눈빛. 설마 레오스 왕자? 왕도가 불탔다는 소식에 이미 늦은 줄 알았는데.' },
+      { who:'tiger', text:'아직 끝나지 않았어. 왕국을 되찾을 거야. 힘을 빌려줘.' },
+      { who:'hound', text:'지금은 부하들을 데리고 남은 마을을 지켜야 하오. 하지만 이 냄새는 기억해 두지. 머지않아 다시 찾아가겠소, 왕자.' } ] },
+    { id:'karasCharge', whenDead:'karasGuard', whenAwake:'karas', activate:'karas', focus:[11, 41], banner:'카라스 출격', talk:[
+      { who:'karas', text:'쓸모없는 놈들… 좋다, 내가 직접 끝내 주마! 호랑이 새끼, 그 목은 내 것이다!' },
+      { who:'tiger', text:'카라스… 여기서 끝을 보자.' } ] },
+    { id:'south', turn:8, focus:[11, 42], banner:'남쪽에서 까마귀 후속 부대', spawn:[
+      { unit:'crowInf',   x:3,  y:43, name:'까마귀 후속 A', lv:7, activeIn:1 },
+      { unit:'crowInf',   x:20, y:43, name:'까마귀 후속 B', lv:7, activeIn:1 },
+      { unit:'birdGreat', x:17, y:43, name:'흑대검병 D', lv:7, activeIn:1 } ], talk:[
+      { who:'karas', text:'아직이다! 후속 부대, 전부 쏟아부어라!' } ] },
+  ],
+  defeat: [
+    { who:'tiger', text:'여기서… 무너질 수는…' },
+    { who:'rea', text:'오빠!' },
+    { text:'검은 날개가 초원을 뒤덮었다.' } ],
+  victory: [
+    { who:'karas', text:'크윽… 베리알 녀석… 처음부터 우릴 버릴 생각이었나… 지원군은… 끝내 오지 않는군…' },
+    { who:'karas', text:'호랑이 새끼… 아니, 레오스. 그 날개 없는 놈들을… 조심해라…' },
+    { text:'까마귀 보병대장 카라스는 초원에서 숨을 거두었다.' },
+    { who:'tiger', text:'…적이었지만, 마지막까지 자기 부대를 지킨 장수였어.' },
+    { who:'rea', text:'베리알… 인간 쪽 마법사 이름이었지. 무언가 꾸미고 있어.' } ],
+};
+const STAGES = [STAGE1, STAGE2, STAGE3, STAGE4, STAGE5, STAGE6A, STAGE6];
 /* 전체 구성: 1~15화 공통 → 15화 분기 → 16~30화 왕도(불살) 또는 패도(학살) → 30화 이후 0화 프롤로그부터 다음 회차 */
 const CHAPTER_TITLES = {
-  common:['불타는 왕도 탈출', '잿빛 숲의 덫', '강 건너의 검은 깃털', '요새 잠입', '새장의 공주', '날지 못하는 새', '숨겨진 야영지', '보이지 않는 추적자', '하얀 전령의 의구심', '흑마법의 그림자',
-    '숲의 수호자와 환술사', '성검의 제단', '지는 까마귀', '1차 총력전과 참패', '붉은 달의 제단'],
+  common:['불타는 왕도 탈출', '잿빛 숲의 덫', '강 건너의 검은 깃털', '요새 잠입', '새장의 공주', '지는 까마귀', '숨겨진 야영지', '보이지 않는 추적자', '하얀 전령의 의구심', '흑마법의 그림자',
+    '숲의 수호자와 환술사', '성검의 제단', '날지 못하는 새', '1차 총력전과 참패', '붉은 달의 제단'],
   royal:['긍지의 무게', '추격의 끝', '은빛 질풍', '폭파 공작', '반격의 봉화', '철벽의 수문장', '하얀 전령의 희생', '흑마법의 심연', '빼앗긴 왕도', '여명, 그리고 엇갈린 신념',
     '험산 돌파', '구름 관문 공방전', '꺾이지 않는 날개', '천공 요새의 꼭대기', '진정한 제왕'],
   tyrant:['피로 물든 마검', '어둠 속의 포식자', '추락하는 매', '핏물 든 골목', '찢겨진 하늘', '피로 덮인 둥지', '꺾인 날개', '서쪽을 향한 광기', '강철 요새 돌파', '죽음의 독 늪',
     '잿빛 황무지의 학살', '심연의 환술', '짓밟힌 영웅', '절망의 연합', '핏빛 옥좌'],
 };
+const stageNo = st => st.sub || st.no;
+const clearedNo = ch => ch > 0 && STAGES[ch - 1] ? stageNo(STAGES[ch - 1]) : ch;
 function chapterTitle(no, route) { return no <= 15 ? CHAPTER_TITLES.common[no - 1] : (CHAPTER_TITLES[route || 'royal'] || CHAPTER_TITLES.royal)[no - 16]; }
 /* 재정비 장소 (n화를 클리어한 뒤) */
-const CAMP_PLACE = [null, '산길 너머 야영지', '숲속 굴 야영지', '강 건너 언덕 야영지', '요새 안 버려진 창고', '요새 서쪽 숲의 은신처'];
+const CAMP_PLACE = [null, '산길 너머 야영지', '숲속 굴 야영지', '강 건너 언덕 야영지', '요새 안 버려진 창고', '요새 서쪽 숲의 은신처', '초원의 결투장', '초원 끝 바위 그늘'];
 /* 재정비 대화 (n화를 클리어한 뒤) */
 const CAMP_TALK = [
   [ { who:'boar', text:'왕도를 빠져나왔습니다. 오늘 밤은 이 바위 뒤에서 쉬시지요.' },
@@ -2070,6 +2259,12 @@ const CAMP_TALK = [
     { who:'rea', text:'감옥에서 들었어요. 조류군이 날지 못하는 새들을 노예처럼 부린다고. 그중엔 우리 편이 될 새도 있을지 몰라요.' },
     { who:'finn', text:'새가 우리 편? 에이, 설마.' },
     { who:'tiger', text:'적이라고 다 같은 건 아니겠지. 다음 길에서 확인해 보자.' } ],
+  null,   // 6-1화 뒤에는 재정비 없이 바로 6-2화
+  [ { text:'초원의 싸움이 끝났다. 바람에 검은 깃털이 흩날린다.' },
+    { who:'boar', text:'카라스의 군대를 정면으로 꺾었습니다. 왕도를 빠져나온 뒤 처음 맛보는 큰 승리입니다.' },
+    { who:'rea', text:'그런데 카라스가 마지막에 베리알 이야기를 했어. 조류군도 인간군을 믿지 않는 것 같아.' },
+    { who:'horse', text:'동쪽에서 나타났던 개 무사도 신경 쓰입니다. 왕국군 깃발을 달고 있었어요.' },
+    { who:'tiger', text:'오늘은 쉬자. 다음은 계곡이다. 몸을 숨길 곳을 찾아야 해.' } ],
 ];
 let STAGE = STAGE1, MAP = STAGE.map, COLS = MAP[0].length, ROWS = MAP.length;
 function loadStage(i) { STAGE = STAGES[i]; MAP = STAGE.map; COLS = MAP[0].length; ROWS = MAP.length; }
@@ -2100,7 +2295,7 @@ const CAMP = {};
 function defaultEquip(id) { const e = { weapon:null, armor:null, acc:null }; for (const g of UNIT_DEFS[id].gear || []) e[GEAR[g].slot] = g; return e; }
 function newRecord(id, lv) { const d = UNIT_DEFS[id]; return { id, lv:lv || 1, exp:0, equip:defaultEquip(id), manual:!!d.manual || !!d.prince, sortie:true, aiMode:'global' }; }
 function newCampaign() {
-  Object.assign(CAMP, { chapter:0, roster:['tiger', 'boar', 'horse', 'deer'].map(id => newRecord(id)), bag:[], items:{ potion:4, ether:0 }, gold:0, cleared:[], training:{}, last:null, loop:CAMP.loop || 1, route:null });
+  Object.assign(CAMP, { flags:{}, duelist:null, chapter:0, roster:['tiger', 'boar', 'horse', 'deer'].map(id => newRecord(id)), bag:[], items:{ potion:4, ether:0 }, gold:0, cleared:[], training:{}, last:null, loop:CAMP.loop || 1, route:null });
 }
 const recOf = id => (CAMP.roster || []).find(r => r.id === id);
 function applyRecord(u, rec) {
@@ -2122,19 +2317,28 @@ function sortieList() {
   return r.sort((a, b) => (b.id === 'tiger') - (a.id === 'tiger'));
 }
 function deployAllies() {
-  const out = [], used = new Set(STAGE.guests || []), pool = sortieList();
+  if (STAGE.duel) {   // 결투: 고른 대표 한 명
+    const id = CAMP.duelist && recOf(CAMP.duelist) ? CAMP.duelist : duelCandidates()[0];
+    if (!id) return [];
+    const u = unitFromRecord(recOf(id), STAGE.allies[0]); u.manual = true;   // 결투는 늘 직접 조작
+    return [u];
+  }
+  const loser = STAGE.idx === 6 ? (CAMP.flags || {}).duelLoser : null;   // 결투에서 진 동료는 6-2화에 나설 수 없다
+  const out = [], used = new Set((STAGE.guests || []).concat(loser ? [loser] : [])), pool = sortieList();
   for (const slot of STAGE.allies) {
-    const rec = slot.unit ? (recOf(slot.unit) || newRecord(slot.unit)) : pool.find(r => !used.has(r.id));
+    const rec = slot.unit && slot.unit !== loser ? (recOf(slot.unit) || newRecord(slot.unit)) : pool.find(r => !used.has(r.id));
     if (!rec || used.has(rec.id)) continue;
     used.add(rec.id);
     out.push(unitFromRecord(rec, slot));
   }
   return out;
 }
+/* 결투 대표 후보: 레오스를 뺀 근접 동료 */
+function duelCandidates() { return (CAMP.roster || []).filter(r => r.id !== 'tiger' && WEAPONS[UNIT_DEFS[r.id].weapon].kind === 'melee').map(r => r.id); }
 function resetState() {
   if (!CAMP.roster) newCampaign();
   Object.assign(S, { stage:STAGE.idx, turn:1, phase:'player', units:[], escaped:[], items:Object.assign({ potion:0, ether:0 }, CAMP.items), bag:(CAMP.bag || []).slice(),
-    globalMode:'escort', allManual:false, over:null, log:[], speed:S.speed || 1, objective:STAGE.startObjective || 'north', fired:{}, kills:0, met:{}, fallen:null, deployed:0, retreats:[], alarm:0, loseReason:'', thiefGold:0 });
+    globalMode:'escort', allManual:false, over:null, log:[], speed:S.speed || 1, objective:STAGE.startObjective || 'north', fired:{}, kills:0, met:{}, fallen:null, deployed:0, retreats:[], alarm:0, loseReason:'', thiefGold:0, flags:{}, secretGot:false });
   for (const u of deployAllies()) S.units.push(u);
   // 처음부터 함께 있는 합류 동료(3화 치유병·4화 마법병): 전투 시작과 동시에 자동으로 배치
   for (const g of STAGE.guestStart || []) {
@@ -2145,7 +2349,9 @@ function resetState() {
   if (STAGE.allManual) S.allManual = true;
   S.deployed = S.units.length;
   const P = prince();
-  for (const e of STAGE.enemies) { const u = scaleEnemy(makeUnit(e.unit, e)); faceToward(u, P); S.units.push(u); }
+  for (const e of STAGE.enemies) { if (e.ifFlag && !(CAMP.flags || {})[e.ifFlag]) continue; const u = scaleEnemy(makeUnit(e.unit, e)); if (e.rage) u.rage = e.rage; faceToward(u, P); S.units.push(u); }
+  if (STAGE.idx === 6 && (CAMP.flags || {}).duelWon) for (const u of S.units) if (u.team === 'ally') u.duelBonus = true;
+  if (STAGE.idx === 6 && (CAMP.flags || {}).duelRefused) for (const u of S.units) if (u.team === 'ally') u.duelPenalty = true;
 }
 /* 처음 등장할 때 적은 레오스 쪽을 바라본다 */
 /* 3화부터: 적 레벨이 기본 레벨보다 높으면 체력·공격·마력·방어 +7%/레벨 */
@@ -2202,7 +2408,9 @@ function harvestBattle() {
   CAMP.bag = S.bag.slice();
   CAMP.items = Object.assign({}, S.items);
   CAMP.cleared[STAGE.idx] = true;
+  if (S.flags) CAMP.flags = Object.assign(CAMP.flags || {}, S.flags);
   CAMP.chapter = Math.max(CAMP.chapter, STAGE.idx + 1);
+  if (S.secretGot) (CAMP.flags = CAMP.flags || {})['secret' + STAGE.no] = true;
   const trained = finishTraining();
   CAMP.last = { stage:STAGE.idx, gold, thief, joined, hurt, healed, bonus, trained, kills:S.kills, turn:S.turn };
   return CAMP.last;
@@ -2220,8 +2428,8 @@ const keyOf = (x, y) => y * COLS + x;
 const W = u => WEAPONS[u.weapon];
 const isMelee = u => W(u).kind === 'melee';
 const alive = () => S.units.filter(u => u.hp > 0);
-const prince = () => S.units.find(u => u.prince);
-const isManual = u => u.team === 'ally' && (u.manual || S.allManual);
+const prince = () => S.units.find(u => u.prince) || (STAGE.duel ? S.units.find(u => u.team === 'ally') : undefined);   // 결투에서는 대표가 쓰러지면 패배
+const isManual = u => u.team === 'ally' && !u.lockAuto && (u.manual || S.allManual);
 function unitAt(x, y, except) { for (const u of S.units) if (u.hp > 0 && u.x === x && u.y === y && u !== except) return u; return null; }
 const buffSum = (u, k) => u.buffs.reduce((s, b) => s + (b[k] || 0), 0);
 const passiveSum = (u, k) => u.passives.reduce((s, p) => s + (PASSIVES[p][k] || 0), 0);
@@ -2252,11 +2460,12 @@ const TRAITS = {
   owlEye:     { name:'올빼미의 눈',  desc:'시야 제한 무시, 주변 2칸 자기편 회피 +10%p' },
   dawnCounter:{ name:'새벽의 반격',  desc:'근접 반격 확률 +20%p, 반격 피해 +20%' },
   conqueror:  { name:'정복자의 긍지', desc:'체력 50% 이하에서 공격력 +20%' },
+  antiCav:    { name:'대기병 방어',  desc:'자신보다 빠른 상대에게 공격당하면 이동 1 차이마다 받는 피해 -10%' },
   phalanx:    { name:'철통 방진',    desc:'상하좌우에 붙은 자기편 1명당 가드 +10%p (최대 +30%p)' },
 };
 const TRAIT_OF = { tiger:'prince', rea:'sharpness', boar:'indomitable', horse:'redHare', finn:'boomerang', ren:'twinBlades', dion:'healer', hound:'loyalty',
   felix:'thief', urs:'heavyBlow', luga:'proven', rix:'engineer', garuda:'ironclad', falco:'speedrun', karas:'mentor', belial:'curse',
-  columba:'hymn', bubo:'owlEye', gallus:'dawnCounter', noah:'conqueror', valerius:'phalanx' };
+  columba:'hymn', bubo:'owlEye', gallus:'dawnCounter', noah:'conqueror', valerius:'phalanx', crowCommander:'antiCav' };
 /* 레오스는 15화 분기 뒤(16화~) 왕도 → 진정한 국왕, 패도 → 흑화 */
 function traitOf(u) { const t = u && TRAIT_OF[u.defId]; if (t === 'prince' && CAMP.route && STAGE.no >= 16) return CAMP.route === 'tyrant' ? 'darkKing' : 'trueKing'; return t || null; }
 const cheb = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
@@ -2277,6 +2486,8 @@ function traitPct(u, k) {
   let p = auraSum(u, k);
   const t = traitOf(u);
   if (t === 'darkKing' && k === 'atk') p += 0.3;
+  if (u.duelBonus && (k === 'atk' || k === 'mag')) p += 0.10;   // 6-1 결투 승리 보너스
+  if (u.duelPenalty && (k === 'atk' || k === 'mag')) p -= 0.10; // 결투 거절: 사기 저하
   if (t === 'proven' && k === 'atk') p += 0.05 * Math.min(6, u.kills || 0);
   if (t === 'conqueror' && k === 'atk' && u.hp > 0 && u.hp <= u.maxHp * 0.5) p += 0.2;
   return p;
@@ -2467,6 +2678,8 @@ function takenMul(att, def, physical) {
   let m = 1;
   const at = traitOf(att), dt = traitOf(def);
   if (physical && dt === 'ironclad' && isMelee(att)) m *= 0.9;               // 가루다
+  if (physical && dt === 'antiCav' && movOf(att) > movOf(def)) m *= Math.max(0.3, 1 - 0.1 * (movOf(att) - movOf(def)));   // 코르닉스: 빠른 상대일수록 덜 아프다
+  if (physical && att.sp && att.sp.javelin && movOf(def) > movOf(att)) m *= 1 + 0.25 * (movOf(def) - movOf(att));          // 투창: 빠른 상대일수록 더 아프다
   if (physical && at === 'speedrun' && movOf(att) > movOf(def)) m *= 1.1;   // 팔코
   if (physical && at === 'sharpness' && att.cls && att._single) m *= 1.2;   // 레아 클래스 체인지
   if (def.weak > 0) m *= 1.3;                                                // 베리알 저주
@@ -2581,6 +2794,8 @@ function kill(u, by) {
   if (by && traitOf(by) === 'proven' && (by.kills || 0) < 6) { by.kills = (by.kills || 0) + 1; FX.popup(by, `실적 +${by.kills * 5}%`, 'buff'); }
   FX.sfx(u.team === 'ally' ? 'down' : 'kill');
   if (u.team === 'enemy' && u.drop) acquireGear(u.drop);
+  const sc = STAGE.secret;
+  if (sc && u.defId === sc.boss && by && by.prince && !S.secretGot) { S.secretGot = true; FX.popup(by, '숨겨진 목표!', 'level'); FX.log(`숨겨진 목표 달성 · 레오스가 직접 ${u.name}을(를) 쓰러뜨렸다`, 'event'); acquireGear(sc.drop); }
 }
 async function flushRetreats() {
   while (S.retreats && S.retreats.length) {
@@ -2833,6 +3048,7 @@ function checkEnd() {
   else if (STAGE.win.allEscape && S.escaped.some(u => u.prince) && !S.units.some(u => u.team === 'ally' && u.hp > 0)) S.over = 'escape';
   else if (!S.escaped.some(u => u.prince) && (!p || p.hp <= 0)) S.over = 'lose';
   else if (STAGE.win.rout && !S.units.some(u => u.team === 'enemy' && u.hp > 0) && !pendingSpawns()) S.over = 'win';
+  else if (STAGE.win.boss && S.units.some(u => u.defId === STAGE.win.boss && u.hp <= 0)) S.over = 'win';
   return S.over;
 }
 /* 전원 탈출: 레오스가 탈출했고 맵에 남은 아군이 없으면 승리 (레오스 혼자 먼저 나가면 안 된다) */
@@ -2872,6 +3088,7 @@ async function fireEvent(ev) {
     // 합류하는 동료는 레오스 레벨에 맞춰 나온다
     const u = ally ? unitFromRecord(recOf(s.unit) || newRecord(s.unit, (prince() || { lv:1 }).lv), Object.assign({}, s, { x, y })) : scaleEnemy(makeUnit(s.unit, Object.assign({}, s, { x, y })));
     if (ally && s.manual != null) u.manual = s.manual;
+    if (s.lockAuto) { u.lockAuto = true; u.manual = false; }
     if (ally && s.aiMode) { u.aiMode = s.aiMode; u.anchor = { x, y }; u.anchorFor = s.aiMode === 'formation' ? 'formation' : null; }
     u.uid = u.id = `${s.unit}_${ev.id}_${x}_${y}`;
     u.activeTurn = S.turn + (s.activeIn || 0);
@@ -2880,6 +3097,8 @@ async function fireEvent(ev) {
     FX.spawned(u);
   }
   if (ev.objective) S.objective = ev.objective;
+  if (ev.flag) (S.flags = S.flags || {})[ev.flag] = true;
+  if (ev.activate) for (const o of S.units) if (o.hp > 0 && (o.defId === ev.activate || (o.wakeGroup && o.wakeGroup === ev.activate))) { o.ai = null; o.activeTurn = 0; }
   if (ev.wakeAll) for (const o of S.units) if (o.team === 'enemy' && o.hp > 0 && (o.ai === 'wake' || o.ai === 'post' || o.ai === 'hold')) { o.ai = null; o.activeTurn = 0; }
   FX.changed();
   if (ev.join) {
@@ -2902,8 +3121,15 @@ async function runZoneEvents() {
       continue;
     }
     if (ev.near) {
-      const a = S.units.find(o => o.defId === ev.near.a && o.hp > 0), b = S.units.find(o => o.defId === ev.near.b && o.hp > 0);
-      if (a && b && man(a.x, a.y, b.x, b.y) <= ev.near.d) { if (ev.focus == null) ev.focusAt = [b.x, b.y]; await fireEvent(ev); }
+      const b = S.units.find(o => o.defId === ev.near.b && o.hp > 0);
+      const a = b && S.units.find(o => [].concat(ev.near.a).includes(o.defId) && o.hp > 0 && cheb(o, b) <= ev.near.d);
+      if (a && b) { if (ev.focus == null) ev.focusAt = [b.x, b.y]; await fireEvent(ev); }
+      continue;
+    }
+    if (ev.whenDead || ev.whenAwake) {
+      const deadAll = ev.whenDead && S.units.some(o => o.group === ev.whenDead) && !S.units.some(o => o.group === ev.whenDead && o.hp > 0);
+      const awake = ev.whenAwake && S.units.some(o => o.defId === ev.whenAwake && o.hp > 0 && o.ai !== 'wake');
+      if (deadAll || awake) await fireEvent(ev);
       continue;
     }
     if (ev.allyRow == null) continue;
@@ -2995,7 +3221,7 @@ function aiCtx(u) {
   };
   const threat = (x, y) => activeOpps.reduce((n, o) => n + (man(o.x, o.y, x, y) <= movOf(o) + 1 ? 1 : 0), 0);
   const pos = (x, y) => {
-    const k = keyOf(x, y), near = Math.min(df[k], 20);
+    const k = keyOf(x, y), near = Math.min(df[k], STAGE.aiReach || 20);
     if (objDF) return -4 * Math.min(objDF[k], 60) - 1.5 * threat(x, y);
     if (goal) return -0.6 * man(x, y, goal.x, goal.y) - 0.15 * near;
     return -1.0 * near;
@@ -3083,7 +3309,7 @@ function planRanged(u, C) {
     const x = k % COLS, y = (k / COLS) | 0;
     if (unitAt(x, y, u) || !C.endOk(x, y)) continue;
     const threat = C.opps.filter(o => isMelee(o) && !isDormant(o) && man(o.x, o.y, x, y) <= 2).length;
-    const posS = (C.goal || C.mode === 'escape' ? C.pos(x, y) : -0.8 * Math.abs(Math.min(C.df[k], 20) - range)) - 4 * threat;
+    const posS = (C.goal || C.mode === 'escape' ? C.pos(x, y) : -0.8 * Math.abs(Math.min(C.df[k], STAGE.aiReach || 20) - range)) - 4 * threat;
     let shot = null, shotS = 0;
     for (const o of C.opps) {
       const d = man(o.x, o.y, x, y);
@@ -3105,7 +3331,7 @@ function planMage(u, C) {
     const x = k % COLS, y = (k / COLS) | 0;
     if (unitAt(x, y, u) || !C.endOk(x, y)) continue;
     const threat = C.opps.filter(o => isMelee(o) && !isDormant(o) && man(o.x, o.y, x, y) <= 2).length;
-    const posS = (C.goal || C.mode === 'escape' ? C.pos(x, y) : -0.5 * Math.abs(Math.min(C.df[k], 20) - 3)) - 5 * threat;
+    const posS = (C.goal || C.mode === 'escape' ? C.pos(x, y) : -0.5 * Math.abs(Math.min(C.df[k], STAGE.aiReach || 20) - 3)) - 5 * threat;
     let act = null, actS = 0;
     for (const sid of u.skills) {
       const sk = SKILLS[sid];
@@ -3154,6 +3380,10 @@ async function aiTakeTurn(u) {
     useItem(u, 'potion'); u.acted = true; await wait(300); FX.changed(); return;
   }
   const sp = rageFull(u) ? specialOf(u) : null;
+  if (sp && sp.javelin) {   // 투창: 사거리 안에서 가장 아프게 맞을 상대에게 던지고 끝
+    const tg = alive().filter(o => o.team !== u.team && man(o.x, o.y, u.x, u.y) <= sp.range).sort((a, b) => expHit(u, b, 1, sp.powMul) / b.hp - expHit(u, a, 1, sp.powMul) / a.hp)[0];
+    if (tg) { u.sp = sp; await execShot(u, tg, sp); u.sp = null; u.acted = true; await flushRetreats(); checkEnd(); return; }
+  }
   if (sp && sp.kind === 'buff') { const near = alive().some(o => o.team !== u.team && !isDormant(o) && man(o.x, o.y, u.x, u.y) <= 7); if (near) await useSpecialBuff(u); }
   let plan = null, armed = false;
   if (sp && sp.kind !== 'buff') { u.sp = sp; plan = planFor(u); if (planHits(u, plan)) armed = true; else { u.sp = null; plan = null; } }
@@ -3842,7 +4072,7 @@ FX.talk = lines => new Promise(resolve => {
 /* ---------- panel ---------- */
 function stat(label, value, up) { return `<span class="stat${up ? ' up' : ''}">${label}<b>${value}</b></span>`; }
 /* 전투 중 동료 수동/자동 바꾸기 (카드의 수동·자동 표시를 누른다, 레오스 제외, 레오스 포함 최대 MANUAL_MAX명) */
-function canToggleManual(u) { return !!u && u.team === 'ally' && !u.prince && u.hp > 0 && !S.escaped.includes(u) && !S.allManual && S.phase === 'player' && !S.over; }
+function canToggleManual(u) { return !!u && u.team === 'ally' && !u.prince && !u.lockAuto && u.hp > 0 && !S.escaped.includes(u) && !S.allManual && S.phase === 'player' && !S.over; }
 function toggleManual(u) {
   if (!canToggleManual(u) || UI.busy) return;
   if (!u.manual && S.units.filter(o => o.team === 'ally' && o.hp > 0 && o.manual).length >= MANUAL_MAX) { FX.log(`수동 조작은 레오스 포함 ${MANUAL_MAX}명까지예요`, 'sys'); FX.popup(u, `수동 최대 ${MANUAL_MAX}명`, 'info'); return; }
@@ -4036,14 +4266,14 @@ function renderHeader() {
   const chip = $('#phaseChip');
   chip.dataset.phase = S.phase;
   chip.textContent = `턴 ${S.turn} · ${S.phase === 'player' ? '아군' : S.phase === 'ally' ? '동맹' : '적'}`;
-  const ch = `<small>${STAGE.no}화</small>${STAGE.title}`, h1 = document.querySelector('.chapter');
+  const ch = `<small>${stageNo(STAGE)}화</small>${STAGE.title}`, h1 = document.querySelector('.chapter');
   if (h1 && h1.innerHTML !== ch) h1.innerHTML = ch;
   $('#objText').textContent = STAGE.objectives[S.objective].text;
   const w = STAGE.win;
   $('#objMeta').textContent = STAGE.stealth ? (S.alarm ? `경보! ${Math.max(0, S.alarm + 3 - S.turn)}턴 남음 · 진입 ${S.escaped.length}` : `들키지 않음 · 진입 ${S.escaped.length}`)
     : w.allEscape ? `턴 ${S.turn}/${w.turnLimit || '-'} · 탈출 ${S.escaped.length}`
     : w.escape ? `탈출 ${S.escaped.length}/${S.deployed} · 처치 ${S.kills}`
-    : w.survive ? `턴 ${Math.min(S.turn, w.survive)}/${w.survive} · 처치 ${S.kills}` : `턴 ${S.turn} · 처치 ${S.kills} · 남은 적 ${S.units.filter(u => u.team === 'enemy' && u.hp > 0).length}`;
+    : w.survive ? `턴 ${Math.min(S.turn, w.survive)}/${w.survive} · 처치 ${S.kills}` : w.boss ? (() => { const b = S.units.find(u => u.defId === w.boss); return `턴 ${S.turn}${w.turnLimit ? `/${w.turnLimit}` : ''} · 처치 ${S.kills} · ${UNIT_DEFS[w.boss].name} ${b ? `${b.hp}/${b.maxHp}` : ''}`; })() : `턴 ${S.turn} · 처치 ${S.kills} · 남은 적 ${S.units.filter(u => u.team === 'enemy' && u.hp > 0).length}`;
 }
 function renderPanel() { renderHeader(); renderCard(); renderPreview(); }
 function render() { renderHeader(); renderCard(); renderPreview(); renderActions(); }
@@ -4305,6 +4535,7 @@ async function commitTarget() {
   if (sid) await execSkill(u, sid, tx, ty);
   else { const t = unitAt(tx, ty); if (t) await execShot(u, t, special ? specialOf(u) : null); }
   await flushRetreats();
+  if (!S.over) await runZoneEvents();
   UI.busy = false;
   if (afterAction()) return;
   finishUnit(u);
@@ -4314,6 +4545,7 @@ async function runSkill(sid, tx, ty) {
   UI.busy = true; render();
   await execSkill(u, sid, tx, ty);
   await flushRetreats();
+  if (!S.over) await runZoneEvents();
   UI.busy = false;
   if (afterAction()) return;
   finishUnit(u);
@@ -4323,6 +4555,17 @@ async function finishStage(r) {
   UI.busy = true;
   Object.assign(UI, { sel:null, mode:'idle', route:[], kn:null, reachSet:null, plan:null, targets:null, tsel:null });
   render();
+  if (STAGE.duel) {   // 결투: 이기든 지든 6-2화로 이어진다
+    await FX.talk(r === 'lose' ? (S.loseReason && STAGE.defeatAlt ? STAGE.defeatAlt : STAGE.defeat) : STAGE.victory);
+    const d = S.units.find(u => u.team === 'ally');
+    const F = CAMP.flags = CAMP.flags || {};
+    F.duelWon = r !== 'lose'; F.duelLost = r === 'lose'; F.duelLoser = r === 'lose' && d ? d.defId : null; F.duelRefused = false; F.captain = r === 'lose';
+    if (d && d.hp <= 0) d.hp = 1;   // 진 대표는 6-2화에서 빠질 뿐, 부상은 아니다
+    harvestBattle();
+    BATTLE_SAVE = null; persist();
+    showResult(r === 'lose' ? 'duelLose' : 'duelWin');
+    return;
+  }
   if (r === 'lose') { if (S.fallen) { centerOn(S.fallen.x, S.fallen.y); await FX.sleep(700); } await FX.talk(S.loseReason && STAGE.defeatAlt ? STAGE.defeatAlt : STAGE.defeat); }
   else { await FX.talk(STAGE.victory); harvestBattle(); }
   BATTLE_SAVE = null; persist();
@@ -4355,6 +4598,7 @@ async function endTurn() {
   if (S.over) return finishStage(S.over);
   if (checkSurvive()) return finishStage(S.over);
   if (checkTimers()) return finishStage(S.over);
+  await runZoneEvents();
   rotateSentries();
   startTurn();
   S.phase = 'player';
@@ -4368,6 +4612,8 @@ async function endTurn() {
   render();
   saveGame();
 }
+/* 받침에 맞는 조사: jo('레아','이','가') → '레아가' */
+function jo(w, a, b) { const c = (w || '').charCodeAt(w.length - 1) - 0xAC00; return w + (c >= 0 && c <= 11171 && c % 28 ? a : b); }
 function showResult(r) {
   UI.busy = false;
   const box = $('#resultBox'), lose = r === 'lose';
@@ -4377,9 +4623,19 @@ function showResult(r) {
   const L = CAMP.last || {};
   $('#resultText').textContent = lose
     ? (S.loseReason ? `${S.loseReason} 처치한 적 ${S.kills}.` : `레오스가 쓰러졌습니다. ${S.turn}턴 동안 버텼어요. 처치한 적 ${S.kills}.`)
-    : `${STAGE.no}화 ${STAGE.title} 클리어 · ${S.turn}턴 · 처치 ${S.kills}${r === 'escape' ? ` · 탈출 ${S.escaped.length}/${S.deployed}명` : ''} · 골드 +${L.gold || 0}${L.joined && L.joined.length ? ` · ${L.joined.join(', ')} 합류!` : ''}`
+    : `${stageNo(STAGE)}화 ${STAGE.title} 클리어 · ${S.turn}턴 · 처치 ${S.kills}${r === 'escape' ? ` · 탈출 ${S.escaped.length}/${S.deployed}명` : ''} · 골드 +${L.gold || 0}${L.joined && L.joined.length ? ` · ${L.joined.join(', ')} 합류!` : ''}`
       + (L.bonus ? ` · 출전 보너스 경험치 +${L.bonus}` : '') + (L.trained && L.trained.length ? ` · 훈련: ${L.trained.join(', ')}` : '') + (L.hurt && L.hurt.length ? ` · 부상: ${L.hurt.join(', ')} (다음 화 체력·방어 -20%)` : '') + (L.healed && L.healed.length ? ` · 부상 회복: ${L.healed.join(', ')}` : '');
   $('#btnCamp').hidden = lose; $('#btnAgain').hidden = !lose;
+  $('#btnCamp').textContent = '재정비로';
+  if (r === 'duelWin' || r === 'duelLose') {
+    const F = CAMP.flags || {}, nm = F.duelLoser ? UNIT_DEFS[F.duelLoser].name : '';
+    box.dataset.r = r === 'duelWin' ? 'win' : 'lose';
+    $('#resultTitle').textContent = r === 'duelWin' ? '결투 승리' : '결투 패배';
+    $('#resultText').textContent = r === 'duelWin' ? `코르닉스를 쓰러뜨렸다! 6-2화에서 아군 전원 공격력·마력 +10%, 코르닉스는 나오지 않는다. 골드 +${L.gold || 0}`
+      : `${jo(nm, '이', '가')} 졌다. 6-2화에서 ${jo(nm, '은', '는')} 싸울 수 없고, 코르닉스가 적 본대와 함께 진격한다. 골드 +${L.gold || 0}`;
+    $('#btnCamp').hidden = false; $('#btnAgain').hidden = true; $('#btnCamp').textContent = '6-2화로';
+    music('battle');
+  }
   $('#result').hidden = false;
   render();
 }
@@ -4500,13 +4756,15 @@ function resetUI(busy) {
   Object.assign(UI, { mode:'idle', sel:null, inspect:prince(), route:[], kn:null, busy:!!busy, reachSet:null, plan:null, sub:null, skill:null, special:false, armed:false,
     targets:null, tsel:null, tpreview:null, popups:[], areas:[], ptr:null, lastTap:null, edge:null, tileInfo:null });
 }
-function hideOverlays() { ['title', 'recap', 'wmap', 'camp', 'result'].forEach(id => { $('#' + id).hidden = true; }); closeSheets(); }
+function hideOverlays() { ['title', 'recap', 'wmap', 'camp', 'result', 'duelPick'].forEach(id => { $('#' + id).hidden = true; }); closeSheets(); }
 const STAGE_TIPS = [
   '레오스를 누른 채 위로 끌어 경로를 그리고, 끝 칸을 두 번 누르면 출발해요',
   '숲은 이동력 80%. 숲속 적은 3칸 안에 와야 보여요. 10턴만 버티면 승리!',
   '외나무다리에 한 줄로 선 적은 로벤의 창으로 꿰뚫어요. 서쪽 모래 여울로도 강을 건널 수 있어요',
   '붉은 칸 = 감시병 시야. 들키면 그 턴 안에 쓰러뜨려야 해요. 철갑병 시야는 피하세요',
   '잠든 무리는 공격하면 다 같이 깨어나요. 감옥 문에 닿는 순간 요새 전체가 깨어나요. 24턴 안에 탈출!',
+  '1대1 결투. 코르닉스는 자기보다 빠른 상대에게 강해요. 분노가 차면 사거리 10 투창이 날아와요',
+  '친위대장 둘을 쓰러뜨리면 카라스가 직접 나와요. 개울(모래)은 느리고, 여울(풀)로 건너면 빨라요',
 ];
 async function newBattle() {
   music('battle');
@@ -4519,7 +4777,7 @@ async function newBattle() {
   resize();
   const p = prince();
   centerOn(p.x, p.y, true);
-  FX.log(`${STAGE.no}화 ${STAGE.title} 시작`, 'event');
+  FX.log(`${stageNo(STAGE)}화 ${STAGE.title} 시작`, 'event');
   render();
   await runStartEvents();
   centerOn(p.x, p.y);
@@ -4560,9 +4818,9 @@ function showTitle() {
   const sv = readSave();
   const b = $('#tContinue');
   b.disabled = !sv;
-  b.innerHTML = !sv ? '이어하기' : sv.battle ? `이어하기<small>${STAGES[sv.battle.stage].no}화 · ${sv.battle.turn}턴</small>` : `이어하기<small>재정비 · ${sv.camp.chapter}화 클리어</small>`;
+  b.innerHTML = !sv ? '이어하기' : sv.battle ? `이어하기<small>${stageNo(STAGES[sv.battle.stage])}화 · ${sv.battle.turn}턴</small>` : `이어하기<small>재정비 · ${clearedNo(sv.camp.chapter)}화 클리어</small>`;
   const ch = sv ? (sv.battle ? STAGES[sv.battle.stage] : STAGES[Math.min(sv.camp.chapter, STAGES.length - 1)]) : STAGES[0];
-  $('#titleCh').textContent = `${ch.no}화 · ${ch.title}`;
+  $('#titleCh').textContent = `${stageNo(ch)}화 · ${ch.title}`;
   $('#titleNote').textContent = '';
   newConfirm = false;
   drawTitleArt();
@@ -4590,8 +4848,10 @@ function showRecap() {
   const loopN = CAMP.loop || 1;
   $('#recapLabel').textContent = STAGE.idx === 0 && loopN > 1 ? `${loopN}회차 · 0화 프롤로그` : (loopN > 1 ? `${loopN}회차 · ` : '') + (STAGE.recapLabel || '');
   $('#recapTitle').textContent = STAGE.recap.title;
-  $('#recapGo').textContent = `${STAGE.no}화 시작`;
+  $('#recapGo').textContent = `${stageNo(STAGE)}화 시작`;
   const lines = (STAGE.idx === 0 && loopN > 1 ? ['…눈을 뜨자, 다시 그날 밤이었다. 손가락에 남은 반지만이 지나간 시간을 기억하고 있었다.'] : []).concat(STAGE.recap.lines);
+  const bf = STAGE.recap.byFlag, F = CAMP.flags || {};
+  if (bf) { const k = Object.keys(bf).find(f => F[f]); if (k) lines.push(bf[k]); }
   lines.forEach((t, i) => {
     const p = document.createElement('p'); p.textContent = t; box.append(p);
     setTimeout(() => p.classList.add('on'), reduceMotion ? 0 : 400 + i * 900);
@@ -4653,6 +4913,7 @@ function winText() {
   if (w.allEscape) return `아군 전원 ${STAGE.stealth ? '들키지 않고 진입' : '탈출'}${w.turnLimit ? ` (${w.turnLimit}턴 안에)` : ''}`;
   if (w.escape) return '탈출 지점 도달';
   if (w.survive) return `${w.survive}턴 버티기${w.rout ? ' 또는 적 전멸' : ''}`;
+  if (w.boss) return `${UNIT_DEFS[w.boss].name} 격파${w.turnLimit ? ` (${w.turnLimit}턴 안에)` : ''}`;
   return w.rout ? '적 전멸' : '';
 }
 let wmImg = null, wmZoom = false;
@@ -4660,7 +4921,7 @@ function showWorldMap() {
   hideOverlays();
   const n = STAGE.no, node = WM_NODES[CH_NODE[n]] || WM_NODES.capital;
   $('#wmKicker').textContent = `CHAPTER ${n}`;
-  $('#wmTitle').textContent = `${n}화 · ${STAGE.title}`;
+  $('#wmTitle').textContent = `${stageNo(STAGE)}화 · ${STAGE.title}`;
   $('#wmPlace').textContent = `${node.name} · 승리: ${winText()} · 패배: 레오스 사망`;
   $('#wmap').hidden = false;
   wmZoom = (window.innerWidth || 400) < 600;
@@ -4721,7 +4982,7 @@ function el(tag, cls, html) { const e = document.createElement(tag); if (cls) e.
 function campMsg(t) { CAMPUI.msg = t; renderCamp(); }
 function renderCamp() {
   const done = CAMP.chapter;
-  $('#campSub').textContent = ((CAMP.loop || 1) > 1 ? `${CAMP.loop}회차 · ` : '') + (done > 0 ? `${done}화 클리어 · 재정비` : '출발 준비');
+  $('#campSub').textContent = ((CAMP.loop || 1) > 1 ? `${CAMP.loop}회차 · ` : '') + (done > 0 ? `${clearedNo(done)}화 클리어 · 재정비` : '출발 준비');
   $('#campTitle').textContent = CAMP_PLACE[done] || '야영지';
   $('#campGold').textContent = CAMP.gold;
   const tabs = [['party', '파티 결성'], ['shop', '상점'], ['train', '훈련']];
@@ -4735,14 +4996,14 @@ function renderCamp() {
   else renderCampTalk(body);
   const st = nextStage(), go = $('#campGo');
   go.disabled = !st;
-  go.textContent = st ? `출격 · ${st.no}화 ${st.title}` : `${done + 1}화 ${chapterTitle(done + 1, CAMP.route) || ''} · 준비 중`;
+  go.textContent = st ? `출격 · ${stageNo(st)}화 ${st.title}` : (n => `${n}화 ${chapterTitle(n, CAMP.route) || ''} · 준비 중`)(parseInt(String(clearedNo(done)), 10) + 1);
   $('#campNote').textContent = CAMPUI.msg || (st ? `출격 ${Math.min(sortieList().length, sortieMax())}/${sortieMax()}명 · 수동 ${CAMP.roster.filter(r => r.manual || r.id === 'tiger').length}/${MANUAL_MAX}명` : '관리자 메뉴에서 다른 화로 이동할 수 있어요.');
 }
 function renderParty(body) {
   // 다음 전투 안내 (winText는 현재 STAGE 기준이라 잠깐 바꿔서 읽는다)
   const st = nextStage(), keep = STAGE;
   const card = el('div', 'next-card');
-  if (st) { STAGE = st; card.innerHTML = `<span class="k">다음 전투</span><b>${st.no}화 ${st.title}</b><br><span class="k">승리</span>${winText()}<br><span class="k">패배</span>레오스 사망 · 출격 최대 ${sortieMax()}명 · 수동 최대 ${MANUAL_MAX}명`; STAGE = keep; }
+  if (st) { STAGE = st; card.innerHTML = `<span class="k">다음 전투</span><b>${stageNo(st)}화 ${st.title}</b><br><span class="k">승리</span>${winText()}<br><span class="k">패배</span>레오스 사망 · 출격 최대 ${sortieMax()}명 · 수동 최대 ${MANUAL_MAX}명`; STAGE = keep; }
   else card.innerHTML = `<span class="k">다음 전투</span>${CAMP.chapter + 1}화 ${chapterTitle(CAMP.chapter + 1, CAMP.route) || ''} · 아직 만들어지지 않았어요.`;
   body.append(card);
   const bar = el('div', 'row');
@@ -4786,6 +5047,7 @@ function renderMember(body, rec) {
   if (inTraining(rec.id)) head.append(el('p', null, '훈련 중: 다음 화에는 출전하지 않아요. 훈련 탭에서 취소할 수 있어요.'));
   if (rec.bonus) head.append(el('p', null, `성장 훈련 보너스 · 체력 +${rec.bonus.hp} · 공격 +${rec.bonus.atk} · 마력 +${rec.bonus.mag} · 방어 +${rec.bonus.def}`));
   if (rec.injured) head.append(el('p', 'hurt-note', '부상: 지난 화에서 쓰러졌습니다. 기본 체력·방어력 -20%. 다음 화를 마치면 회복돼요 (출격하지 않아도 회복).'));
+  if (rec.injured) head.append(btn(`치료제 사용 <small>보유 ${CAMP.items.cure || 0}</small>`, () => { if (!(CAMP.items.cure > 0)) return campMsg('치료제가 없어요. 상점에서 살 수 있어요.'); CAMP.items.cure--; rec.injured = false; persist(); campMsg(`${UNIT_DEFS[rec.id].name}의 부상이 나았어요.`); }, { disabled:!(CAMP.items.cure > 0) }));
   body.append(head);
   // 출격·조작
   const ctl = el('div', 'box');
@@ -4900,10 +5162,10 @@ function campAutoEquip() {
   campMsg(changed ? `${changed}개 장비를 가장 이득이 큰 동료에게 착용했어요.` : '더 좋아지는 장비가 없어요.');
 }
 function renderShop(body) {
-  const own = el('div', 'next-card', `<span class="k">보유</span>회복약 <b>${CAMP.items.potion || 0}</b> · 마나 물약 <b>${CAMP.items.ether || 0}</b> · 가방 장비 <b>${CAMP.bag.length}</b>개`);
+  const own = el('div', 'next-card', `<span class="k">보유</span>회복약 <b>${CAMP.items.potion || 0}</b> · 마나 물약 <b>${CAMP.items.ether || 0}</b> · 치료제 <b>${CAMP.items.cure || 0}</b> · 가방 장비 <b>${CAMP.bag.length}</b>개`);
   body.append(own);
   const cons = el('div', 'box'); cons.append(el('h3', null, '소모품'));
-  for (const [k, nm, desc] of [['potion', '회복약', '체력 60 회복'], ['ether', '마나 물약', '마나 40 회복']]) {
+  for (const [k, nm, desc] of [['potion', '회복약', '전투 중 · 체력 60 회복'], ['ether', '마나 물약', '전투 중 · 마나 40 회복'], ['cure', '치료제', '재정비에서만 · 부상 회복 (파티 결성에서 사용)']]) {
     const row = el('div', 'row');
     row.append(el('div', 'nm', `${nm} <small>${desc} · ${PRICE[k]}G</small>`));
     row.append(btn('구매', () => buy(k), { disabled:CAMP.gold < PRICE[k] }));
@@ -4911,12 +5173,12 @@ function renderShop(body) {
   }
   body.append(cons);
   const gear = el('div', 'box'); gear.append(el('h3', null, '장비'));
-  for (const id of SHOP_GEAR) {
-    const g2 = GEAR[id], users = CAMP.roster.filter(r => fitsGear({ weapon:UNIT_DEFS[r.id].weapon }, id)).map(r => UNIT_DEFS[r.id].name);
-    const row = el('div', 'row');
-    row.append(el('div', 'nm', `<em>${SLOT_NAME[g2.slot]}</em>${g2.name} <small>${gearText(id)} · ${g2.slot === 'weapon' ? (users.length ? users.join(', ') : '착용 가능한 동료 없음') : '누구나'} · ${PRICE[id]}G</small>`));
-    row.append(btn('구매', () => buy(id), { disabled:CAMP.gold < PRICE[id] }));
-    gear.append(row);
+  const tier2 = CAMP.chapter >= 5;
+  for (const id of (tier2 ? SHOP_GEAR2.map(x => '@' + x) : []).concat(SHOP_GEAR)) {
+    if (id[0] === '@' && id === '@' + SHOP_GEAR2[0]) gear.append(el('p', null, '<b style="color:var(--gold)">상급 장비 입고</b> · 5화를 넘기자 행상이 좋은 물건을 들여왔어요.'));
+    if (id === SHOP_GEAR[0] && tier2) gear.append(el('p', null, '기본 장비'));
+    if (id[0] === '@') { renderShopRow(gear, id.slice(1)); continue; }
+    renderShopRow(gear, id);
   }
   body.append(gear);
   const sell = el('div', 'box'); sell.append(el('h3', null, '판매 (가방)'));
@@ -4928,6 +5190,13 @@ function renderShop(body) {
     sell.append(row);
   });
   body.append(sell);
+}
+function renderShopRow(box, id) {
+  const g2 = GEAR[id], users = CAMP.roster.filter(r => fitsGear({ weapon:UNIT_DEFS[r.id].weapon }, id)).map(r => UNIT_DEFS[r.id].name);
+  const row = el('div', 'row');
+  row.append(el('div', 'nm', `<em>${SLOT_NAME[g2.slot]}</em>${g2.name} <small>${gearText(id)} · ${g2.slot === 'weapon' ? (users.length ? users.join(', ') : '착용 가능한 동료 없음') : '누구나'} · ${PRICE[id]}G</small>`));
+  row.append(btn('구매', () => buy(id), { disabled:CAMP.gold < PRICE[id] }));
+  box.append(row);
 }
 function buy(k) {
   const price = PRICE[k];
@@ -5013,12 +5282,12 @@ function ensureRosterFor(i) {
 function openAdmin() {
   const ch = $('#admChapters'), cp = $('#admCamps');
   ch.textContent = ''; cp.textContent = '';
-  STAGES.forEach((st, i) => ch.append(btn(`${st.no}화 ${st.title}`, () => {
+  STAGES.forEach((st, i) => ch.append(btn(`${stageNo(st)}화 ${st.title}`, () => {
     if (!CAMP.roster) newCampaign();
     ensureRosterFor(i); CAMP.chapter = i; for (let j = 0; j < i; j++) CAMP.cleared[j] = true;
     closeSheets(); startChapter(i);
   })));
-  STAGES.forEach((st, i) => cp.append(btn(`${st.no}화 클리어 후`, () => {
+  STAGES.forEach((st, i) => cp.append(btn(`${stageNo(st)}화 클리어 후`, () => {
     ensureRosterFor(i + 1); CAMP.chapter = i + 1; for (let j = 0; j <= i; j++) CAMP.cleared[j] = true;
     BATTLE_SAVE = null; closeSheets(); openCamp();
   })));
@@ -5064,10 +5333,33 @@ $('#tExit').addEventListener('click', exitGame);
 $('#tAdmin').addEventListener('click', openAdmin);
 $('#recapGo').addEventListener('click', showWorldMap);
 $('#recapSkip').addEventListener('click', showWorldMap);
-$('#wmGo').addEventListener('click', () => newBattle());
+$('#wmGo').addEventListener('click', () => (STAGE.duel ? showDuelPick() : newBattle()));
+function showDuelPick() {
+  hideOverlays();
+  const list = $('#duelList'); list.textContent = '';
+  for (const id of duelCandidates()) {
+    const rec = recOf(id), u = unitFromRecord(rec, { x:0, y:0 });
+    list.append(btn(`${u.name} <small>Lv ${u.lv} · ${W(u).name} · 이동 ${movOf(u)} · 공격 ${Math.round(atkOf(u))} · 체력 ${u.maxHp}${rec.injured ? ' · 부상' : ''}</small>`, () => { CAMP.duelist = id; persist(); newBattle(); }));
+  }
+  refuseConfirm = false;
+  $('#duelRefuse').textContent = '결투를 거절한다';
+  $('#duelPick').hidden = false;
+}
+/* 결투 거절: 6-1화를 건너뛰고 6-2화로. 사기 저하(공격력·마력 -10%) + 코르닉스 참전 */
+let refuseConfirm = false;
+$('#duelRefuse').addEventListener('click', () => {
+  if (!refuseConfirm) { refuseConfirm = true; $('#duelRefuse').textContent = '정말 거절할까요? 한 번 더 누르면 거절'; return; }
+  refuseDuel(); persist(); startChapter(STAGE.idx + 1);
+});
+function refuseDuel() {
+  CAMP.flags = Object.assign(CAMP.flags || {}, { duelRefused:true, duelWon:false, duelLost:false, duelLoser:null, captain:true });
+  CAMP.cleared[STAGE.idx] = true;
+  CAMP.chapter = Math.max(CAMP.chapter, STAGE.idx + 1);
+  CAMP.last = { stage:STAGE.idx, gold:0, joined:[], hurt:[], healed:[], trained:[] };
+}
 $('#wmZoom').addEventListener('click', () => { wmZoom = !wmZoom; drawWorldMap(); });
 $('#btnToTitle').addEventListener('click', showTitle);
-$('#btnCamp').addEventListener('click', openCamp);
+$('#btnCamp').addEventListener('click', () => (STAGE.duel ? startChapter(STAGE.idx + 1) : openCamp()));
 $('#btnMenuTitle').addEventListener('click', () => { saveGame(); showTitle(); });
 $('#campGo').addEventListener('click', () => { const st = nextStage(); if (st) startChapter(st.idx); });
 $('#campMenuBtn').addEventListener('click', () => openSheet('campMenu'));
