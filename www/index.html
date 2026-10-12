@@ -70,7 +70,7 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .toast{position:absolute;left:0;right:0;bottom:10px;margin:0 auto;width:max-content;max-width:92%;background:var(--panel);border:1px solid var(--ember);color:var(--ink);font-size:.82rem;padding:8px 12px;border-radius:10px;text-align:center;pointer-events:none;z-index:3}
 
 .scene{position:absolute;inset:0;z-index:6;cursor:pointer;background:linear-gradient(180deg,rgb(8 6 14 / .35),rgb(8 6 14 / .72))}
-.port{position:absolute;bottom:58px;width:var(--pw,180px);height:var(--pw,180px);object-fit:contain;object-position:bottom;transition:filter .2s,opacity .2s;filter:drop-shadow(0 6px 8px rgb(0 0 0 / .55))}
+.port{position:absolute;bottom:var(--pb,100px);width:var(--pw,180px);height:var(--pw,180px);object-fit:contain;object-position:bottom;transition:filter .2s,opacity .2s;filter:drop-shadow(0 6px 8px rgb(0 0 0 / .55))}
 .port{left:0}
 .port.right{left:auto;right:0;transform:scaleX(-1)}
 .port.dim{filter:brightness(.4) saturate(.55) drop-shadow(0 6px 8px rgb(0 0 0 / .55))}
@@ -81,7 +81,7 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .scene-name span{font-size:.72rem;color:#7a5a3a}
 .scene-box p{margin:0;font-family:var(--font-display);font-weight:700;font-size:.95rem;line-height:1.55}
 .talk-next{position:absolute;right:10px;bottom:4px;font-size:.7rem;color:#7a5a2e;animation:pulse 1.2s infinite}
-.panel{height:198px;flex:0 0 auto;background:var(--panel);border:1px solid var(--line);border-bottom:none;border-radius:14px 14px 0 0;padding:10px 12px;display:flex;flex-direction:column;gap:7px;margin-inline:-4px}
+.panel{height:236px;flex:0 0 auto;background:var(--panel);border:1px solid var(--line);border-bottom:none;border-radius:14px 14px 0 0;padding:10px 12px;display:flex;flex-direction:column;gap:7px;margin-inline:-4px}
 .card{display:flex;flex-direction:column;gap:6px;min-width:0}
 .card-head{display:flex;align-items:center;gap:10px;min-width:0}
 #cTok{width:36px;height:36px;flex:0 0 auto;border-radius:50%;border:2px solid var(--ally);background:var(--ally-deep)}
@@ -101,6 +101,21 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .bar.rage i{background:var(--ember)}
 .bar.rage.full{box-shadow:0 0 0 1px var(--ember)}
 .bar span{position:relative;display:block;padding-left:6px;font-family:var(--font-num);font-size:.68rem;line-height:16px;color:var(--ink);font-variant-numeric:tabular-nums;text-shadow:0 1px 0 var(--ground)}
+.card-body{display:flex;gap:8px;align-items:stretch;min-width:0}
+.card-main{flex:1;min-width:0;display:flex;flex-direction:column;gap:5px}
+.radar{flex:0 0 auto;width:132px;height:96px;padding:0;border:none;background:none;cursor:pointer}
+.radar svg{width:100%;height:100%;overflow:visible}
+.radar .ax{fill:var(--ink-dim);font-size:9px;font-family:var(--font-body)}
+.radar .ax b,.radar .val{fill:var(--ink);font-family:var(--font-num);font-size:8.5px}
+.radar .val.up{fill:var(--gold)}
+.traitline{font-size:.72rem;color:var(--ink-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.traitline b{color:var(--gold);font-weight:700;margin-right:4px}
+.traitline .t2{color:var(--ink-dim)}
+.who .lvtag{font-family:var(--font-num);font-size:.78rem;color:var(--gold);margin-left:6px}
+.statpop{position:absolute;right:8px;bottom:8px;z-index:8;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;font-size:.75rem;color:var(--ink-dim);box-shadow:0 6px 16px rgb(0 0 0 / .45);min-width:170px}
+.statpop div{display:flex;justify-content:space-between;gap:12px;font-variant-numeric:tabular-nums}
+.statpop b{color:var(--ink);font-family:var(--font-num)}
+.statpop .g{color:#6aa8ff}.statpop .t{color:var(--gold)}
 .stats{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;white-space:nowrap}
 .stats::-webkit-scrollbar{display:none}
 .stat{flex:0 0 auto;font-size:.72rem;color:var(--ink-dim);background:var(--panel-2);border-radius:6px;padding:3px 7px}
@@ -177,6 +192,11 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 
 .title{position:fixed;inset:0;z-index:15;background:radial-gradient(120% 80% at 50% 20%,#2a2238 0%,#11131a 60%);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;padding-inline:16px;text-align:center}
 .title-sub{font-family:var(--font-num);font-size:.72rem;letter-spacing:.3em;color:var(--ember)}
+.vol{display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--ink-dim);margin:6px 0}
+.vol span{width:64px}
+.vol input{flex:1;accent-color:var(--gold)}
+.vol b{width:34px;text-align:right;font-family:var(--font-num);color:var(--ink);font-weight:600}
+.credit{font-size:.72rem;color:var(--ink-dim);margin:8px 0 0}
 .title h1{margin:0;font-family:var(--font-display);font-weight:800;font-size:2.4rem;letter-spacing:.12em;line-height:1.2;text-wrap:balance}
 .title p{margin:0;font-size:.82rem;color:var(--ink-dim)}
 #titleArt{width:min(420px,96vw);height:auto;aspect-ratio:720/240;max-width:100%}
@@ -236,6 +256,7 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 .sgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
 .sgrid div{background:var(--panel-2);border-radius:8px;padding:5px 8px;font-size:.7rem;color:var(--ink-dim)}
 .sgrid b{display:block;font-family:var(--font-num);font-size:.95rem;color:var(--ink);font-variant-numeric:tabular-nums}
+.gplus{color:#6aa8ff;font-size:.8em}.tplus{color:var(--gold);font-size:.8em}
 .row{display:flex;align-items:center;gap:8px;justify-content:space-between;font-size:.82rem}
 .row .nm{flex:1;min-width:0}
 .row .nm em{font-style:normal;color:var(--ink-dim);font-size:.72rem;margin-right:6px}
@@ -295,7 +316,7 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
     <div class="scene" id="talk" hidden>
       <img id="portL" class="port off" alt="">
       <img id="portR" class="port right off" alt="">
-      <div class="scene-box">
+      <div class="scene-box" id="talkBox">
         <div class="scene-name"><b id="talkName"></b><span id="talkRole"></span></div>
         <p id="talkText"></p>
         <span class="talk-next">▼</span>
@@ -310,12 +331,18 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
         <div class="who"><b id="cName"></b><span id="cSub"></span></div>
         <span class="ctrl" id="cCtrl"></span>
       </div>
-      <div class="bars">
-        <div class="bar hp"><i id="cHpBar"></i><span id="cHp"></span></div>
-        <div class="bar mp" id="cMpWrap"><i id="cMpBar"></i><span id="cMp"></span></div>
-        <div class="bar rage" id="cRageWrap"><i id="cRageBar"></i><span id="cRage"></span></div>
+      <div class="card-body">
+        <div class="card-main">
+          <div class="bars">
+            <div class="bar hp"><i id="cHpBar"></i><span id="cHp"></span></div>
+            <div class="bar mp" id="cMpWrap"><i id="cMpBar"></i><span id="cMp"></span></div>
+            <div class="bar rage" id="cRageWrap"><i id="cRageBar"></i><span id="cRage"></span></div>
+          </div>
+          <div class="traitline" id="cTrait"></div>
+          <div class="stats" id="cStats"></div>
+        </div>
+        <button type="button" class="radar" id="cRadar" aria-label="능력치 자세히"><svg id="cRadarSvg" viewBox="0 0 132 96"></svg></button>
       </div>
-      <div class="stats" id="cStats"></div>
     </div>
     <p class="preview" id="preview"></p>
     <div class="actions" id="actions"></div>
@@ -353,6 +380,12 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
       <div class="seg" id="speedSeg"></div>
     </div>
     <div>
+      <h3>소리</h3>
+      <label class="vol"><span>배경음악</span><input type="range" id="volMusic" min="0" max="100" step="5"><b id="volMusicV"></b></label>
+      <label class="vol"><span>효과음</span><input type="range" id="volSfx" min="0" max="100" step="5"><b id="volSfxV"></b></label>
+      <p class="credit">음악: Google Gemini(Lyria)로 생성 · 효과음: 게임 안에서 직접 합성 · 버전 1.05</p>
+    </div>
+    <div>
       <h3>캐릭터 그래픽</h3>
       <div class="seg" id="gfxSeg"></div>
     </div>
@@ -371,7 +404,8 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
         <li><b>잠입</b> 감시병의 붉은 칸에 들어가거나 지나가면 발견됩니다. 다음 적 페이즈 전에 그 감시병을 쓰러뜨리면 경보를 막을 수 있어요. 금색 화살표 감시병은 매 턴 시계 방향으로 돌아요.</li>
         <li><b>부상</b> 화를 클리어했을 때 쓰러져 있던 동료는 다음 화에 체력·방어력 -20%로 출전합니다. 다음 화가 끝나면 회복됩니다.</li>
         <li><b>통과 공격</b> 근접 유닛은 경로 위의 적을 지나가며 적마다 한 번씩 벱니다(3명을 지나면 3명 모두 같은 위력). 너클·격투만 적 하나를 2번 치는 1대1 특화로, 적을 통과하지 못하고 적 쪽으로 끌면 그 적이 대상이 됩니다.</li>
-        <li><b>활·석궁·마법</b> 이동한 뒤 공격이나 스킬을 고르고, 대상을 두 번 누르면 실행됩니다. 아군 사격은 위력 ×1.25에 거리 1칸당 +10%라 멀리서 쏠수록 강합니다.</li>
+        <li><b>활·석궁·마법</b> 이동한 뒤 공격이나 스킬을 고르고, 대상을 두 번 누르면 실행됩니다. 아군 사격은 위력 ×1.25에 거리 1칸당 +10%(최대 +50%)라 멀리서 쏠수록 강합니다. 핀의 부메랑은 갔다 오며 2번 맞힙니다.</li>
+        <li><b>특성</b> 주요 캐릭터와 장군급 적은 특성이 하나씩 있어요(카드의 금색 이름). 능력치 육각형을 누르면 기본 <span style="color:#6aa8ff">+장비</span> <span style="color:var(--gold)">+특성·버프</span>로 나눠 보여 줘요. 이동은 최대 10칸(로벤 12칸)이에요.</li>
         <li><b>분노·필살기</b> 때리면 타격마다 +7, 맞으면 +12. 100이 되면 필살기를 쓸 수 있습니다. <b>적과 동맹 AI는 분노가 높은 대상부터 노립니다</b> (분노 100 = 3배 우선) — 많이 맞은 탱커가 어그로를 끌고, 필살기를 쓰면 분노가 0이 되어 어그로도 풀립니다.</li>
       </ul>
     </div>
@@ -382,7 +416,7 @@ canvas.px{image-rendering:pixelated;image-rendering:crisp-edges}
 </div>
 
 <div class="title" id="title">
-  <div class="title-sub">ROUTE MOVE SRPG · 가제</div>
+  <div class="title-sub">ROUTE MOVE SRPG · 가제 · v1.05</div>
   <h1>동물왕국 전기</h1>
   <canvas id="titleArt" width="720" height="240" aria-hidden="true"></canvas>
   <p id="titleCh">1화 · 왕도 탈출</p>
@@ -1328,7 +1362,7 @@ const CFG = {
   exp: { act:10, kill:30, perLevelGap:5, toLevel:100, maxLevel:50 },
   moveUnit: 60, moveSlack: 24,          // 지형 이동: 칸 비용(초원 50, 보통 60, 돌밭·모래 74), 예산 = 이동 × 60 + 24 → 이동 3~14에서 균일 지형이면 정확히 round(이동 × 1.2 / 1 / 0.8)
   atkScale: 1.2,           // 공격횟수를 없앤 대신 모든 물리 피해 +20% (거짓의 윤무곡식: 통과한 적마다 1타)
-  allyRanged: { pow:1.25, perTile:0.10 },
+  allyRanged: { pow:1.25, perTile:0.10, cap:0.5 },   // 거리 보너스는 최대 +50%
   foeScale: 1.12,          // 적 물리 피해 보정 (공격횟수가 사라져 약해진 만큼 난이도 유지)   // 아군 활·석궁·부메랑·폭탄: 위력 ×1.25, 거리 1칸당 +10% (붙어서 쏘면 보너스 없음)
   aggroRage: 2.0,          // 어그로 = 분노 우선: 대상 가중치 ×(1 + 2×분노/100) → 분노 가득 찬 유닛이 3배 우선
 };
@@ -1345,6 +1379,7 @@ const WEAPONS = {
   'dagger':  { name:'쌍단검',      pow:0.80, crit:0.30, kind:'melee', art:'sword' },
   'kick':    { name:'격투',        pow:0.85, hits:2.0, crit:0.25, kind:'melee', art:'knuckle', noPass:true },
   'boomerang':{ name:'부메랑',     pow:0.95, crit:0.15, kind:'ranged', art:'bow', range:4 },
+  'rifle':   { name:'소총',        pow:1.00, crit:0.20, kind:'ranged', art:'bow', range:8 },
   'bomb':    { name:'폭탄',        pow:1.10, crit:0.10, kind:'ranged', art:'xbow', range:4 },
 };
 const SKILLS = {
@@ -1361,7 +1396,7 @@ const ITEMS = { potion:{ name:'회복약', hp:60 }, ether:{ name:'마나 물약'
 const SPECIALS = {
   tigerDance:  { name:'백호난무',     kind:'charge', desc:'이번 돌격의 타격 위력 2배', hitsMul:2 },
   ironWall:    { name:'철벽 진형',    kind:'buff',   desc:'자신과 상하좌우 아군 방어력 +20, 가드 +15%p (2턴)', area:'adjacent', buff:{ def:20, guard:0.15, turns:2 } },
-  galeCharge:  { name:'질풍 돌격',    kind:'charge', desc:'이번 이동 +4칸, 창 보너스 +0.2', movAdd:4, spearAdd:0.2 },
+  galeCharge:  { name:'질풍 돌격',    kind:'charge', desc:'이번 이동 +2칸(상한까지), 창 보너스 +0.2', movAdd:2, spearAdd:0.2 },
   bearRage:    { name:'곰의 분노',    kind:'charge', desc:'이번 공격 공격력 +60%, 가드 무시', atkAdd:0.6, ignoreGuard:true },
   wolfFang:    { name:'광랑의 송곳니', kind:'charge', desc:'이번 돌격의 모든 타격이 치명타', allCrit:true },
   skyBow:      { name:'천궁',         kind:'shot',   desc:'사거리 +3, 위력 2배', rangeAdd:3, powMul:2 },
@@ -1439,15 +1474,15 @@ const PASSIVE_DESC = { rally:'아군이 지나가면 그 이동 동안 공격력
 const WEAPON_DESC = {
   '1h':'통과한 적마다 한 번씩 벱니다. 기본 무기.', '1hs':'통과한 적마다 1타, 방어 +20. 붙어 있는 아군에게 오는 화살을 대신 맞습니다.', '2h':'통과한 적마다 1타, 위력 1.2배.',
   spear:'통과한 적마다 1타. 한 번에 여럿을 꿰뚫으면 1.2~1.4배.', knuckle:'적을 통과하지 못하고 막힌 적 하나를 2번 칩니다(1대1 특화). 치명 25%.',
-  bow:'사거리 7. 치명 20%. 아군은 위력 ×1.25, 거리 1칸당 +10%.', shortbow:'사거리 5.', xbow:'사거리 5, 위력 1.2배. 아군은 위력 ×1.25, 거리 1칸당 +10%.', staff:'마법 스킬 사용. 마나는 매 턴 마력의 10% 회복.',
-  dagger:'통과한 적마다 1타, 위력 0.8배, 치명 30%.', kick:'적을 통과하지 못하고 막힌 적 하나를 2번 찹니다(1대1 특화).', boomerang:'사거리 4, 위력 0.95배. 아군은 거리 보너스.', bomb:'사거리 4, 위력 1.1배. 아군은 거리 보너스.',
+  bow:'사거리 7. 치명 20%. 아군은 위력 ×1.25, 거리 1칸당 +10%(최대 +50%).', shortbow:'사거리 5.', xbow:'사거리 5, 위력 1.2배. 아군은 위력 ×1.25, 거리 1칸당 +10%(최대 +50%).', staff:'마법 스킬 사용. 마나는 매 턴 마력의 10% 회복.',
+  dagger:'통과한 적마다 1타, 위력 0.8배, 치명 30%.', kick:'적을 통과하지 못하고 막힌 적 하나를 2번 찹니다(1대1 특화).', boomerang:'사거리 4, 위력 0.95배. 핀은 특성으로 갔다 오며 2회 타격. 아군은 거리 보너스.', bomb:'사거리 4, 위력 1.1배. 아군은 거리 보너스.',
 };
 /* 각성: 해당 레벨에 도달하면 필살기가 강화된다 */
 const AWAKEN = {
   tiger: { lv:10, name:'백호난무·진',   desc:'이번 돌격의 타격 위력 2.5배, 공격력 +20%', over:{ hitsMul:2.5, atkAdd:0.2 } },
   rea:   { lv:10, name:'백호의 포효',   desc:'이번 돌격 공격력 +70%, 이동 +2칸', over:{ atkAdd:0.7, movAdd:2 } },
   boar:  { lv:10, name:'철벽 진형·극',  desc:'자신과 상하좌우 아군 방어력 +30, 가드 +25%p (3턴)', over:{ buff:{ def:30, guard:0.25, turns:3 } } },
-  horse: { lv:10, name:'질풍 돌격·진',  desc:'이번 이동 +6칸, 창 보너스 +0.35', over:{ movAdd:6, spearAdd:0.35 } },
+  horse: { lv:10, name:'질풍 돌격·진',  desc:'이번 이동 +3칸(상한까지), 창 보너스 +0.35', over:{ movAdd:3, spearAdd:0.35 } },
   deer:  { lv:10, name:'천궁·관통',     desc:'사거리 +4, 위력 2.4배, 방패 무시', over:{ rangeAdd:4, powMul:2.4, pierce:true } },
   ren:   { lv:10, name:'구미호 환영진', desc:'아군 전원 체력 회복(마력 × 90%), 공격력 +25% (2턴)', over:{ heal:0.9, buff:{ atk:0.25, turns:2 } } },
   dion:  { lv:10, name:'대지의 가호',   desc:'아군 전원 방어력 +25, 체력 회복(마력 × 60%) (2턴)', over:{ heal:0.6, buff:{ def:25, turns:2 } } },
@@ -1494,11 +1529,11 @@ const portraitKey = id => (PORTRAIT_IMG[id] ? id : PORTRAIT_ALIAS[id]) || null;
 
 /* 유닛 원형. grow = 레벨당 성장률(1레벨 대비). elite = 이 스테이지에서 사실상 못 잡는 적 */
 const UNIT_DEFS = {
-  tiger:  { name:'레오스', race:'호랑이', title:'동물 왕국의 왕자', age:16, species:'tiger', team:'ally', weapon:'1h', hp:130, atk:50, mag:10, def:30, mov:6, hitBonus:0.2, manual:true, prince:true, passives:['rally'],
+  tiger:  { name:'레오스', race:'호랑이', title:'동물 왕국의 왕자', age:16, species:'tiger', team:'ally', weapon:'1h', hp:143, atk:55, mag:10, def:33, mov:7, hitBonus:0.2, manual:true, prince:true, passives:['rally'],
             grow:{ hp:0.05, atk:0.05, mag:0.02, def:0.04 }, gear:['w_1h_royal','arm_leather'], special:'tigerDance' },
-  boar:   { name:'보르도', race:'멧돼지', title:'왕실 기사', age:23, species:'boar', team:'ally', weapon:'1hs', hp:170, atk:44, mag:5, def:45, mov:4, manual:true, passives:['wall'],
+  boar:   { name:'보르도', race:'멧돼지', title:'왕실 기사', age:23, species:'boar', team:'ally', weapon:'1hs', hp:170, atk:46, mag:5, def:45, mov:5, manual:true, passives:['wall'],
             grow:{ hp:0.08, atk:0.03, mag:0.01, def:0.06 }, gear:['w_1h_guard','arm_chain'], special:'ironWall' },
-  horse:  { name:'로벤', race:'말', title:'왕실 기사', age:22, species:'horse', team:'ally', weapon:'spear', hp:135, atk:46, mag:5, def:28, mov:10, hitBonus:1.0, manual:true,
+  horse:  { name:'로벤', race:'말', title:'왕실 기사', age:22, species:'horse', team:'ally', weapon:'spear', hp:135, atk:46, mag:5, def:28, mov:10, manual:true,
             grow:{ hp:0.05, atk:0.05, mag:0.01, def:0.03 }, gear:['w_spear_knight','arm_leather'], special:'galeCharge' },
   deer:   { name:'궁수', race:'여우', species:'deer', team:'ally', weapon:'bow', hp:100, atk:44, mag:8, def:20, mov:7,
             grow:{ hp:0.04, atk:0.05, mag:0.02, def:0.02 }, gear:['w_bow_hunt'], special:'skyBow' },
@@ -1514,7 +1549,7 @@ const UNIT_DEFS = {
             grow:{ hp:0.03, atk:0.04, mag:0.05, def:0.02 }, gear:['w_dagger_twin','arm_leather'], special:'foxBlessing' },
   dion:   { name:'디온', race:'사슴', title:'숲의 방패 · 치유사', age:24, species:'deer', lookAlias:'deer', team:'ally', weapon:'staff', hp:150, atk:20, mag:42, def:40, mov:5, maxMp:100, skills:['heal','bless','medit'],
             grow:{ hp:0.06, atk:0.01, mag:0.05, def:0.05 }, gear:['w_staff_oak','arm_chain'], special:'forestAegis' },
-  finn:   { name:'핀', race:'토끼', title:'민병대 유격대원', age:15, species:'rabbit', lookAlias:'rabbit', team:'ally', weapon:'boomerang', hp:100, atk:44, mag:8, def:18, mov:7, evade:0.3,
+  finn:   { name:'핀', race:'토끼', title:'민병대 유격대원', age:15, species:'rabbit', lookAlias:'rabbit', team:'ally', weapon:'boomerang', hp:100, atk:33, mag:8, def:18, mov:7, evade:0.3,
             grow:{ hp:0.04, atk:0.05, mag:0.02, def:0.02 }, gear:['w_boom_wood','arm_leather'], special:'boomerangX' },
   hound:  { name:'하운드', race:'개', title:'추적자 · 호위무사', age:21, species:'wolf', lookAlias:'wolf', team:'ally', weapon:'1h', hp:140, atk:47, mag:5, def:34, mov:6, hitBonus:0.4, passives:['riposte'],
             grow:{ hp:0.05, atk:0.05, mag:0.01, def:0.04 }, gear:['w_1h_guard','arm_chain'], special:'twinFang' },
@@ -1605,7 +1640,7 @@ const STAGE1 = {
     { unit:'sparrow', x:6,  y:28, name:'참새 궁수 A', drop:'w_bow_sparrow', activeTurn:2 },
     { unit:'sparrow', x:17, y:28, name:'참새 궁수 B', activeTurn:2 },
     { unit:'parrot',  x:14, y:25, name:'앵무새 술사', drop:'acc_boots', activeTurn:2 },
-    { unit:'noah',       x:4, y:20, ai:'hold', drop:'acc_noah_seal' },
+    { unit:'noah',       x:4, y:20, ai:'hold', drop:'acc_noah_seal', lv:20, lvScale:true },
     { unit:'humanHeavy', x:6, y:17, name:'인간 중갑병 A', ai:'hold' },
     { unit:'humanHeavy', x:6, y:21, name:'인간 중갑병 B', ai:'hold' },
     { unit:'humanXbow',  x:3, y:18, name:'인간 석궁병 A', ai:'hold' },
@@ -1623,7 +1658,7 @@ const STAGE1 = {
       { who:'karas', text:'호랑이 새끼가 아직 성 안에 있다! 성문을 막아라, 한 놈도 놓치지 마!' },
       { who:'tiger', text:'카라스… 저 까마귀가 성문을 지키고 있어.' } ] },
     { id:'hawks', turn:2, focus:[21, 29], banner:'매 기갑군단 출현', spawn:[
-      { unit:'falco',     x:21, y:30, activeIn:5, drop:'acc_falco_plume' },
+      { unit:'falco',     x:21, y:30, activeIn:5, drop:'acc_falco_plume', lv:20, lvScale:true },
       { unit:'hawkRider', x:20, y:29, name:'매 기갑병 A', activeIn:5 },
       { unit:'hawkRider', x:22, y:29, name:'매 기갑병 B', activeIn:5 },
       { unit:'hawkRider', x:20, y:30, name:'매 기갑병 C', activeIn:5 } ], talk:[
@@ -1639,7 +1674,7 @@ const STAGE1 = {
       { unit:'crowInf', x:4, y:29, name:'까마귀 보병 I', activeIn:1 } ], talk:[
       { text:'서쪽에서 까마귀 보병대가 뒤를 쫓아온다.' } ] },
     { id:'eagles', allyRow:11, focus:[11, 2], banner:'흰독수리 철갑군단 출현', objective:'east', spawn:[   // 다리(11행)를 밟는 순간
-      { unit:'garuda',    x:11, y:1, activeIn:1, drop:'acc_garuda_crest' },
+      { unit:'garuda',    x:11, y:1, activeIn:1, drop:'acc_garuda_crest', lv:20, lvScale:true },
       { unit:'eagleIron', x:10, y:2, name:'흰독수리 철갑병 A', activeIn:1 },
       { unit:'eagleIron', x:13, y:2, name:'흰독수리 철갑병 B', activeIn:1 },
       { unit:'eagleIron', x:9,  y:3, name:'흰독수리 철갑병 C', activeIn:1 },
@@ -1651,8 +1686,8 @@ const STAGE1 = {
       { who:'boar', text:'북문이 막혔습니다! 저 철갑엔 칼이 들지 않습니다!' },
       { who:'horse', text:'동쪽 산길로 우회하십시오! 오른쪽 위 끝까지 가면 빠져나갈 수 있습니다!' } ] },
     { id:'castle', allyRow:11, focus:[11, 40], banner:'왕성 함락 — 추격대 출현', spawn:[   // 같은 순간 시작 지점에서 추격
-      { unit:'gallus',  x:12, y:41, activeIn:1, elite:true, drop:'acc_gallus_spur' },
-      { unit:'columba', x:10, y:41, activeIn:1, elite:true, drop:'acc_columba_lyre' } ], talk:[
+      { unit:'gallus',  x:12, y:41, activeIn:1, elite:true, drop:'acc_gallus_spur', lv:20, lvScale:true },
+      { unit:'columba', x:10, y:41, activeIn:1, elite:true, drop:'acc_columba_lyre', lv:20, lvScale:true } ], talk:[
       { who:'gallus', text:'왕성은 떨어졌다! 새벽 타격대, 호랑이 새끼의 꼬리를 물어라!' },
       { who:'columba', text:'…노래 대신 추격이라니. 미안해요, 왕자님. 뒤를 쫓을게요.' },
       { who:'boar', text:'뒤에서도 옵니다! 왕성을 친 놈들입니다, 멈추지 마십시오!' } ] },
@@ -2037,7 +2072,7 @@ const S = {};
 const FX = {
   sleep: () => Promise.resolve(),
   popup() {}, log() {}, flash() {}, area() {}, onKill() {}, changed() {}, focus() {},
-  focusTile: () => Promise.resolve(), talk: () => Promise.resolve(), banner: () => Promise.resolve(), spawned() {},
+  focusTile: () => Promise.resolve(), talk: () => Promise.resolve(), banner: () => Promise.resolve(), spawned() {}, sfx() {},
 };
 let rng = Math.random;
 
@@ -2092,7 +2127,7 @@ function deployAllies() {
 function resetState() {
   if (!CAMP.roster) newCampaign();
   Object.assign(S, { stage:STAGE.idx, turn:1, phase:'player', units:[], escaped:[], items:Object.assign({ potion:0, ether:0 }, CAMP.items), bag:(CAMP.bag || []).slice(),
-    globalMode:'escort', allManual:false, over:null, log:[], speed:S.speed || 1, objective:STAGE.startObjective || 'north', fired:{}, kills:0, met:{}, fallen:null, deployed:0, retreats:[], alarm:0, loseReason:'' });
+    globalMode:'escort', allManual:false, over:null, log:[], speed:S.speed || 1, objective:STAGE.startObjective || 'north', fired:{}, kills:0, met:{}, fallen:null, deployed:0, retreats:[], alarm:0, loseReason:'', thiefGold:0 });
   for (const u of deployAllies()) S.units.push(u);
   if (STAGE.allManual) S.allManual = true;
   S.deployed = S.units.length;
@@ -2102,7 +2137,7 @@ function resetState() {
 /* 처음 등장할 때 적은 레오스 쪽을 바라본다 */
 /* 3화부터: 적 레벨이 기본 레벨보다 높으면 체력·공격·마력·방어 +7%/레벨 */
 function scaleEnemy(u) {
-  const d = UNIT_DEFS[u.defId]; if (!STAGE.lvScale || u.team !== 'enemy' || !d) return u;
+  const d = UNIT_DEFS[u.defId]; if ((!STAGE.lvScale && !u.lvScale) || u.team !== 'enemy' || !d) return u;
   const f = 1 + 0.07 * Math.max(0, (u.lv || 1) - (d.lv || 1)); if (f === 1) return u;
   for (const k of ['atk', 'mag', 'def']) u[k] = Math.round(u[k] * f);
   u.maxHp = u.hp = Math.round(u.hp * f); u.base = { hp:u.maxHp, atk:u.atk, mag:u.mag, def:u.def };
@@ -2148,14 +2183,15 @@ function harvestBattle() {
     }
     rec.lv = u.lv; rec.exp = u.exp; rec.equip = Object.assign({}, u.equip);
   }
-  const gold = (STAGE.reward ? STAGE.reward.gold : 0) + S.kills * 20;
+  const thief = Math.round(S.thiefGold || 0);
+  const gold = (STAGE.reward ? STAGE.reward.gold : 0) + S.kills * 20 + thief;
   CAMP.gold += gold;
   CAMP.bag = S.bag.slice();
   CAMP.items = Object.assign({}, S.items);
   CAMP.cleared[STAGE.idx] = true;
   CAMP.chapter = Math.max(CAMP.chapter, STAGE.idx + 1);
   const trained = finishTraining();
-  CAMP.last = { stage:STAGE.idx, gold, joined, hurt, healed, bonus, trained, kills:S.kills, turn:S.turn };
+  CAMP.last = { stage:STAGE.idx, gold, thief, joined, hurt, healed, bonus, trained, kills:S.kills, turn:S.turn };
   return CAMP.last;
 }
 
@@ -2179,26 +2215,94 @@ const passiveSum = (u, k) => u.passives.reduce((s, p) => s + (PASSIVES[p][k] || 
 const hasPassive = (u, p) => u.passives.includes(p);
 const gearSum = (u, k) => Object.values(u.equip).reduce((s, id) => s + (id && GEAR[id][k] || 0), 0);
 const spv = (u, k) => (u.sp && u.sp[k]) || 0;
-const atkOf = u => (u.atk + gearSum(u, 'atk')) * (1 + buffSum(u, 'atk') + (u.tempAtk || 0) + spv(u, 'atkAdd'));
-const defOf = u => u.def + gearSum(u, 'def') + (W(u).defBonus || 0) + buffSum(u, 'def');
-const magOf = u => u.mag + gearSum(u, 'mag');
-const movOf = u => u.mov + gearSum(u, 'mov') + spv(u, 'movAdd');
+/* ---------- 특성 (주요 캐릭터만, 잡몹 없음) ---------- */
+const TRAITS = {
+  prince:     { name:'왕자',         desc:'주변 1칸(대각선 포함) 아군 방어력 +10%' },
+  trueKing:   { name:'진정한 국왕',  desc:'자신 포함 주변 3칸 아군 공격력·방어력 +10%' },
+  darkKing:   { name:'흑화',         desc:'자신 공격력 +30%, 이동 +1' },
+  sharpness:  { name:'샤프니스',     desc:'치명 확률 +50%p, 적 하나만 공격하면 치명 100%', cc:'단일 공격 피해 +20%' },
+  indomitable:{ name:'불굴의 의지',  desc:'쓰러질 피해를 받아도 체력 1로 버팀 (전투당 1회)', cc:'최대 체력 +10%' },
+  redHare:    { name:'적토마',       desc:'이동 상한 12 (다른 유닛은 10)', cc:'이동 +1' },
+  boomerang:  { name:'부메랑',       desc:'원거리 공격이 갔다 오며 2회 타격', cc:'사거리 +1' },
+  twinBlades: { name:'쌍검',         desc:'지나간 적마다 2회 타격', cc:'이동 +1' },
+  healer:     { name:'치유사',       desc:'치유한 아군 공격력 +10% (2턴)', cc:'+15%로' },
+  loyalty:    { name:'충성심',       desc:'레오스의 격려를 받으면 공격력 +30% (1턴)', cc:'+45%로' },
+  thief:      { name:'도둑고양이',   desc:'적에게 준 피해만큼 골드 획득' },
+  heavyBlow:  { name:'묵직한 한방',  desc:'상대 방어력 30% 무시' },
+  proven:     { name:'실적 증명',    desc:'직접 처치할 때마다 공격력 +5% (전투 중, 최대 +30%)' },
+  engineer:   { name:'공병',         desc:'2턴 동안 아무 행동도 안 하면 소총 장착(사거리 8, 공격력 +10) · 10턴 유지, 전투당 1회' },
+  ironclad:   { name:'철갑무장',     desc:'근접 피해 -10%' },
+  speedrun:   { name:'스피드런',     desc:'상대보다 이동이 높으면 피해 +10%' },
+  mentor:     { name:'지식전수',     desc:'주변 2칸 자기편 공격력·마력 +10%' },
+  curse:      { name:'저주',         desc:'공격에 맞은 상대에게 약화(받는 피해 +30%, 2턴, 맞으면 갱신)' },
+  hymn:       { name:'평화의 노래',  desc:'치유·축복을 받은 자기편은 1턴간 받는 피해 -15%' },
+  owlEye:     { name:'올빼미의 눈',  desc:'시야 제한 무시, 주변 2칸 자기편 회피 +10%p' },
+  dawnCounter:{ name:'새벽의 반격',  desc:'근접 반격 확률 +20%p, 반격 피해 +20%' },
+  conqueror:  { name:'정복자의 긍지', desc:'체력 50% 이하에서 공격력 +20%' },
+  phalanx:    { name:'철통 방진',    desc:'상하좌우에 붙은 자기편 1명당 가드 +10%p (최대 +30%p)' },
+};
+const TRAIT_OF = { tiger:'prince', rea:'sharpness', boar:'indomitable', horse:'redHare', finn:'boomerang', ren:'twinBlades', dion:'healer', hound:'loyalty',
+  felix:'thief', urs:'heavyBlow', luga:'proven', rix:'engineer', garuda:'ironclad', falco:'speedrun', karas:'mentor', belial:'curse',
+  columba:'hymn', bubo:'owlEye', gallus:'dawnCounter', noah:'conqueror', valerius:'phalanx' };
+/* 레오스는 15화 분기 뒤(16화~) 왕도 → 진정한 국왕, 패도 → 흑화 */
+function traitOf(u) { const t = u && TRAIT_OF[u.defId]; if (t === 'prince' && CAMP.route && STAGE.no >= 16) return CAMP.route === 'tyrant' ? 'darkKing' : 'trueKing'; return t || null; }
+const cheb = (a, b) => Math.max(Math.abs(a.x - b.x), Math.abs(a.y - b.y));
+/* 주변 효과 (대각선 포함 거리) */
+const AURA = { prince:{ r:1, self:false, def:0.10 }, trueKing:{ r:3, self:true, atk:0.10, def:0.10 }, mentor:{ r:2, self:false, atk:0.10, mag:0.10 }, owlEye:{ r:2, self:false, evade:0.10 } };
+function auraSum(u, k) {
+  let p = 0;
+  if (!S.units || u.hp <= 0 || !S.units.includes(u)) return 0;   // 재정비 화면의 임시 유닛에는 주변 효과 없음
+  for (const a of S.units) {
+    if (a.hp <= 0 || a.team !== u.team || !TRAIT_OF[a.defId]) continue;
+    const A = AURA[traitOf(a)]; if (!A || !A[k]) continue;
+    if (a === u ? A.self : cheb(a, u) <= A.r) p += A[k];
+  }
+  return p;
+}
+/* 특성으로 붙는 % (기본 수치 기준) */
+function traitPct(u, k) {
+  let p = auraSum(u, k);
+  const t = traitOf(u);
+  if (t === 'darkKing' && k === 'atk') p += 0.3;
+  if (t === 'proven' && k === 'atk') p += 0.05 * Math.min(6, u.kills || 0);
+  if (t === 'conqueror' && k === 'atk' && u.hp > 0 && u.hp <= u.maxHp * 0.5) p += 0.2;
+  return p;
+}
+function traitMov(u) { const t = traitOf(u); return (t === 'darkKing' ? 1 : 0) + ((t === 'redHare' || t === 'twinBlades') && u.cls ? 1 : 0); }
+const MOV_CAP = 10;
+const movCap = u => traitOf(u) === 'redHare' ? 12 : MOV_CAP;
+/* 최종 능력치 = 기본 + 장비 + 기본 × (특성% + 버프% + 격려% + 필살%) */
+const pctOf = (u, k) => k === 'atk' ? buffSum(u, 'atk') + (u.tempAtk || 0) + spv(u, 'atkAdd') + traitPct(u, 'atk') : traitPct(u, k);
+const atkOf = u => u.atk + gearSum(u, 'atk') + (u.rifle ? 10 : 0) + u.atk * pctOf(u, 'atk');
+const defOf = u => u.def + gearSum(u, 'def') + (W(u).defBonus || 0) + buffSum(u, 'def') + u.def * traitPct(u, 'def');
+const magOf = u => Math.round(u.mag + gearSum(u, 'mag') + u.mag * traitPct(u, 'mag'));
+const movOf = u => Math.min(movCap(u), u.mov + gearSum(u, 'mov') + spv(u, 'movAdd') + traitMov(u));
+/* 표시용: [기본, 장비, 그 밖의 보너스] */
+function statParts(u, k) {
+  if (k === 'atk') { const b = u.atk, g = gearSum(u, 'atk') + (u.rifle ? 10 : 0); return [b, g, Math.round(atkOf(u) - b - g)]; }
+  if (k === 'def') { const b = u.def, g = gearSum(u, 'def') + (W(u).defBonus || 0); return [b, g, Math.round(defOf(u) - b - g)]; }
+  if (k === 'mag') { const b = u.mag, g = gearSum(u, 'mag'); return [b, g, magOf(u) - b - g]; }
+  if (k === 'mov') { const b = u.mov, g = gearSum(u, 'mov'); return [b, g, movOf(u) - b - g]; }
+  if (k === 'hp') { const g = gearSum(u, 'hp'); return [u.maxHp - g, g, 0]; }
+  return [0, 0, 0];
+}
+const partsText = pr => `${pr[0]}${pr[1] ? ` +${pr[1]}` : ''}${pr[2] ? ` ${pr[2] > 0 ? '+' : ''}${pr[2]}` : ''}`;
 const moveBudget = u => movOf(u) * CFG.moveUnit + CFG.moveSlack;
-const rangeOf = u => (W(u).range || 0) + spv(u, 'rangeAdd');
+const rangeOf = u => (W(u).range || 0) + spv(u, 'rangeAdd') + (traitOf(u) === 'boomerang' && u.cls ? 1 : 0);
 const hitsOf = u => round2(((W(u).hits || 0) + (u.hitBonus || 0) + gearSum(u, 'hits')) * (spv(u, 'hitsMul') || 1));
 /* 공격횟수는 너클 계열(1대1 특화)만. 나머지 근접은 통과한 적마다 1타, 그 1타의 위력 = (1 + 타격 보너스 × 0.5) × 필살 배율 */
 const isKnuckle = u => !!W(u).noPass;
 const strikePow = u => round2((1 + 0.5 * ((u.hitBonus || 0) + gearSum(u, 'hits'))) * (spv(u, 'hitsMul') || 1));
-function strikesFor(u, n) { return isKnuckle(u) ? distributeHits(hitsOf(u), n) : Array.from({ length:n }, () => [strikePow(u)]); }
+function strikesFor(u, n) { const tw = traitOf(u) === 'twinBlades'; return isKnuckle(u) ? distributeHits(hitsOf(u), n) : Array.from({ length:n }, () => tw ? [strikePow(u), strikePow(u)] : [strikePow(u)]); }
 const hitStat = u => isKnuckle(u) ? ['공격횟수', hitsOf(u).toFixed(1)] : ['타격 위력', '×' + strikePow(u).toFixed(2).replace(/0$/, '')];
-const critOf = u => (u.sp && u.sp.allCrit) ? 1 : W(u).crit;
+const critOf = u => (u.sp && u.sp.allCrit) ? 1 : traitOf(u) === 'sharpness' ? (u._single ? 1 : Math.min(1, W(u).crit + 0.5)) : W(u).crit;
 const awakenOf = u => { const a = AWAKEN[u.defId || u.id]; return a && u.cls ? a : null; };   // 각성 스킬은 클래스 체인지 후에만
 const specialOf = u => {
   if (!u.special) return null;
   const a = awakenOf(u), base = SPECIALS[u.special];
   return a ? Object.assign({}, base, a.over, { name:a.name, desc:a.desc, awakened:true }) : base;
 };
-const evadeOf = u => Math.min(0.6, (u.evade || 0) + gearSum(u, 'evade') + buffSum(u, 'evade'));
+const evadeOf = u => Math.min(0.6, (u.evade || 0) + gearSum(u, 'evade') + buffSum(u, 'evade') + auraSum(u, 'evade'));
 const rageFull = u => !!u.special && u.rage >= CFG.rage.max;
 const gainRage = (u, n) => { if (u.hp > 0 && u.special) u.rage = Math.min(CFG.rage.max, u.rage + n); };
 const isDormant = u => u.team === 'enemy' && (u.ai === 'hold' || u.ai === 'wake' || u.ai === 'post' || S.turn < u.activeTurn);
@@ -2220,10 +2324,11 @@ const isSentry = u => !!u && u.team === 'enemy' && (u.watch || u.ai === 'post');
 function checkSpotted(a) {
   if (!STAGE.stealth || S.alarm || !a || a.team !== 'ally' || a.hp <= 0) return;
   const k = keyOf(a.x, a.y);
-  for (const g of sentries()) { const z = watchZone(g); if (g.alert || !z || !z.has(k)) continue; g.alert = true; FX.popup(g, '!', 'crit'); FX.log(`${g.name}에게 발견됐다! 다음 적 페이즈 전에 쓰러뜨리지 못하면 경보가 울린다`, 'counter'); }
+  for (const g of sentries()) { const z = watchZone(g); if (g.alert || !z || !z.has(k)) continue; g.alert = true; FX.popup(g, '!', 'crit'); FX.sfx('spot'); FX.log(`${g.name}에게 발견됐다! 다음 적 페이즈 전에 쓰러뜨리지 못하면 경보가 울린다`, 'counter'); }
 }
 function raiseAlarm() {
   if (S.alarm) return false;
+  FX.sfx('alarm');
   S.alarm = S.turn;
   for (const u of S.units) if (u.team === 'enemy' && (u.ai === 'post' || u.ai === 'wake')) { u.ai = null; u.activeTurn = 0; }
   FX.log('경보! 요새 전체가 깨어났다', 'event');
@@ -2255,11 +2360,13 @@ const INJURY = 0.8;
 function injStat(u, k) {
   let v = levelStat(u, k) + ((u.bonus && u.bonus[k]) || 0);
   if (u.cls) v *= CLASS_MUL;
+  if (u.cls && k === 'hp' && TRAIT_OF[u.defId || u.id] === 'indomitable') v *= 1.1;
   if (u.injured && (k === 'hp' || k === 'def')) v *= INJURY;
   return Math.round(v);
 }
 function levelUp(u) {
   u.lv++;
+  if (u.team === 'ally' && S.units && S.units.includes(u)) FX.sfx('level');
   const gains = [];
   for (const k of ['hp', 'atk', 'mag', 'def']) {
     const nv = injStat(u, k), cur = k === 'hp' ? u.maxHp - gearSum(u, 'hp') : u[k], d = nv - cur;
@@ -2338,9 +2445,24 @@ function distributeHits(total, n) {
   }
   return out;
 }
-function baseHit(att, def, value, mult) { return atkOf(att) * W(att).pow * CFG.atkScale * (att.team === 'enemy' ? CFG.foeScale : 1) * value * mult * 100 / (100 + defOf(def)); }
+function baseHit(att, def, value, mult) {
+  const d = defOf(def) * (traitOf(att) === 'heavyBlow' ? 0.7 : 1);     // 우르스: 방어력 30% 무시
+  return atkOf(att) * W(att).pow * CFG.atkScale * (att.team === 'enemy' ? CFG.foeScale : 1) * value * mult * 100 / (100 + d) * takenMul(att, def, true);
+}
+/* 특성·상태로 바뀌는 받는 피해 배율 */
+function takenMul(att, def, physical) {
+  let m = 1;
+  const at = traitOf(att), dt = traitOf(def);
+  if (physical && dt === 'ironclad' && isMelee(att)) m *= 0.9;               // 가루다
+  if (physical && at === 'speedrun' && movOf(att) > movOf(def)) m *= 1.1;   // 팔코
+  if (physical && at === 'sharpness' && att.cls && att._single) m *= 1.2;   // 레아 클래스 체인지
+  if (def.weak > 0) m *= 1.3;                                                // 베리알 저주
+  if (def.hymn > 0) m *= 0.85;                                               // 콜롬바 평화의 노래
+  return m;
+}
 /* 아군 원거리: 멀리 있는 적일수록 아프다 */
-function rangedMul(att, d) { return att.team === 'ally' && W(att).kind === 'ranged' ? CFG.allyRanged.pow * (1 + CFG.allyRanged.perTile * Math.max(0, d - 1)) : 1; }
+const rangeBonus = d => Math.min(CFG.allyRanged.cap, CFG.allyRanged.perTile * Math.max(0, d - 1));
+function rangedMul(att, d) { return att.team === 'ally' && W(att).kind === 'ranged' ? CFG.allyRanged.pow * (1 + rangeBonus(d)) : 1; }
 function expHit(att, def, value, mult) { return baseHit(att, def, value, mult) * (1 + critOf(att) * (CFG.critMul - 1)) * (1 - evadeOf(def)); }
 function calcHit(att, def, value, mult, guarded) {
   const r = CFG.rnd[0] + (CFG.rnd[1] - CFG.rnd[0]) * rng();
@@ -2350,7 +2472,7 @@ function calcHit(att, def, value, mult, guarded) {
   return { dmg: Math.max(1, Math.round(dmg)), crit };
 }
 const magicDef = def => defOf(def) * CFG.magicDefRatio;
-function expMagic(c, def, coef) { return magOf(c) * coef * 100 / (100 + magicDef(def)); }
+function expMagic(c, def, coef) { return magOf(c) * coef * 100 / (100 + magicDef(def)) * takenMul(c, def, false); }
 function calcMagic(c, def, coef) { const r = CFG.rnd[0] + (CFG.rnd[1] - CFG.rnd[0]) * rng(); return Math.max(1, Math.round(expMagic(c, def, coef) * r)); }
 const expHeal = (c, coef) => magOf(c) * coef;
 function reactChances(att, def) {
@@ -2358,8 +2480,10 @@ function reactChances(att, def) {
   const cap = CFG.baseReactCap, canCounter = isMelee(def);
   const baseC = canCounter ? cap * clamp((r - 0.6) / 0.8, 0, 1) : 0;
   const baseG = cap * clamp((d - 0.2) / 0.8, 0, 1);
-  const counter = canCounter ? Math.min(CFG.totalReactCap, baseC + passiveSum(def, 'counter')) : 0;
-  const guard = Math.min(CFG.totalReactCap, baseG + passiveSum(def, 'guard') + buffSum(def, 'guard'));
+  const dt = traitOf(def);
+  const counter = canCounter ? Math.min(CFG.totalReactCap, baseC + passiveSum(def, 'counter') + (dt === 'dawnCounter' ? 0.2 : 0)) : 0;
+  const phal = dt === 'phalanx' ? Math.min(0.3, 0.1 * DIRS.filter(([dx, dy]) => { const o = unitAt(def.x + dx, def.y + dy); return o && o.team === def.team; }).length) : 0;
+  const guard = Math.min(CFG.totalReactCap, baseG + passiveSum(def, 'guard') + buffSum(def, 'guard') + phal);
   const guardCounter = canCounter && r >= 1.0 && d >= 0.6 ? counter * guard : 0;
   return { counter, guard, guardCounter };
 }
@@ -2398,13 +2522,13 @@ function computePlan(u, route, knTarget) {
   const struck = dist.filter(s => s.length).length;
   const mult = W(u).spear ? round2(spearMul(struck) + (struck >= 2 ? spv(u, 'spearAdd') : 0)) : 1;
   const encountered = W(u).noPass ? (knTarget ? [knTarget] : []) : passed;
-  const saved = u.tempAtk;
-  u.tempAtk = rally ? CFG.rallyAtk : 0;
+  const saved = u.tempAtk, savedS = u._single;
+  u.tempAtk = rally ? CFG.rallyAtk : 0; u._single = struck === 1;
   const rows = encountered.map(o => {
     const st = strikes.get(o.id) || [], ch = reactChances(u, o);
     return { unit:o, strikes:st, base:Math.round(st.reduce((s, v) => s + baseHit(u, o, v, mult), 0)), counter:ch.counter, guard:ch.guard, guardCounter:ch.guardCounter };
   });
-  u.tempAtk = saved;
+  u.tempAtk = saved; u._single = savedS;
   return { passed, strikes, mult, rows, rally, cost:routeCost(route),
     total: rows.reduce((s, r) => s + r.base, 0), maxCounter: rows.reduce((m, r) => Math.max(m, r.counter + r.guardCounter), 0) };
 }
@@ -2424,6 +2548,16 @@ const RETREAT_LINES = {
   bubo:    '허허, 늙은이는 이만 물러가겠네. 밤은 또 오니까.',
 };
 const canRetreat = u => u.team === 'enemy' && !!(UNIT_DEFS[u.defId] && UNIT_DEFS[u.defId].age) && !(STAGE.mortal || []).includes(u.defId);
+/* 피해 적용: 불굴(보르도)·도둑고양이(펠릭스)·저주(베리알) */
+function dealDamage(u, dmg, att) {
+  const before = u.hp;
+  if (u.hp - dmg <= 0 && traitOf(u) === 'indomitable' && !u.endured) { u.endured = true; u.hp = 1; FX.popup(u, '불굴!', 'special'); FX.log(`${u.name}, 불굴의 의지로 버텼다`, 'special'); FX.sfx('endure'); }
+  else u.hp = Math.max(0, u.hp - dmg);
+  const done = before - u.hp;
+  if (att && traitOf(att) === 'thief' && att.team === 'ally' && u.team !== att.team) S.thiefGold = (S.thiefGold || 0) + done;
+  if (att && traitOf(att) === 'curse' && u.hp > 0) { if (!(u.weak > 0)) FX.popup(u, '약화', 'info'); u.weak = 3; }
+  return done;
+}
 function kill(u, by) {
   u.hp = 0; u.sp = null;
   if (u.prince) { S.fallen = { x:u.x, y:u.y }; S.over = S.over || 'lose'; }
@@ -2431,6 +2565,8 @@ function kill(u, by) {
   else { FX.log(`${u.name} 쓰러짐`, 'kill'); FX.onKill(u); }
   if (by && by.team === 'ally' && u.team === 'enemy') S.kills++;
   if (by) grantExp(by, u, 'kill');
+  if (by && traitOf(by) === 'proven' && (by.kills || 0) < 6) { by.kills = (by.kills || 0) + 1; FX.popup(by, `실적 +${by.kills * 5}%`, 'buff'); }
+  FX.sfx(u.team === 'ally' ? 'down' : 'kill');
   if (u.team === 'enemy' && u.drop) acquireGear(u.drop);
 }
 async function flushRetreats() {
@@ -2455,7 +2591,7 @@ async function resolvePass(att, def, strikes, mult) {
     wake(def);
     if (rng() < evadeOf(def)) { n++; FX.popup(def, '회피', 'guard'); FX.changed(); await wait(170); continue; }
     const r = calcHit(att, def, v, mult, guard);
-    def.hp = Math.max(0, def.hp - r.dmg);
+    dealDamage(def, r.dmg, att); FX.sfx(r.crit ? 'crit' : guard ? 'guard' : 'hit');
     total += r.dmg; n++; if (r.crit) crits++;
     gainRage(att, CFG.rage.hit); gainRage(def, CFG.rage.hurt);
     FX.popup(def, String(r.dmg), r.crit ? 'crit' : 'dmg'); FX.flash(def); FX.changed();
@@ -2470,8 +2606,8 @@ async function resolvePass(att, def, strikes, mult) {
   if (counter && att.hp > 0 && rng() < evadeOf(att)) { await wait(120); FX.popup(att, '반격 회피', 'guard'); FX.log(`${att.name}, ${def.name}의 반격을 피함`, 'sys'); counter = false; }
   if (counter && att.hp > 0) {
     await wait(120);
-    const r = calcHit(def, att, 1, 1, false);
-    att.hp = Math.max(0, att.hp - r.dmg);
+    const r = calcHit(def, att, 1, traitOf(def) === 'dawnCounter' ? 1.2 : 1, false);
+    dealDamage(att, r.dmg, def); FX.sfx('hit');
     gainRage(def, CFG.rage.hit); gainRage(att, CFG.rage.hurt);
     FX.popup(att, `반격 ${r.dmg}`, 'counter'); FX.flash(att); FX.changed();
     FX.log(`${def.name}${guard ? ' 가드 후' : ''} 반격 → ${att.name} ${r.dmg}${r.crit ? ' (치명)' : ''}`, 'counter');
@@ -2491,11 +2627,13 @@ async function useSpecialBuff(u) {
   useRage(u);
   const targets = sp.area === 'team' ? alive().filter(a => a.team === u.team) : sp.area === 'self' ? [u]
     : [u, ...DIRS.map(([dx, dy]) => unitAt(u.x + dx, u.y + dy)).filter(a => a && a.team === u.team)];
+  u.didAct = true; FX.sfx('special');
   if (sp.manaFull && u.maxMp) { u.mp = u.maxMp; FX.popup(u, '마나 MAX', 'mana'); }
   FX.area(targets.map(a => [a.x, a.y]), 'heal');
   await wait(260);
   for (const a of targets) {
-    if (sp.heal) { const got = Math.min(Math.round(magOf(u) * sp.heal), a.maxHp - a.hp); if (got > 0) { a.hp += got; FX.popup(a, `+${got}`, 'heal'); } }
+    if (sp.heal) { const got = Math.min(Math.round(magOf(u) * sp.heal), a.maxHp - a.hp); if (got > 0) { a.hp += got; FX.popup(a, `+${got}`, 'heal'); } supportTrait(u, a); }
+    else if (sp.buff && traitOf(u) === 'hymn') a.hymn = 2;
     if (sp.buff) { a.buffs = a.buffs.filter(b => b.src !== u.special); a.buffs.push(Object.assign({ src:u.special }, sp.buff)); }
   }
   FX.changed();
@@ -2504,6 +2642,9 @@ async function useSpecialBuff(u) {
 async function execMove(u, route, knTarget) {
   const plan = computePlan(u, route, knTarget);
   let rallied = false;
+  if (route.length > 1 || knTarget) u.didAct = true;
+  u._single = plan.rows.filter(r => r.strikes.length).length === 1;   // 레아: 적 하나만 치면 치명 100%
+  if (plan.rows.some(r => r.strikes.length)) FX.sfx('charge');
   for (let i = 1; i < route.length; i++) {
     const t = route[i];
     if (t.x !== u.x) u.face = t.x > u.x ? 1 : -1;
@@ -2514,7 +2655,10 @@ async function execMove(u, route, knTarget) {
     const o = unitAt(t.x, t.y, u);
     if (!o) continue;
     if (o.team === u.team) {
-      if (!rallied && hasPassive(o, 'rally')) { rallied = true; u.tempAtk = CFG.rallyAtk; FX.popup(u, '격려 +15%', 'buff'); FX.log(`${u.name}, ${o.name}의 격려로 공격력 +15%`, 'sys'); }
+      if (!rallied && hasPassive(o, 'rally')) {
+        rallied = true; u.tempAtk = CFG.rallyAtk; FX.popup(u, '격려 +15%', 'buff'); FX.log(`${u.name}, ${o.name}의 격려로 공격력 +15%`, 'sys');
+        if (traitOf(u) === 'loyalty') { const v = u.cls ? 0.45 : 0.30; u.buffs = u.buffs.filter(b => b.src !== 'loyalty'); u.buffs.push({ atk:v, turns:1, src:'loyalty' }); FX.popup(u, `충성심 +${Math.round(v * 100)}%`, 'buff'); FX.log(`${u.name} 충성심 · 공격력 +${Math.round(v * 100)}% (1턴)`, 'special'); }
+      }
       continue;
     }
     await resolvePass(u, o, plan.strikes.get(o.id) || [], plan.mult);
@@ -2525,34 +2669,40 @@ async function execMove(u, route, knTarget) {
     await wait(80);
     await resolvePass(u, knTarget, plan.strikes.get(knTarget.id) || [], 1);
   }
-  u.tempAtk = 0;
+  u.tempAtk = 0; u._single = false;
   if (u.sp && u.sp.kind === 'charge') u.sp = null;
   FX.changed();
 }
 async function execShot(att, target, sp) {
-  const icp = sp && sp.pierce ? null : findInterceptor(att.x, att.y, target);
-  const recv = icp || target;
   if (target.x !== att.x) att.face = target.x > att.x ? 1 : -1;
   if (sp) useRage(att);
-  FX.area([[target.x, target.y]], 'dmg');
-  await wait(sp ? 300 : 160);
-  if (icp) FX.popup(icp, '방패!', 'guard');
-  wake(recv);
-  if (rng() < evadeOf(recv)) {
-    FX.popup(recv, '회피', 'guard'); FX.log(`${att.name} ${sp ? sp.name : '사격'} → ${recv.name} 회피`, 'sys');
-    att.sp = null; await wait(300); return;
+  att.didAct = true;
+  const times = traitOf(att) === 'boomerang' ? 2 : 1, dist = man(att.x, att.y, target.x, target.y);
+  att._single = true;
+  FX.sfx(sp ? 'special' : 'shoot');
+  for (let n = 0; n < times; n++) {
+    if (target.hp <= 0) break;
+    const icp = sp && sp.pierce ? null : findInterceptor(att.x, att.y, target);
+    const recv = icp || target;
+    FX.area([[target.x, target.y]], 'dmg');
+    await wait(sp ? 300 : 160);
+    if (icp) FX.popup(icp, '방패!', 'guard');
+    wake(recv);
+    const tag = times > 1 ? (n ? ' (돌아오며)' : ' (가며)') : '';
+    if (rng() < evadeOf(recv)) { FX.popup(recv, '회피', 'guard'); FX.log(`${att.name} ${sp ? sp.name : '사격'}${tag} → ${recv.name} 회피`, 'sys'); FX.sfx('evade'); await wait(260); continue; }
+    const r = calcHit(att, recv, 1, (sp ? sp.powMul : 1) * rangedMul(att, dist), false);
+    dealDamage(recv, r.dmg, att); FX.sfx(r.crit ? 'crit' : 'hit');
+    if (!sp) gainRage(att, CFG.rage.hit);
+    gainRage(recv, CFG.rage.hurt);
+    FX.popup(recv, String(r.dmg), r.crit ? 'crit' : 'dmg'); FX.flash(recv); FX.changed();
+    FX.log(`${att.name} ${sp ? sp.name : '사격'}${tag} → ${recv.name} ${r.dmg}${r.crit ? ' (치명)' : ''}${icp ? ` · 방패로 ${target.name} 보호` : ''}`, r.crit ? 'crit' : 'hit');
+    grantExp(att, recv, 'act');
+    await wait(300);
+    if (recv.hp <= 0) kill(recv, att);
+    else if (isSentry(recv) && STAGE.stealth && !S.alarm) { recv.alert = true; FX.popup(recv, '!', 'crit'); }
   }
-  const r = calcHit(att, recv, 1, (sp ? sp.powMul : 1) * rangedMul(att, man(att.x, att.y, target.x, target.y)), false);
-  recv.hp = Math.max(0, recv.hp - r.dmg);
-  if (!sp) gainRage(att, CFG.rage.hit);
-  gainRage(recv, CFG.rage.hurt);
-  FX.popup(recv, String(r.dmg), r.crit ? 'crit' : 'dmg'); FX.flash(recv); FX.changed();
-  FX.log(`${att.name} ${sp ? sp.name : '사격'} → ${recv.name} ${r.dmg}${r.crit ? ' (치명)' : ''}${icp ? ` · 방패로 ${target.name} 보호` : ''}`, r.crit ? 'crit' : 'hit');
-  grantExp(att, recv, 'act');
+  att._single = false;
   att.sp = null;
-  await wait(300);
-  if (recv.hp <= 0) kill(recv, att);
-  else if (isSentry(recv) && STAGE.stealth && !S.alarm) { recv.alert = true; FX.popup(recv, '!', 'crit'); }
 }
 function crossTiles(tx, ty) { return [[tx, ty], [tx + 1, ty], [tx - 1, ty], [tx, ty + 1], [tx, ty - 1]].filter(([x, y]) => inB(x, y)); }
 function skillAreaTiles(sk, tx, ty) { return sk.shape === 'cross' ? crossTiles(tx, ty) : [[tx, ty]]; }
@@ -2568,9 +2718,16 @@ function skillTargets(u, sid) {
   }
   return out;
 }
+/* 치유사(디온): 치유한 아군 공격력 +10%(클체 15%) 2턴 · 평화의 노래(콜롬바): 받는 피해 -15% 1턴 */
+function supportTrait(u, t) {
+  const tr = traitOf(u);
+  if (tr === 'healer') { const v = u.cls ? 0.15 : 0.10; t.buffs = t.buffs.filter(b => b.src !== 'healer'); t.buffs.push({ atk:v, turns:2, src:'healer' }); FX.log(`${t.name} 공격력 +${Math.round(v * 100)}% (치유사, 2턴)`, 'heal'); }
+  if (tr === 'hymn') t.hymn = 2;
+}
 async function execSkill(u, sid, tx, ty) {
   const sk = SKILLS[sid];
-  u.mp -= sk.mp;
+  u.mp -= sk.mp; u.didAct = true;
+  FX.sfx(sk.type === 'dmg' ? 'magic' : sk.type === 'mana' ? 'mana' : 'heal');
   if (tx !== u.x) u.face = tx > u.x ? 1 : -1;
   FX.changed();
   if (sk.type === 'dmg') {
@@ -2585,7 +2742,7 @@ async function execSkill(u, sid, tx, ty) {
       if (!o || o.team === u.team) continue;
       const d = calcMagic(u, o, sk.coef);
       wake(o);
-      o.hp = Math.max(0, o.hp - d);
+      dealDamage(o, d, u);
       gainRage(u, CFG.rage.magic); gainRage(o, CFG.rage.hurt);
       FX.popup(o, String(d), 'magic'); FX.flash(o); FX.log(`  ${o.name} ${d}`, 'hit');
       hitAny = hitAny || o;
@@ -2601,14 +2758,14 @@ async function execSkill(u, sid, tx, ty) {
     if (t) {
       const amt = Math.round(expHeal(u, sk.coef) * (CFG.rnd[0] + (CFG.rnd[1] - CFG.rnd[0]) * rng()));
       const got = Math.min(amt, t.maxHp - t.hp);
-      t.hp += got; gainRage(u, CFG.rage.support); grantExp(u, u, 'act');
+      t.hp += got; gainRage(u, CFG.rage.support); grantExp(u, u, 'act'); supportTrait(u, t);
       FX.area([[tx, ty]], 'heal'); FX.popup(t, `+${got}`, 'heal'); FX.log(`${u.name} ${sk.name} → ${t.name} +${got}`, 'heal');
     }
     await wait(320);
   } else if (sk.type === 'buff') {
     const t = unitAt(tx, ty);
     if (t) {
-      t.buffs = t.buffs.filter(b => b.src !== sid); t.buffs.push({ atk:sk.atkUp, turns:sk.turns, src:sid });
+      t.buffs = t.buffs.filter(b => b.src !== sid); t.buffs.push({ atk:sk.atkUp, turns:sk.turns, src:sid }); if (traitOf(u) === 'hymn') t.hymn = 2;
       gainRage(u, CFG.rage.support); grantExp(u, u, 'act');
       FX.area([[tx, ty]], 'heal'); FX.popup(t, '공격력 +20%', 'buff'); FX.log(`${u.name} ${sk.name} → ${t.name} 공격력 +20% (2턴)`, 'heal');
     }
@@ -2623,15 +2780,30 @@ async function execSkill(u, sid, tx, ty) {
 function useItem(u, kind) {
   const it = ITEMS[kind];
   if (!S.items[kind]) return false;
+  u.didAct = true; FX.sfx('heal');
   if (it.hp) { const got = Math.min(it.hp, u.maxHp - u.hp); u.hp += got; FX.popup(u, `+${got}`, 'heal'); FX.log(`${u.name} ${it.name} · 체력 +${got}`, 'heal'); }
   if (it.mp) { const got = Math.min(it.mp, u.maxMp - u.mp); u.mp += got; FX.popup(u, `마나 +${got}`, 'mana'); FX.log(`${u.name} ${it.name} · 마나 +${got}`, 'sys'); }
   S.items[kind]--;
   FX.changed();
   return true;
 }
+/* 공병(릭스): 2턴 동안 아무 행동도 안 하면 소총 10턴 (전투당 1회) */
+function engineerTick(u) {
+  if (u.rifle > 0) {
+    if (--u.rifle <= 0) { u.weapon = u.weapon0 || 'bomb'; u.rifle = 0; FX.popup(u, '소총 해제', 'info'); FX.log(`${u.name} 소총을 내려놓았다`, 'sys'); }
+    return;
+  }
+  if (u.rifleUsed) return;
+  u.idle = u.didAct ? 0 : (u.idle || 0) + 1;
+  if (u.idle >= 2) { u.weapon0 = u.weapon; u.weapon = 'rifle'; u.rifle = 10; u.rifleUsed = true; FX.popup(u, '소총 장착!', 'special'); FX.log(`${u.name} 공병 · 소총 장착 (사거리 8, 공격력 +10, 10턴)`, 'special'); }
+}
 function startTurn() {
   S.turn++;
   for (const u of alive()) {
+    if (traitOf(u) === 'engineer' && u.team === 'ally') engineerTick(u);
+    u.didAct = false;
+    if (u.weak > 0) u.weak--;
+    if (u.hymn > 0) u.hymn--;
     u.acted = false; u.movedThisTurn = false;
     if (u.maxMp) u.mp = Math.min(u.maxMp, u.mp + Math.ceil(magOf(u) * CFG.manaRegen));
     u.buffs.forEach(b => b.turns--);
@@ -2698,7 +2870,7 @@ async function fireEvent(ev) {
   FX.changed();
   if (ev.join) {
     const j = S.units.find(o => o.defId === ev.join && o.hp > 0);
-    if (j) { j.manual = !ev.joinAuto; j.joined = true; j.aiMode = 'global'; j.anchorFor = null; FX.popup(j, '합류!', 'level'); FX.log(`${j.name} 합류 · ${ev.joinAuto ? '자동으로 싸워요 (카드의 자동/수동 표시를 눌러 바꿀 수 있어요)' : '이제 직접 조작할 수 있어요'}`, 'event'); }
+    if (j) { j.manual = !ev.joinAuto; j.joined = true; j.aiMode = 'global'; j.anchorFor = null; FX.popup(j, '합류!', 'level'); FX.sfx('join'); FX.log(`${j.name} 합류 · ${ev.joinAuto ? '자동으로 싸워요 (카드의 자동/수동 표시를 눌러 바꿀 수 있어요)' : '이제 직접 조작할 수 있어요'}`, 'event'); }
   }
   if (ev.banner) await FX.banner(ev.banner, 'event');
   if (ev.spawn) FX.log(`${ev.banner || '적 증원'}`, 'event');
@@ -2903,7 +3075,7 @@ function planRanged(u, C) {
       const d = man(o.x, o.y, x, y);
       if (d < 1 || d > range) continue;
       const recv = (!pierce && findInterceptor(x, y, o)) || o;
-      const e = expHit(u, recv, 1, pow * rangedMul(u, d));
+      const e = expHit(u, recv, 1, pow * rangedMul(u, d)) * (traitOf(u) === 'boomerang' ? 2 : 1);
       const s = Math.min(e, recv.hp) * C.weight(recv) + (e >= recv.hp ? 25 * C.weight(recv) : 0);
       if (s > shotS) { shotS = s; shot = o; }
     }
@@ -3003,7 +3175,7 @@ async function runAI(list) {
     await aiTakeTurn(u);
   }
 }
-function autoAllies() { return S.units.filter(u => u.team === 'ally' && u.hp > 0 && !isManual(u)); }
+function autoAllies() { return S.units.filter(u => u.team === 'ally' && u.hp > 0 && !isManual(u) && !u.acted); }   // 이번 턴에 이미 행동한 동료는 다시 움직이지 않는다
 function enemyOrder() {
   const allies = alive().filter(u => u.team === 'ally');
   if (!allies.length) return [];
@@ -3266,12 +3438,15 @@ function drawOverlays(now) {
   drawFog();
   drawWatch(now);
   if (UI.reachSet && UI.mode === 'route') {
+    const left = UI.route.length > 1 && UI.reachLeft ? UI.reachLeft : null;   // 경로를 그리는 중이면 남은 범위만 진하게
     for (const k of UI.reachSet) {
       const x = k % COLS, y = (k / COLS) | 0;
-      const o = unitAt(x, y);
-      ctx.fillStyle = o && UI.sel && o.team !== UI.sel.team && seenByPlayer(o) ? 'rgba(232,80,64,0.30)' : 'rgba(80,150,255,0.30)';
+      const o = unitAt(x, y), hot = !left || left.has(k);
+      const enemy = o && UI.sel && o.team !== UI.sel.team && seenByPlayer(o);
+      ctx.fillStyle = enemy ? `rgba(232,80,64,${hot ? 0.32 : 0.10})` : `rgba(80,150,255,${hot ? 0.32 : 0.07})`;
       ctx.fillRect(sx(x) + 1, sy(y) + 1, T - 2, T - 2);
     }
+    if (left) for (const k of left) if (!UI.reachSet.has(k)) { const x = k % COLS, y = (k / COLS) | 0; ctx.fillStyle = 'rgba(80,150,255,0.32)'; ctx.fillRect(sx(x) + 1, sy(y) + 1, T - 2, T - 2); }
   }
   if (UI.mode === 'target' && UI.targets) {
     const sk = UI.skill ? SKILLS[UI.skill] : null;
@@ -3497,6 +3672,103 @@ FX.focus = (u, moving) => { if (!seenByPlayer(u)) return; if (!moving) { UI.insp
 FX.focusTile = async (x, y) => { centerOn(x, y); await FX.sleep(reduceMotion ? 200 : 650); };
 FX.spawned = u => { if (seenByPlayer(u)) UI.popups.push({ x:u.x, y:u.y, text:'!', kind:'special', t:0 }); };
 FX.banner = (text, tone) => banner(text, tone);
+/* ---------- 소리: 배경음악(파일) + 효과음(직접 합성) ---------- */
+const AUDIO = { vol:{ music:0.6, sfx:0.7 }, el:null, track:null, want:null, ctx:null, unlocked:false };
+try { Object.assign(AUDIO.vol, JSON.parse(localStorage.getItem('rondo.audio') || '{}')); } catch (e) {}
+const BGM = { title:'audio/title.mp3', map:'audio/map.mp3', camp:'audio/camp.mp3', battle:'audio/battle.mp3' };
+function saveAudio() { try { localStorage.setItem('rondo.audio', JSON.stringify(AUDIO.vol)); } catch (e) {} }
+function fadeAudio(a, to, ms, done) {
+  const from = a.volume, t0 = performance.now();
+  const step = () => { const k = Math.min(1, (performance.now() - t0) / ms); try { a.volume = Math.max(0, Math.min(1, from + (to - from) * k)); } catch (e) {} if (k < 1) requestAnimationFrame(step); else if (done) done(); };
+  step();
+}
+function music(name) {
+  AUDIO.want = name;
+  if (!AUDIO.unlocked) return;
+  if (AUDIO.track === name && AUDIO.el) return;
+  const old = AUDIO.el;
+  if (old) fadeAudio(old, 0, 700, () => { try { old.pause(); } catch (e) {} });
+  AUDIO.el = null; AUDIO.track = name || null;
+  if (!name) return;
+  try {
+    const a = new Audio(BGM[name]); a.loop = true; a.volume = 0; a.preload = 'auto';
+    const pr = a.play(); if (pr && pr.catch) pr.catch(() => {});
+    fadeAudio(a, AUDIO.vol.music, 900);
+    AUDIO.el = a;
+  } catch (e) {}
+}
+function unlockAudio() {
+  if (AUDIO.unlocked) return;
+  AUDIO.unlocked = true;
+  try { const AC = window.AudioContext || window.webkitAudioContext; if (AC) AUDIO.ctx = new AC(); } catch (e) {}
+  music(AUDIO.want);
+}
+const onDoc = (t, f, o) => { if (document.addEventListener) document.addEventListener(t, f, o); };
+onDoc('pointerdown', unlockAudio, { capture:true });
+onDoc('keydown', unlockAudio, { capture:true });
+onDoc('visibilitychange', () => { if (!AUDIO.el) return; try { if (document.hidden) AUDIO.el.pause(); else { const pr = AUDIO.el.play(); if (pr && pr.catch) pr.catch(() => {}); } } catch (e) {} });
+/* 합성 효과음: 짧은 음·잡음을 겹쳐 만든다 (3초 이내) */
+function sTone(c, out, t, f, dur, type, vol, f2) {
+  const o = c.createOscillator(), g = c.createGain();
+  o.type = type || 'square'; o.frequency.setValueAtTime(f, t); if (f2) o.frequency.exponentialRampToValueAtTime(Math.max(20, f2), t + dur);
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.3, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(out); o.start(t); o.stop(t + dur + 0.02);
+}
+let noiseBuf = null;
+function sNoise(c, out, t, dur, vol, freq, ftype, f2) {
+  if (!noiseBuf) { noiseBuf = c.createBuffer(1, c.sampleRate, c.sampleRate); const d = noiseBuf.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1; }
+  const src = c.createBufferSource(), fl = c.createBiquadFilter(), g = c.createGain();
+  src.buffer = noiseBuf; fl.type = ftype || 'bandpass'; fl.frequency.setValueAtTime(freq || 1500, t); if (f2) fl.frequency.exponentialRampToValueAtTime(f2, t + dur); fl.Q.value = 0.9;
+  g.gain.setValueAtTime(0.0001, t); g.gain.exponentialRampToValueAtTime(vol || 0.3, t + 0.006); g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  src.connect(fl); fl.connect(g); g.connect(out); src.start(t); src.stop(t + dur + 0.02);
+}
+const NOTE = n => 440 * Math.pow(2, (n - 69) / 12);
+const SFX = {
+  hit:    (c, o, t) => { sNoise(c, o, t, 0.09, 0.45, 1800); sTone(c, o, t, 150, 0.09, 'square', 0.25, 60); },
+  crit:   (c, o, t) => { sNoise(c, o, t, 0.12, 0.55, 2400); sTone(c, o, t, 180, 0.1, 'square', 0.3, 50); sTone(c, o, t + 0.02, 1400, 0.18, 'triangle', 0.25, 900); },
+  guard:  (c, o, t) => { sTone(c, o, t, 620, 0.07, 'square', 0.18); sTone(c, o, t, 930, 0.09, 'square', 0.12); sNoise(c, o, t, 0.05, 0.25, 4000, 'highpass'); },
+  evade:  (c, o, t) => { sNoise(c, o, t, 0.16, 0.18, 600, 'bandpass', 2600); },
+  charge: (c, o, t) => { sNoise(c, o, t, 0.18, 0.2, 400, 'bandpass', 1800); },
+  shoot:  (c, o, t) => { sTone(c, o, t, 320, 0.1, 'triangle', 0.25, 160); sNoise(c, o, t + 0.02, 0.16, 0.22, 3000, 'highpass'); },
+  magic:  (c, o, t) => { sTone(c, o, t, 380, 0.32, 'sine', 0.25, 1300); sTone(c, o, t + 0.05, 760, 0.28, 'triangle', 0.12, 2000); sNoise(c, o, t + 0.12, 0.25, 0.15, 5000, 'highpass'); },
+  heal:   (c, o, t) => { [72, 76, 79, 84].forEach((n, i) => sTone(c, o, t + i * 0.07, NOTE(n), 0.22, 'sine', 0.2)); },
+  mana:   (c, o, t) => { sTone(c, o, t, 500, 0.3, 'sine', 0.18, 900); },
+  special:(c, o, t) => { sTone(c, o, t, 220, 0.3, 'sawtooth', 0.16, 880); [64, 68, 71].forEach(n => sTone(c, o, t + 0.25, NOTE(n), 0.35, 'square', 0.08)); },
+  kill:   (c, o, t) => { sTone(c, o, t, 320, 0.3, 'square', 0.22, 70); sNoise(c, o, t, 0.25, 0.25, 900, 'lowpass', 200); },
+  down:   (c, o, t) => { sTone(c, o, t, 440, 0.5, 'triangle', 0.25, 180); sTone(c, o, t + 0.12, 330, 0.5, 'triangle', 0.18, 140); },
+  level:  (c, o, t) => { [72, 76, 79, 84, 88].forEach((n, i) => sTone(c, o, t + i * 0.065, NOTE(n), 0.16, 'square', 0.13)); },
+  endure: (c, o, t) => { sTone(c, o, t, 110, 0.7, 'sine', 0.35, 90); sTone(c, o, t, 220, 0.5, 'triangle', 0.15); },
+  alarm:  (c, o, t) => { for (let i = 0; i < 4; i++) sTone(c, o, t + i * 0.22, i % 2 ? 660 : 880, 0.2, 'square', 0.16); },
+  join:   (c, o, t) => { [67, 71, 74, 79].forEach((n, i) => sTone(c, o, t + i * 0.09, NOTE(n), 0.3, 'triangle', 0.2)); },
+  spot:   (c, o, t) => { sTone(c, o, t, 1100, 0.06, 'square', 0.15); sTone(c, o, t + 0.09, 1400, 0.08, 'square', 0.15); },
+  click:  (c, o, t) => { sTone(c, o, t, 1500, 0.025, 'square', 0.07); },
+  turn:   (c, o, t) => { sTone(c, o, t, 660, 0.28, 'sine', 0.14); sTone(c, o, t + 0.06, 990, 0.24, 'sine', 0.08); },
+  win:    (c, o, t) => { [72, 76, 79, 84].forEach((n, i) => sTone(c, o, t + i * 0.13, NOTE(n), i === 3 ? 0.7 : 0.18, 'square', 0.14)); },
+  lose:   (c, o, t) => { [67, 63, 60, 55].forEach((n, i) => sTone(c, o, t + i * 0.2, NOTE(n), i === 3 ? 0.9 : 0.25, 'triangle', 0.2)); },
+};
+function sfx(name) {
+  const c = AUDIO.ctx; if (!c || !SFX[name] || AUDIO.vol.sfx <= 0) return;
+  try {
+    if (c.state === 'suspended') c.resume();
+    const out = c.createGain(); out.gain.value = AUDIO.vol.sfx * 0.6; out.connect(c.destination);
+    SFX[name](c, out, c.currentTime + 0.01);
+  } catch (e) {}
+}
+FX.sfx = sfx;
+function renderVolume() {
+  $('#volMusic').value = Math.round(AUDIO.vol.music * 100); $('#volMusicV').textContent = Math.round(AUDIO.vol.music * 100);
+  $('#volSfx').value = Math.round(AUDIO.vol.sfx * 100); $('#volSfxV').textContent = Math.round(AUDIO.vol.sfx * 100);
+}
+$('#volMusic').addEventListener('input', e => { AUDIO.vol.music = Number(e.target.value) / 100; if (AUDIO.el) AUDIO.el.volume = AUDIO.vol.music; renderVolume(); saveAudio(); });
+$('#volSfx').addEventListener('input', e => { AUDIO.vol.sfx = Number(e.target.value) / 100; renderVolume(); saveAudio(); });
+$('#volSfx').addEventListener('change', () => sfx('hit'));
+onDoc('click', e => { const b = e.target && e.target.closest && e.target.closest('.btn,.tool,.seg button'); if (b && !b.disabled) sfx('click'); }, { capture:true });
+/* 맵에 없는 화자: 기본 능력치 카드 */
+const speakerCache = {};
+function speakerCard(id) {
+  if (!speakerCache[id]) { const d = UNIT_DEFS[id]; const rec = d.team === 'ally' ? recOf(id) : null; speakerCache[id] = rec ? unitFromRecord(rec, { x:0, y:0 }) : makeUnit(id, { team:d.team, x:0, y:0 }); speakerCache[id].offMap = true; }
+  return speakerCache[id];
+}
 function paintPortrait(img, id) {
   const k = portraitKey(id);
   if (k) { if (img.dataset.k !== k) { img.src = PORTRAIT_IMG[k]; img.dataset.k = k; } return true; }
@@ -3520,9 +3792,11 @@ FX.talk = lines => new Promise(resolve => {
     paintPortrait(side === 'L' ? L : Rr, who);
     return side;
   };
+  const keepInspect = UI.inspect;
   const show = () => {
     const l = lines[i];
     const def = l.who ? UNIT_DEFS[l.who] : null;
+    if (def) { UI.inspect = S.units.find(o => o.defId === l.who && o.hp > 0) || S.escaped.find(o => o.defId === l.who) || speakerCard(l.who); renderCard(); }
     const first = def && def.age && !S.met[l.who];
     if (first) S.met[l.who] = true;
     $('#talkName').textContent = l.name || (def ? def.name : '');
@@ -3533,11 +3807,15 @@ FX.talk = lines => new Promise(resolve => {
     L.classList.toggle('off', !slot.L); Rr.classList.toggle('off', !slot.R);
     L.classList.toggle('dim', side !== 'L'); Rr.classList.toggle('dim', side !== 'R');
     last = l.who || last;
+    // 초상화는 대화창 바로 위에 (세로 화면에서 대화창이 얼굴을 가리지 않게)
+    const bh = $('#talkBox').offsetHeight > 20 ? $('#talkBox').offsetHeight : 96;
+    const pw2 = Math.max(110, Math.min(Math.floor(VW * 0.5), Math.floor(VH - bh - 18), 320));
+    box.style.setProperty('--pw', pw2 + 'px'); box.style.setProperty('--pb', (bh + 8) + 'px');
   };
   const next = e => {
     if (e) e.stopPropagation();
     i++;
-    if (i >= lines.length) { box.hidden = true; box.removeEventListener('click', next); UI.talking = false; render(); resolve(); return; }
+    if (i >= lines.length) { box.hidden = true; box.removeEventListener('click', next); UI.talking = false; UI.inspect = keepInspect && keepInspect.hp > 0 ? keepInspect : prince(); render(); resolve(); return; }
     show();
   };
   box.addEventListener('click', next);
@@ -3563,7 +3841,7 @@ function renderCard() {
   const tok = $('#cTok');
   tok.dataset.team = u.team; tok.dataset.manual = String(isManual(u));
   drawFace(tok, u);
-  $('#cName').textContent = u.race && u.race !== u.name ? `${u.name} · ${u.race}` : u.name;
+  $('#cName').innerHTML = `${u.race && u.race !== u.name ? `${u.name} · ${u.race}` : u.name}<span class="lvtag">Lv ${u.lv}</span>`;
   const w = W(u);
   const tags = [];
   if (u.elite) tags.push(u.boss ? '군단장' : '정예');
@@ -3587,18 +3865,55 @@ function renderCard() {
   rw.hidden = !u.special;
   if (u.special) { $('#cRageBar').style.width = (u.rage / CFG.rage.max * 100) + '%'; $('#cRage').textContent = rageFull(u) ? '분노 MAX' : `분노 ${u.rage}`; rw.classList.toggle('full', rageFull(u)); }
   const ter = terrainAt(u.x, u.y);
-  let h = `<span class="stat lv">Lv<b>${u.lv}</b>${u.team === 'ally' ? `<b style="color:var(--ink-dim);font-weight:500">${u.exp}%</b>` : ''}</span>`;
-  h += stat('공격력', Math.round(atkOf(u)), buffSum(u, 'atk') > 0 || spv(u, 'atkAdd') > 0) + stat('마력', magOf(u)) + stat('방어력', defOf(u), buffSum(u, 'def') > 0) + stat('이동', movOf(u), spv(u, 'movAdd') > 0);
+  // 특성 한 줄 + 필살·지형
+  const tr = traitOf(u), T0 = tr && TRAITS[tr];
+  $('#cTrait').innerHTML = (T0 ? `<b>${T0.name}</b><span>${T0.desc}${T0.cc && u.cls ? ` · ${T0.cc}` : ''}</span>` : `<span class="t2">특성 없음</span>`);
+  drawRadar(u);
+  let h = '';
+  if (u.team === 'ally') h += `<span class="stat lv">경험치<b>${u.exp}%</b></span>`;
   if (w.kind === 'melee') h += stat(hitStat(u)[0], hitStat(u)[1], spv(u, 'hitsMul') > 1);
-  h += stat('치명', Math.round(critOf(u) * 100) + '%', critOf(u) >= 1);
   if (evadeOf(u) > 0) h += stat('회피', Math.round(evadeOf(u) * 100) + '%');
-  h += `<span class="stat">${ter.name}<b>${ter.pct}%</b></span>`;
+  if (u.weak > 0) h += '<span class="stat warn">약화 받는 피해 +30%</span>';
+  if (u.hymn > 0) h += '<span class="stat passive">평화의 노래 -15%</span>';
+  if (u.rifle > 0) h += `<span class="stat passive">소총 ${u.rifle}턴</span>`;
+  if (u.kills && traitOf(u) === 'proven') h += `<span class="stat passive">실적 +${Math.min(6, u.kills) * 5}%</span>`;
+  if (!u.offMap) h += `<span class="stat">${ter.name}<b>${ter.pct}%</b></span>`; else h += '<span class="stat">아직 전장에 없음</span>';
   if (u.special) h += `<span class="stat passive">${awakenOf(u) ? '각성 ' : '필살 '}${specialOf(u).name}</span>`;
   for (const p of u.passives) h += `<span class="stat passive">${PASSIVES[p].name}</span>`;
   for (const slot of ['weapon', 'armor', 'acc']) if (u.equip[slot]) h += `<span class="stat gear"><em>${SLOT_NAME[slot]}</em>${GEAR[u.equip[slot]].name}</span>`;
   $('#cStats').innerHTML = h;
 }
 function pct(v) { return Math.round(v * 100) + '%'; }
+/* 육각형 능력치: 체력·공격·마력·방어·이동·치명 (꼭짓점에 최종 수치, 누르면 기본+장비+보너스) */
+const RADAR_AX = [['hp', '체력', 600], ['atk', '공격', 110], ['mag', '마력', 110], ['def', '방어', 130], ['mov', '이동', 12], ['crit', '치명', 1]];
+function radarVal(u, k) { return k === 'hp' ? u.maxHp : k === 'atk' ? Math.round(atkOf(u)) : k === 'mag' ? magOf(u) : k === 'def' ? Math.round(defOf(u)) : k === 'mov' ? movOf(u) : critOf(u); }
+function drawRadar(u) {
+  const svg = $('#cRadarSvg'); if (!svg) return;
+  const cx = 66, cy = 50, R = 27, n = RADAR_AX.length;
+  const pt = (i, r) => { const a = -Math.PI / 2 + i * 2 * Math.PI / n; return [cx + Math.cos(a) * r, cy + Math.sin(a) * r]; };
+  let g = '';
+  for (const f of [0.33, 0.66, 1]) g += `<polygon points="${RADAR_AX.map((_, i) => pt(i, R * f).join(',')).join(' ')}" fill="none" stroke="rgba(255,255,255,${f === 1 ? 0.22 : 0.1})" stroke-width="0.8"/>`;
+  const col = u.team === 'enemy' ? '232,80,64' : isManual(u) ? '240,190,70' : '80,150,255';
+  const vals = RADAR_AX.map(([k, , mx]) => Math.max(0.06, Math.min(1, Math.sqrt(radarVal(u, k) / mx))));
+  g += `<polygon points="${vals.map((v, i) => pt(i, R * v).join(',')).join(' ')}" fill="rgba(${col},0.35)" stroke="rgb(${col})" stroke-width="1.4"/>`;
+  RADAR_AX.forEach(([k, lab], i) => {
+    const [x, y] = pt(i, R + 11), v = radarVal(u, k), up = k !== 'hp' && k !== 'crit' && statParts(u, k)[2] > 0;
+    const anchor = Math.abs(x - cx) < 4 ? 'middle' : x > cx ? 'start' : 'end', dy = y < cy - 10 ? -2 : y > cy + 10 ? 8 : 3;
+    g += `<text class="ax" x="${x.toFixed(1)}" y="${(y + dy).toFixed(1)}" text-anchor="${anchor}">${lab} <tspan class="val${up ? ' up' : ''}">${k === 'crit' ? Math.round(v * 100) + '%' : v}</tspan></text>`;
+  });
+  svg.innerHTML = g;
+}
+function toggleStatPop() {
+  const old = document.querySelector('.statpop'); if (old) { old.remove(); return; }
+  const u = UI.sel || UI.inspect || prince(); if (!u) return;
+  const pop = document.createElement('div'); pop.className = 'statpop';
+  const row = (lab, pr) => `<div><span>${lab}</span><b>${pr[0]}${pr[1] ? ` <span class="g">+${pr[1]}</span>` : ''}${pr[2] ? ` <span class="t">${pr[2] > 0 ? '+' : ''}${pr[2]}</span>` : ''}</b></div>`;
+  pop.innerHTML = `<div style="margin-bottom:4px"><span>기본 <span class="g">+장비</span> <span class="t">+특성·버프</span></span></div>`
+    + row('체력', statParts(u, 'hp')) + row('공격력', statParts(u, 'atk')) + row('마력', statParts(u, 'mag')) + row('방어력', statParts(u, 'def')) + row('이동', statParts(u, 'mov'))
+    + `<div><span>치명</span><b>${Math.round(critOf(u) * 100)}%</b></div>`;
+  pop.addEventListener('click', () => pop.remove());
+  document.querySelector('.panel').append(pop);
+}
 function renderPreview() {
   const el = $('#preview');
   if (S.over) { el.textContent = ''; return; }
@@ -3635,7 +3950,7 @@ function renderPreview() {
     return;
   }
   const left = S.units.filter(x => isManual(x) && x.hp > 0 && !x.acted).length;
-  el.innerHTML = left ? `<b style="color:var(--gold)">수</b> 표시(금색 실선) 유닛을 누른 채 끌어 경로를 그리세요 · <b style="color:#5b9bf0">자</b> 표시(파란 점선)는 자동 · 남은 수동 <b>${left}</b>` : '수동 유닛이 모두 행동했어요. 턴을 종료하세요.';
+  el.innerHTML = left ? '' : '수동 유닛이 모두 행동했어요. 턴을 종료하세요.';
 }
 function btn(label, onClick, o = {}) {
   const b = document.createElement('button');
@@ -3719,7 +4034,24 @@ function localPoint(e) { const r = cvs.getBoundingClientRect(); return { x:e.cli
 function tileAtPoint(p) { const x = Math.floor((p.x + CAM.x) / T), y = Math.floor((p.y + CAM.y) / T); return inB(x, y) ? { x, y } : null; }
 function canAct() { return S.phase === 'player' && !UI.busy && !S.over && !UI.talking; }
 function displayReach(u) { return new Set(reach(u, !!W(u).noPass).dist.keys()); }
-function refreshPlan() { UI.plan = UI.sel ? computePlan(UI.sel, UI.route, UI.kn) : null; }
+function refreshPlan() { UI.plan = UI.sel ? computePlan(UI.sel, UI.route, UI.kn) : null; UI.reachLeft = UI.sel && UI.route.length ? reachLeft(UI.sel, UI.route) : null; }
+/* 경로 끝 칸에서 남은 이동력으로 더 갈 수 있는 칸 (이미 지난 칸 제외) */
+function reachLeft(u, route) {
+  const end = route[route.length - 1], budget = moveBudget(u) - routeCost(route), on = new Set(route.map(p => keyOf(p.x, p.y)));
+  const dist = new Map([[keyOf(end.x, end.y), 0]]), open = [keyOf(end.x, end.y)], out = new Set();
+  while (open.length) {
+    let bi = 0; for (let i = 1; i < open.length; i++) if (dist.get(open[i]) < dist.get(open[bi])) bi = i;
+    const k = open.splice(bi, 1)[0], d = dist.get(k), x = k % COLS, y = (k / COLS) | 0;
+    for (const [dx, dy] of DIRS) {
+      const nx = x + dx, ny = y + dy; if (!inB(nx, ny) || isWall(nx, ny)) continue;
+      const nk = keyOf(nx, ny); if (on.has(nk)) continue;
+      const nd = d + tileCost(nx, ny); if (nd > budget) continue;
+      const o = unitAt(nx, ny, u); if (o && o.team !== u.team && W(u).noPass) continue;
+      if (!dist.has(nk) || nd < dist.get(nk)) { dist.set(nk, nd); open.push(nk); out.add(nk); }
+    }
+  }
+  return out;
+}
 function hideToast() { $('#toast').hidden = true; }
 function disarm() { if (UI.sel && !UI.busy) UI.sel.sp = null; UI.armed = false; }
 function selectUnit(u) {
@@ -3912,7 +4244,7 @@ function buildTargetPreview() {
     const icp = sp && sp.pierce ? null : findInterceptor(u.x, u.y, target), recv = icp || target;
     const dd = man(u.x, u.y, target.x, target.y), b = Math.round(baseHit(u, recv, 1, (sp ? sp.powMul : 1) * rangedMul(u, dd)));
     UI.tpreview.push({ unit:recv, text:`~${b}` });
-    UI.tsummary = (sp ? `필살 <b>${sp.name}</b> · ` : '') + `${target.name}에게 사격 · 예상 <b>${b}</b>${rangedMul(u, dd) > CFG.allyRanged.pow ? ` (거리 ${dd}칸 +${Math.round(CFG.allyRanged.perTile * (dd - 1) * 100)}%)` : ''} · 치명 ${pct(W(u).crit)}`
+    UI.tsummary = (sp ? `필살 <b>${sp.name}</b> · ` : '') + `${target.name}에게 사격 · 예상 <b>${b}</b>${rangedMul(u, dd) > CFG.allyRanged.pow ? ` (거리 ${dd}칸 +${Math.round(rangeBonus(dd) * 100)}%)` : ''}${traitOf(u) === 'boomerang' ? ' ×2회' : ''} · 치명 ${pct(W(u).crit)}`
       + (icp ? ` · <span class="warn">${icp.name}의 방패가 대신 맞아요</span>` : (sp && sp.pierce && findInterceptor(u.x, u.y, target) ? ' · 방패 무시' : ''));
     return;
   }
@@ -3967,6 +4299,7 @@ async function banner(text, tone) {
   const b = $('#banner');
   $('#bannerText').textContent = text;
   b.dataset.tone = tone;
+  if (tone === 'player') sfx('turn'); else if (tone === 'event') sfx('spot');
   b.classList.remove('show'); void b.offsetWidth; b.classList.add('show');
   await FX.sleep(reduceMotion ? 450 : 800 / Math.sqrt(S.speed));
 }
@@ -4004,6 +4337,7 @@ async function endTurn() {
 function showResult(r) {
   UI.busy = false;
   const box = $('#resultBox'), lose = r === 'lose';
+  music(lose ? null : 'camp'); sfx(lose ? 'lose' : 'win');
   box.dataset.r = lose ? 'lose' : 'win';
   $('#resultTitle').textContent = lose ? '패배' : r === 'escape' ? '탈출 성공' : '클리어';
   const L = CAMP.last || {};
@@ -4070,6 +4404,7 @@ function renderLog() {
   }
 }
 function renderMenu() {
+  renderVolume();
   segment($('#speedSeg'), [[1, '보통'], [2.2, '빠르게'], [4, '아주 빠르게']], S.speed, v => { S.speed = v; try { localStorage.setItem('rondo.speed', String(v)); } catch (e) {} renderMenu(); });
   segment($('#gfxSeg'), [['art', '원본 그림'], ['dot', '도트']], GFX.mode, v => { GFX.mode = v; try { localStorage.setItem('rondo.gfx', v); } catch (e) {} renderMenu(); render(); drawTitleArt(); });
   $('#allManual').setAttribute('aria-checked', String(S.allManual));
@@ -4081,6 +4416,7 @@ $('#allManual').addEventListener('click', () => { S.allManual = !S.allManual; if
 $('#btnRestart').addEventListener('click', () => { closeSheets(); newBattle(); });
 $('#btnAdmin').addEventListener('click', () => openAdmin());
 $('#btnAgain').addEventListener('click', () => newBattle());
+$('#cRadar').addEventListener('click', e => { e.stopPropagation(); toggleStatPop(); });
 $('#cCtrl').addEventListener('click', e => { e.stopPropagation(); toggleManual(UI.sel || UI.inspect); });
 $('#btnCenter').addEventListener('click', () => { const u = UI.sel || prince(); if (u) centerOn(u.x, u.y); });
 function setZoom(i) {
@@ -4109,6 +4445,7 @@ const STAGE_TIPS = [
   '잠든 무리는 공격하면 다 같이 깨어나요. 감옥 문에 닿는 순간 요새 전체가 깨어나요. 24턴 안에 탈출!',
 ];
 async function newBattle() {
+  music('battle');
   const keepSpeed = S.speed || 1, keepManual = !!S.allManual;
   ensureMap();
   resetState();
@@ -4154,6 +4491,7 @@ function clearSave() { BATTLE_SAVE = null; persist(); }
 let newConfirm = false;
 function showTitle() {
   hideOverlays();
+  music('title');
   $('#title').hidden = false;
   const sv = readSave();
   const b = $('#tContinue');
@@ -4182,6 +4520,7 @@ function drawTitleArt() {
 }
 function showRecap() {
   hideOverlays();
+  music('map');
   const box = $('#recapLines');
   box.textContent = '';
   const loopN = CAMP.loop || 1;
@@ -4202,6 +4541,7 @@ function continueGame() {
   Object.assign(CAMP, sv.camp);
   if (!sv.battle) { BATTLE_SAVE = null; openCamp(); return; }
   BATTLE_SAVE = sv.battle;
+  music('battle');
   loadStage(sv.battle.stage);
   ensureMap();
   const keepSpeed = S.speed || 1;
@@ -4305,6 +4645,7 @@ function nextStage() { return STAGES[CAMP.chapter] || null; }
 function sortieMax() { const st = nextStage(); return st ? (st.sortieMax || st.allies.length) : 8; }
 function openCamp() {
   hideOverlays();
+  music('camp');
   CAMPUI.sel = null; CAMPUI.pick = null; CAMPUI.msg = '';
   if (CAMPUI.tab === 'talk' && !CAMP_TALK[CAMP.chapter - 1]) CAMPUI.tab = 'party';
   $('#camp').hidden = false;
@@ -4407,9 +4748,11 @@ function renderMember(body, rec) {
   // 능력치
   const stb = el('div', 'box');
   stb.append(el('h3', null, '능력치'));
-  const w = W(u), cells = [['체력', u.maxHp], ['공격력', Math.round(atkOf(u))], ['마력', magOf(u)], ['방어력', defOf(u)], ['이동', movOf(u)],
+  const sp2 = k => { const pr = statParts(u, k); return `${pr[0]}${pr[1] ? `<span class="gplus"> +${pr[1]}</span>` : ''}${pr[2] ? `<span class="tplus"> ${pr[2] > 0 ? '+' : ''}${pr[2]}</span>` : ''}`; };
+  const w = W(u), cells = [['체력', sp2('hp')], ['공격력', sp2('atk')], ['마력', sp2('mag')], ['방어력', sp2('def')], ['이동', sp2('mov')],
     w.kind === 'melee' ? hitStat(u) : ['사거리', w.range ? `1~${w.range}` : '스킬'], ['치명', Math.round(critOf(u) * 100) + '%'], ['회피', Math.round(evadeOf(u) * 100) + '%'], ['마나', u.maxMp || '-']];
   const g = el('div', 'sgrid'); for (const [k, v] of cells) g.append(el('div', null, `${k}<b>${v}</b>`)); stb.append(g);
+  stb.append(el('p', null, '숫자: 기본 <span class="gplus">+장비</span> <span class="tplus">+특성·버프</span>'));
   if (d.grow) stb.append(el('p', null, `레벨당 성장 · 체력 ${Math.round(d.grow.hp * 100)}% · 공격 ${Math.round(d.grow.atk * 100)}% · 마력 ${Math.round(d.grow.mag * 100)}% · 방어 ${Math.round(d.grow.def * 100)}%`));
   body.append(stb);
   // 장비
@@ -4441,6 +4784,7 @@ function renderMember(body, rec) {
   sk.append(el('h3', null, '무기 · 스킬'));
   sk.append(skl(`${WEAPONS[d.weapon].name}`, WEAPON_DESC[d.weapon] || ''));
   for (const sid of d.skills || []) { const s2 = SKILLS[sid]; sk.append(skl(`${s2.name} <span class="cap">마나 ${s2.mp}</span>`, skillDesc(s2))); }
+  { const tid = TRAIT_OF[rec.id]; if (tid) { const t0 = TRAITS[tid]; sk.append(skl(`${t0.name} <span class="cap">특성</span>`, t0.desc + (t0.cc ? ` · 클래스 체인지 후: ${t0.cc}${rec.cls ? '' : ' (잠김)'}` : '') + (tid === 'prince' ? ' · 16화부터 왕도는 진정한 국왕(주변 3칸 공격·방어 +10%), 패도는 흑화(공격 +30%, 이동 +1)' : ''))); } }
   for (const pid of d.passives || []) sk.append(skl(`${PASSIVES[pid].name} <span class="cap">패시브</span>`, PASSIVE_DESC[pid] || ''));
   if (evadeOf(u) > 0) sk.append(skl('회피 <span class="cap">패시브</span>', `받는 타격·사격을 ${Math.round(evadeOf(u) * 100)}% 확률로 피합니다. 마법은 못 피합니다.`));
   body.append(sk);
